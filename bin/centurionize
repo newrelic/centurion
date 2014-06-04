@@ -1,0 +1,60 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+require 'trollop'
+
+opts = Trollop::options do
+  opt :project,       'The short name (no spaces) of the project to scaffold', required: true, type: String
+  opt :registry_base, 'The base url for your registry (ex: example.com/yourcompany/) slash terminated', default: ''
+  opt :centurion_dir, 'The base dir for centurion configs', default: File.join(Dir.getwd, 'config', 'centurion')
+end
+
+project_file  = File.join(opts[:centurion_dir], "#{opts[:project]}.rake")
+
+unless Dir.exists?(opts[:centurion_dir])
+  puts "Creating #{opts[:centurion_dir]}"
+  FileUtils.mkdir_p(opts[:centurion_dir])
+end
+
+unless File.exists?(project_file)
+  puts "Writing example config to #{project_file}"
+  File.write(project_file, <<-EOS.gsub(/^\s{4}/, ''))
+    namespace :environment do
+      task :common do
+        set :image, '#{opts[:registry_base]}#{opts[:project]}'
+      end
+    
+      desc 'Staging environment'
+      task :staging => :common do
+        set_current_environment(:staging)
+        #env_var YOUR_ENV: 'staging'
+        #host_port 10234, container_port: 9292
+        #host 'docker-server-staging-1.example.com'
+        #host 'docker-server-staging-2.example.com'
+      end
+    
+      desc 'Production environment'
+      task :production => :common do
+        set_current_environment(:production)
+        #env_var YOUR_ENV: 'production'
+        #host_port 23235, container_port: 9293
+        #host 'docker-server-prod-1.example.com'
+        #host 'docker-server-prod-2.example.com'
+        #host_volume '/mnt/volume1', container_volume: '/mnt/volume1'
+      end
+    end
+  EOS
+end
+
+gemfile = File.join(opts[:centurion_dir], *%w{.. .. Gemfile})
+unless File.exists?(gemfile)
+  raise "Error creating Gemfile: $!" unless system("bash -c 'cd #{File.dirname(gemfile)} && bundle init'")
+end
+
+unless File.read(gemfile) =~ /centurion/s
+  puts 'Adding Centurion to the Gemfile'
+  File.open(gemfile, 'a') { |f| f << "gem 'centurion'" }
+  puts "\n\nRemember to run `bundle install` before running Centurion\n\n"
+end
+
+puts 'Done!'

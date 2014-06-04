@@ -1,0 +1,70 @@
+#!/usr/bin/env ruby
+$: << File.join(File.dirname(__FILE__), '..', 'lib')
+require_relative '../lib/centurion'
+require 'capistrano_dsl'
+
+self.extend Capistrano::DSL
+self.extend Centurion::DeployDSL
+self.extend Centurion::Logging
+
+#
+# Initialize Rake engine
+#
+require 'rake'
+Rake.application.options.trace = true
+
+task_dir = File.expand_path(File.join(File.dirname(__FILE__), *%w{.. lib tasks}))
+Dir.glob(File.join(task_dir, '*.rake')).each { |file| load file }
+
+possible_environments = %w[development integration staging production local_integration]
+def possible_environments.to_s
+  join(', ').sub(/, (\w+)$/, ', or \1')
+end
+
+#
+# Trollup option setup
+#
+require 'trollop'
+
+opts = Trollop::options do
+  opt :project,     'project (dirac, rubicon...)',                 type: String, required: true,  short: '-p'
+  opt :environment, "environment (#{possible_environments})",      type: String, required: true,  short: '-e'
+  opt :action,      'action (deploy, list...)',                    type: String, default: 'list', short: '-a'
+  opt :image,       'image (analytics/rubicon...)',                type: String, required: false, short: '-i'
+  opt :tag,         'tag (latest...)',                             type: String, required: false, short: '-t'
+  opt :hosts,       'hosts, comma separated',                      type: String, required: false, short: '-h'
+  opt :docker_path, 'path to docker executable (default: docker)', type: String, default: 'docker', short: '-d'
+end
+
+unless possible_environments.include?(opts[:environment])
+  Trollop::die :environment, "is unknown; must be #{possible_environments}"
+end
+
+set_current_environment(opts[:environment].to_sym)
+set :project, opts[:project]
+set :environment, opts[:environment]
+
+# Load the per-project config and execute the task for the current environment
+projects_dir = File.join(Dir.getwd(), 'config', 'centurion')
+config_file  = "#{opts[:project]}.rake"
+if File.exists?(File.join(projects_dir, config_file))
+  load File.join(File.join(projects_dir, config_file))
+elsif File.exists?(config_file)
+  load config_file
+else
+  raise "Can't find '#{config_file}'!"
+end
+invoke("environment:#{opts[:environment]}")
+
+# Override the config with command line values if given
+set :image, opts[:image] if opts[:image]
+set :tag,   opts[:tag] if opts[:tag]
+set :hosts, opts[:hosts].split(",") if opts[:hosts]
+
+# Default tag should be "latest"
+set :tag, 'latest' unless any?(:tag)
+
+# Specify a path to docker executable
+set :docker_path, opts[:docker_path]
+
+invoke(opts[:action])
