@@ -161,6 +161,16 @@ times.
 $ bundle exec centurion -p radio-radio -e staging -a deploy
 ````
 
+###Deploy a bash console on a host
+
+This will give you a command line shell with all of your existing environment
+passed to the container. The `CMD` from the `Dockerfile` will be replaced
+with `/bin/bash`. It will use the first host from the host list.
+
+````bash
+$ bundle exec centurion -p radio-radio -e staging -a deploy_console
+````
+
 ###List all the tags running on your servers for a particular project
 
 Returns a nicely-formatted list of all the current tags and which machines
