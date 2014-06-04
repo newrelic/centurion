@@ -9,9 +9,10 @@ Your name could be here!
 Pre-release
 -----------
 
-A lot of work was done on Centurion before its public release. Those
-statistics are not reflected in the current history. At the time of
-public release, here's how the contributors list looked:
+A lot of work was done on Centurion before its public release. Those statistics
+are not reflected in the current history. Many of the ideas for the project
+originally came from Nic Benders and the Insights team at New Relic.  At the
+time of public release, here's how the contributors list looked:
 
  * 343 commits
  * 12 branches
