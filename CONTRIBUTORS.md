@@ -19,6 +19,7 @@ time of public release, here's how the contributors list looked:
  * 0 releases
  * 19 contributors
 
+```
 kmatthias 97 commits / 3,870 ++ / 3,658 --
 andrew    47 commits / 326 ++ / 55 --
 nic       36 commits / 1,481 ++ / 971 --
@@ -38,3 +39,4 @@ aaron      2 commits / 111 ++ / 23 --
 brett      1 commit / 26 ++ / 0 --
 franky     1 commit / 2 ++ / 0 --
 jonathan   1 commit / 13 ++ / 10 --
+```
