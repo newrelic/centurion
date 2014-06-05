@@ -145,7 +145,7 @@ distributed containers easy.  Here are some examples:
 A rolling deployment will stop and start each container one at a time to make
 sure that the application stays available from the viewpoint of the load
 balancer.  Currently assumes a valid response in the 200 range on
-`/status/check`. This will shortly be settable in your config.
+`/status/check`. This endpoint will shortly be settable in your config.
 
 ````bash
 $ bundle exec centurion -p radio-radio -e staging -a rolling_deploy
@@ -173,10 +173,10 @@ $ bundle exec centurion -p radio-radio -e staging -a deploy_console
 
 ###List all the tags running on your servers for a particular project
 
-Returns a nicely-formatted list of all the current tags and which machines
-they are running on. Gives a uniqued list of tags across all hosts as well.
-This is useful for validating the state of the deployment in the case where
-something goes wrong mid-deploy.
+Returns a nicely-formatted list of all the current tags and which machines they
+are running on. Gives a unique list of tags across all hosts as well.  This is
+useful for validating the state of the deployment in the case where something
+goes wrong mid-deploy.
 
 ```bash
 $ bundle exec centurion -p radio-radio -e staging -a list:running_container_tags
@@ -229,5 +229,11 @@ If you are simply looking to contribute to the project, taking on one of the
 items in the "Future Additions" section above would be a great place to start.
 Ping us to let us know you're working on it by opening a GitHub Issue on the
 project.
+
+By contributing to this project you agree that you are granting New Relic a
+non-exclusive, non-revokable, no-cost license to use the code, algorithms,
+patents, and ideas in that code in our products if we so choose. You also agree
+the code is provided as-is and you provide no warranties as to its fitness or
+correctness for any purpose
 
 Copyright (c) 2014 New Relic, Inc. All rights reserved.
