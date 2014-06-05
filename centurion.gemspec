@@ -17,9 +17,9 @@ Gem::Specification.new do |spec|
     'jonathan@newrelic.com', 'jon@newrelic.com', 'merlyn@newrelic.com',
     'amjith@newrelic.com', 'dcelis@newrelic.com', 'ehyland@newrelic.com',
     'bryan@newrelic.com']
-  spec.summary       = %q{Deploy images to a Docker server}
-  spec.homepage      = 'https://source.datanerd.us/site-engineering/centurion'
-  spec.license       = "New Relic"
+  spec.summary       = %q{Deploy images to a fleet of Docker servers}
+  spec.homepage      = 'https://github.com/newrelic/centurion'
+  spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0")
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
