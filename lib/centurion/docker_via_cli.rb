@@ -36,9 +36,23 @@ class Centurion::DockerViaCli
   end
 
   def run_without_echo(command)
-    IO.popen(command) do |io|
-      io.each_line { |line| puts line }
+    output = Queue.new
+    output_thread = Thread.new do
+      while true do
+        begin
+          puts output.pop
+        rescue => e
+          info "Rescuing... #{e.message}"
+        end
+      end
     end
+
+    IO.popen(command) do |io|
+      io.each_line { |line| output << line }
+    end
+
+    output_thread.kill
+
     unless $?.success?
       raise "The command failed with a non-zero exit status: #{$?.exitstatus}"
     end
