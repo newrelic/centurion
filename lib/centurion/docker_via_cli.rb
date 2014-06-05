@@ -13,12 +13,12 @@ class Centurion::DockerViaCli
 
   def pull(image, tag='latest')
     info "Using CLI to pull"
-    run_with_echo("#{@docker_path} -H=#{@docker_host} pull #{image}:#{tag}")
+    echo("#{@docker_path} -H=#{@docker_host} pull #{image}:#{tag}")
   end
 
   def tail(container_id)
     info "Tailing the logs on #{container_id}"
-    run_with_echo("#{@docker_path} -H=#{@docker_host} logs -f #{container_id}")
+    echo("#{@docker_path} -H=#{@docker_host} logs -f #{container_id}")
   end
 
   def attach(container_id)
@@ -26,6 +26,23 @@ class Centurion::DockerViaCli
   end
 
   private
+
+  def echo(command)
+    if Thread.list.find_all { |t| t.status == 'run' }.count > 1
+      run_without_echo(command)
+    else
+      run_with_echo(command)
+    end
+  end
+
+  def run_without_echo(command)
+    IO.popen(command) do |io|
+      io.each_line { |line| puts line }
+    end
+    unless $?.success?
+      raise "The command failed with a non-zero exit status: #{$?.exitstatus}"
+    end
+  end
 
   def run_with_echo( command )
     $stdout.sync = true
