@@ -25,7 +25,7 @@ Status
 ------
 
 This project is under active development! The initial release on GitHub contains
-one roll-up commit of all our internal code. But all internal devlopment will
+one roll-up commit of all our internal code. But all internal development will
 now be on public GitHub. See the CONTRIBUTORS file for the contributors to the
 original internal project.
 
@@ -44,7 +44,7 @@ Once you have a running, modern Ruby, you simply:
 $ gem install centurion
 ```
 
-With rbenv you will now need to do and `rbenv rehash` and the commands should
+With rbenv you will now need to do an `rbenv rehash` and the commands should
 be available. With a non-rbenv install, assuming the gem dir is in your path,
 the commands should just work now.
 
@@ -124,12 +124,12 @@ namespace :environment do
 end
 ```
 
-This sets up a staging and productionenvironment and defines a `common` task
+This sets up a staging and production environment and defines a `common` task
 that will be run in either case. Note the dependency call in the task
-definition for the `production` and `staging` tasks.  Additionally, it defines
-some host ports to map and sets which servers to deploy to. Some configuration
-will provided to the containers at startup time, in the form of environment
-variables.
+definition for the `production` and `staging` tasks.  Additionally, it
+defines some host ports to map and sets which servers to deploy to. Some
+configuration will provided to the containers at startup time, in the form of
+environment variables.
 
 All of the DSL items (`host_port`, `host_volume`, `env_var`, `host`) can be
 specified more than once and will append to the configuration.
