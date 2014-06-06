@@ -145,7 +145,8 @@ distributed containers easy.  Here are some examples:
 A rolling deployment will stop and start each container one at a time to make
 sure that the application stays available from the viewpoint of the load
 balancer.  Currently assumes a valid response in the 200 range on
-`/status/check`. This endpoint will shortly be settable in your config.
+`/status/check` by default. This is configurable by adding
+`set(:status_endpoint, '/somewhere')` in your config.
 
 ````bash
 $ bundle exec centurion -p radio-radio -e staging -a rolling_deploy
@@ -208,7 +209,6 @@ We're currently looking at the following feature additions:
  * Add the ability to show all the available tasks on the command line
  * Certificate authentication
  * Customized tasks
- * Settable status page URL for rolling deployment
  * Dynamic host allocation to a pool of servers
 
 Contributions
