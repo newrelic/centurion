@@ -16,19 +16,19 @@ module Centurion::Deploy
     end
   end
 
-  def wait_for_http_status_ok(target_server, port, image_id, tag, sleep_time=5, retries=12)
+  def wait_for_http_status_ok(target_server, port, endpoint, image_id, tag, sleep_time=5, retries=12)
     info 'Waiting for the port to come up'
     1.upto(retries) do
-      if container_up?(target_server, port) && http_status_ok?(target_server, port)
+      if container_up?(target_server, port) && http_status_ok?(target_server, port, endpoint)
         info 'Container is up!'
         break
       end
 
-      info "Waiting #{sleep_time} seconds to test the /status/check endpoint..."
+      info "Waiting #{sleep_time} seconds to test the #{endpoint} endpoint..."
       sleep(sleep_time)
     end
 
-    unless http_status_ok?(target_server, port)
+    unless http_status_ok?(target_server, port, endpoint)
       error "Failed to validate started container on #{target_server}:#{port}"
       exit(FAILED_CONTAINER_VALIDATION)
     end
@@ -55,8 +55,8 @@ module Centurion::Deploy
     false
   end
 
-  def http_status_ok?(target_server, port)
-    url      = "http://#{target_server.hostname}:#{port}/status/check"
+  def http_status_ok?(target_server, port, endpoint)
+    url      = "http://#{target_server.hostname}:#{port}#{endpoint}"
     response = begin
       Excon.get(url)
     rescue Excon::Errors::SocketError
