@@ -17,7 +17,14 @@ Gem::Specification.new do |spec|
     'jonathan@newrelic.com', 'jon@newrelic.com', 'merlyn@newrelic.com',
     'amjith@newrelic.com', 'dcelis@newrelic.com', 'ehyland@newrelic.com',
     'bryan@newrelic.com']
-  spec.summary       = %q{Deploy images to a fleet of Docker servers}
+  spec.summary       = <<-EOS.gsub(/^\s+/, '')
+    A deployment tool for Docker. Takes containers from a Docker registry and
+    runs them on a fleet of hosts with the correct environment variables, host
+    mappings, and port mappings. Supports rolling deployments out of the box, and
+    makes it easy to ship applications to Docker servers.
+    
+    We're using it to run our production infrastructure.
+  EOS
   spec.homepage      = 'https://github.com/newrelic/centurion'
   spec.license       = 'MIT'
 

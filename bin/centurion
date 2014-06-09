@@ -27,10 +27,10 @@ end
 require 'trollop'
 
 opts = Trollop::options do
-  opt :project,     'project (dirac, rubicon...)',                 type: String, required: true,  short: '-p'
+  opt :project,     'project (blog, forums...)',                   type: String, required: true,  short: '-p'
   opt :environment, "environment (#{possible_environments})",      type: String, required: true,  short: '-e'
   opt :action,      'action (deploy, list...)',                    type: String, default: 'list', short: '-a'
-  opt :image,       'image (analytics/rubicon...)',                type: String, required: false, short: '-i'
+  opt :image,       'image (yourco/project...)',                   type: String, required: false, short: '-i'
   opt :tag,         'tag (latest...)',                             type: String, required: false, short: '-t'
   opt :hosts,       'hosts, comma separated',                      type: String, required: false, short: '-h'
   opt :docker_path, 'path to docker executable (default: docker)', type: String, default: 'docker', short: '-d'
