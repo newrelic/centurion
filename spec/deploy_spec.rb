@@ -158,13 +158,21 @@ describe Centurion::Deploy do
       expect(config).to be_a(Hash)
       expect(config.keys).to match_array(%w{ Hostname Image })
     end
+
+    it 'handles mapping host volumes' do
+      config = test_deploy.container_config_for(server, 'image_id', nil, nil, ["/tmp/foo:/tmp/chaucer"])
+
+      expect(config).to be_a(Hash)
+      expect(config.keys).to match_array(%w{ Hostname Image Volumes VolumesFrom })
+      expect(config['Volumes']['/tmp/chaucer']).to eq({})
+    end
   end
 
   describe '#start_new_container' do
     let(:bindings) { {'80/tcp'=>[{'HostIp'=>'0.0.0.0', 'HostPort'=>'80'}]} }
 
     it 'configures the container' do
-      expect(test_deploy).to receive(:container_config_for).with(server, 'image_id', bindings, nil).once
+      expect(test_deploy).to receive(:container_config_for).with(server, 'image_id', bindings, nil, {}).once
       test_deploy.stub(:start_container_with_config)
 
       test_deploy.start_new_container(server, 'image_id', bindings, {})
@@ -193,7 +201,7 @@ describe Centurion::Deploy do
     let(:bindings) { {'80/tcp'=>[{'HostIp'=>'0.0.0.0', 'HostPort'=>'80'}]} }
 
     it 'configures the container' do
-      expect(test_deploy).to receive(:container_config_for).with(server, 'image_id', bindings, nil).once
+      expect(test_deploy).to receive(:container_config_for).with(server, 'image_id', bindings, nil, {}).once
       test_deploy.stub(:start_container_with_config)
 
       test_deploy.start_new_container(server, 'image_id', bindings, {})

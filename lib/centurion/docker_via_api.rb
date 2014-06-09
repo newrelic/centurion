@@ -61,7 +61,7 @@ class Centurion::DockerViaApi
   end
 
   def create_container(configuration)
-    path = "/v1.7/containers/create"
+    path = "/v1.10/containers/create"
     response = Excon.post(
       @base_uri + path,
       :body => configuration.to_json,
@@ -72,7 +72,7 @@ class Centurion::DockerViaApi
   end
 
   def start_container(container_id, configuration)
-    path = "/v1.7/containers/#{container_id}/start"
+    path = "/v1.10/containers/#{container_id}/start"
     response = Excon.post(
       @base_uri + path,
       :body => configuration.to_json,

@@ -87,7 +87,7 @@ module Centurion::Deploy
     end
   end
 
-  def container_config_for(target_server, image_id, port_bindings=nil, env_vars=nil)
+  def container_config_for(target_server, image_id, port_bindings=nil, env_vars=nil, volumes=nil)
     container_config = {
       'Image'        => image_id,
       'Hostname'     => target_server.hostname,
@@ -101,16 +101,24 @@ module Centurion::Deploy
       container_config['Env'] = env_vars.map { |k,v| "#{k}=#{v}" }
     end
 
+    if volumes
+      container_config['Volumes'] = volumes.inject({}) do |memo, v|
+        memo[v.split(/:/).last] = {}
+        memo
+      end
+      container_config['VolumesFrom'] = 'parent'
+    end
+
     container_config
   end
 
   def start_new_container(target_server, image_id, port_bindings, volumes, env_vars=nil)
-    container_config = container_config_for(target_server, image_id, port_bindings, env_vars)
+    container_config = container_config_for(target_server, image_id, port_bindings, env_vars, volumes)
     start_container_with_config(target_server, volumes, port_bindings, container_config)
   end
 
   def launch_console(target_server, image_id, port_bindings, volumes, env_vars=nil)
-    container_config = container_config_for(target_server, image_id, port_bindings, env_vars).merge(
+    container_config = container_config_for(target_server, image_id, port_bindings, env_vars, volumes).merge(
       'Cmd'         => [ '/bin/bash' ],
       'AttachStdin' => true,
       'Tty'         => true,
@@ -128,11 +136,11 @@ module Centurion::Deploy
     info "Creating new container for #{container_config['Image'][0..7]}"
     new_container = target_server.create_container(container_config)
 
-    host_config = { 
-      'PortBindings' => port_bindings 
-    }
+    host_config = {}
     # Map some host volumes if needed
     host_config['Binds'] = volumes if volumes && !volumes.empty?
+    # Bind the ports
+    host_config['PortBindings'] = port_bindings 
 
     info "Starting new container #{new_container['Id'][0..7]}"
     target_server.start_container(new_container['Id'], host_config)
