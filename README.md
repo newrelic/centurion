@@ -192,9 +192,9 @@ this project on each of the servers from the config.
 $ bundle exec centurion -p radio-radio -e staging -a list:running_containers
 ```
 
-###List registry containers
+###List registry images
 
-Returns a list of all the containers for this project in the registry.
+Returns a list of all the images for this project in the registry.
 
 ````bash
 $ bundle exec centurion -p radio-radio -e staging -a list
