@@ -106,8 +106,8 @@ namespace :environment do
   desc 'Staging environment'
   task :staging => :common do
 	set_current_environment(:staging)
-	env_var YOUR_ENV: 'staging'
-	env_var MY_DB: 'radio-db.example.com'
+	env_vars YOUR_ENV: 'staging'
+	env_vars MY_DB: 'radio-db.example.com'
     host_port 10234, container_port: 9292
     host_port 10235, container_port: 9293
 	hot_volume '/mnt/volume1', container_volume: '/mnt/volume2'
@@ -116,8 +116,8 @@ namespace :environment do
   desc 'Production environment'
   task :production => :common do
 	set_current_environment(:production)
-	env_var YOUR_ENV: 'production'
-	env_var MY_DB: 'radio-db-prod.example.com'
+	env_vars YOUR_ENV: 'production'
+	env_vars MY_DB: 'radio-db-prod.example.com'
     host_port 22234, container_port: 9292
     host_port 23235, container_port: 9293
   end
@@ -131,7 +131,7 @@ defines some host ports to map and sets which servers to deploy to. Some
 configuration will provided to the containers at startup time, in the form of
 environment variables.
 
-All of the DSL items (`host_port`, `host_volume`, `env_var`, `host`) can be
+All of the DSL items (`host_port`, `host_volume`, `env_vars`, `host`) can be
 specified more than once and will append to the configuration.
 
 Deploying
