@@ -110,7 +110,7 @@ namespace :environment do
 	env_vars MY_DB: 'radio-db.example.com'
     host_port 10234, container_port: 9292
     host_port 10235, container_port: 9293
-	hot_volume '/mnt/volume1', container_volume: '/mnt/volume2'
+	host_volume '/mnt/volume1', container_volume: '/mnt/volume2'
   end
 
   desc 'Production environment'
