@@ -2,9 +2,9 @@ Centurion
 =========
 
 A deployment tool for Docker. Takes containers from a Docker registry and runs
-them on a fleet of hosts with the correct environment variables, host mappings,
-and port mappings. Supports rolling deployments out of the box, and makes it
-easy to ship applications to Docker servers.
+them on a fleet of hosts with the correct environment variables, host volume 
+mappings, and port mappings. Supports rolling deployments out of the box, and
+makes it easy to ship applications to Docker servers.
 
 We're using it to run our production infrastructure.
 
