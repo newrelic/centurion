@@ -84,7 +84,7 @@ namespace :deploy do
         wait_for_http_status_ok(
           server,
           host_ports.first['HostPort'],
-          fetch(:status_endpoint, '/status/check'),
+          fetch(:status_endpoint, '/'),
           fetch(:image),
           fetch(:tag),
           fetch(:rolling_deploy_wait_time, 5),
