@@ -2,7 +2,7 @@ Centurion
 =========
 
 A deployment tool for Docker. Takes containers from a Docker registry and runs
-them on a fleet of hosts with the correct environment variables, host volume 
+them on a fleet of hosts with the correct environment variables, host volume
 mappings, and port mappings. Supports rolling deployments out of the box, and
 makes it easy to ship applications to Docker servers.
 
@@ -35,7 +35,7 @@ Installation
 Centurion is a Ruby gem. It assumes that you have a working, modern-ish Ruby
 (1.9.3 or higher). On Ubuntu 12.04 you can install this with the `ruby-1.9.1`
 system package, for example. On OSX this is best accomplished via `rbenv` and
-`ruby-build` which can be installed with [Homebrew](http://brew.sh/) or from 
+`ruby-build` which can be installed with [Homebrew](http://brew.sh/) or from
 [GitHub](https://github.com/sstephenson/rbenv).
 
 Once you have a running, modern Ruby, you simply:
@@ -144,9 +144,11 @@ distributed containers easy.  Here are some examples:
 
 A rolling deployment will stop and start each container one at a time to make
 sure that the application stays available from the viewpoint of the load
-balancer.  Currently assumes a valid response in the 200 range on
-`/status/check` by default. This is configurable by adding
-`set(:status_endpoint, '/somewhere')` in your config.
+balancer. As the deploy runs, a health check will hit each container to ensure
+that the application booted correctly. By default, this will be a GET request to
+the root path of the application. This is configurable by adding
+`set(:status_endpoint, '/somewhere/else')` in your config. The status endpoint
+must respond with a valid response in the 200 status range.
 
 ````bash
 $ bundle exec centurion -p radio-radio -e staging -a rolling_deploy
