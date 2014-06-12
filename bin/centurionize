@@ -23,7 +23,7 @@ unless File.exists?(project_file)
       task :common do
         set :image, '#{opts[:registry_base]}#{opts[:project]}'
         # Point this to an appropriate health check endpoint for rolling deploys (defaults to '/')
-        # set :status_endpoint, '/status'
+        # set :status_endpoint, '/status/check'
       end
 
       desc 'Staging environment'
