@@ -5,12 +5,11 @@ require 'uri'
 module Centurion; end
 
 class Centurion::DockerRegistry
-  def initialize()
-    # @base_uri = "https://staging-docker-registry.nr-ops.net"
-    @base_uri = 'http://chi-docker-registry.nr-ops.net'
+  def initialize(base_uri)
+    @base_uri = base_uri
   end
   
-  def digest_for_tag( repository, tag)
+  def digest_for_tag(repository, tag)
     path = "/v1/repositories/#{repository}/tags/#{tag}"
     $stderr.puts "GET: #{path.inspect}"
     response = Excon.get(
@@ -25,8 +24,8 @@ class Centurion::DockerRegistry
     JSON.load('[' + response.body + ']').first
   end
   
-  def respository_tags( respository )
-    path = "/v1/repositories/#{respository}/tags"
+  def repository_tags(repository)
+    path = "/v1/repositories/#{repository}/tags"
     $stderr.puts "GET: #{path.inspect}"
     response = Excon.get(@base_uri + path)
     raise response.inspect unless response.status == 200
