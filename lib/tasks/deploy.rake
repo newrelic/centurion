@@ -120,6 +120,10 @@ namespace :deploy do
   end
 
   task :pull_image do
+    if fetch(:no_pull)
+      info "--no-pull option specified: skipping pull"
+      next
+    end
     $stderr.puts "Fetching image #{fetch(:image)}:#{fetch(:tag)} IN PARALLEL\n"
 
     target_servers = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
