@@ -34,6 +34,7 @@ opts = Trollop::options do
   opt :tag,         'tag (latest...)',                             type: String, required: false, short: '-t'
   opt :hosts,       'hosts, comma separated',                      type: String, required: false, short: '-h'
   opt :docker_path, 'path to docker executable (default: docker)', type: String, default: 'docker', short: '-d'
+  opt :no_pull,     'Skip the pull_image step',                    type: :flag, default: false, long: '--no-pull'
 end
 
 unless possible_environments.include?(opts[:environment])
@@ -67,5 +68,7 @@ set :docker_registry, 'https://registry.hub.docker.com/'
 
 # Specify a path to docker executable
 set :docker_path, opts[:docker_path]
+
+set :no_pull, opts[:no_pull]
 
 invoke(opts[:action])
