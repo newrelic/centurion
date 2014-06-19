@@ -22,7 +22,7 @@ def possible_environments.to_s
 end
 
 #
-# Trollup option setup
+# Trollop option setup
 #
 require 'trollop'
 
