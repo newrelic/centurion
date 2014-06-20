@@ -166,6 +166,13 @@ describe Centurion::Deploy do
       expect(config.keys).to match_array(%w{ Hostname Image Volumes VolumesFrom })
       expect(config['Volumes']['/tmp/chaucer']).to eq({})
     end
+
+    it "exposes all ports" do
+      config = test_deploy.container_config_for(server, 'image_id', {1234 => 80, 9876 => 80})
+
+      expect(config['ExposedPorts']).to be_a(Hash)
+      expect(config['ExposedPorts'].keys).to eq [1234, 9876]
+    end
   end
 
   describe '#start_new_container' do
