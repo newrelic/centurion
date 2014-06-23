@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Get latest Docker.io version
+# Docs: https://docs.docker.com/installation/ubuntulinux/#ubuntu-trusty-1404-lts-64-bit
+curl -s https://get.docker.io/ubuntu/ | sudo sh
+
+# Enable docker to respond on socket and tcp
+echo 'DOCKER_OPTS="-H=0.0.0.0:2375 -H unix:///var/run/docker.sock"' >> /etc/default/docker
+service docker restart
+
+# install ruby bundle
+gem install bundle
+
+# Download centurion
+cd /home/vagrant
+git clone https://github.com/newrelic/centurion.git
+
+# install gems for centurion
+cd centurion
+bundle install
+
+# Create test project and centurion scaffolding
+#cd ..
+#mkdir my_test
+#cd my_test
+#exec ../centurion/bin/centurionize -p my_test
+     # at the end of this...it exits the command shell for some reason.  Have to look at what it is doing
+
+
