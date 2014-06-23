@@ -52,10 +52,7 @@ class Centurion::DockerViaCli
     end
 
     output_thread.kill
-
-    unless $?.success?
-      raise "The command failed with a non-zero exit status: #{$?.exitstatus}"
-    end
+    validate_status(command)
   end
 
   def run_with_echo( command )
@@ -64,8 +61,12 @@ class Centurion::DockerViaCli
     IO.popen(command) do |io|
       io.each_char { |char| print char }
     end
+    validate_status(command)
+  end
+
+  def validate_status(command)
     unless $?.success?
-      raise "The command failed with a non-zero exit status: #{$?.exitstatus}"
+      raise "The command failed with a non-zero exit status: #{$?.exitstatus}. Command: '#{command}'"
     end
   end
 end
