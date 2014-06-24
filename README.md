@@ -154,9 +154,9 @@ must respond with a valid response in the 200 status range.
 $ bundle exec centurion -p radio-radio -e staging -a rolling_deploy
 ````
 
-####Rolling Deployment Settings:
-You can set the following variables in your config to tune how the rolling
-deployment behaves. Each of these would be controlled with `set(:var_name, 'value')`.
+**Rolling Deployment Settings**:
+You can change the following settings in your config to tune how the rolling
+deployment behaves. Each of these is controlled with `set(:var_name, 'value')`.
 These can be different for each environment or put into a common block if they
 are the same everywhere. Settings are per-project.
 
