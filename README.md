@@ -154,6 +154,24 @@ must respond with a valid response in the 200 status range.
 $ bundle exec centurion -p radio-radio -e staging -a rolling_deploy
 ````
 
+####Rolling Deployment Settings:
+You can set the following variables in your config to tune how the rolling
+deployment behaves. Each of these would be controlled with `set(:var_name, 'value')`.
+These can be different for each environment or put into a common block if they
+are the same everywhere. Settings are per-project.
+
+ * `rolling_deploy_check_interval` => Controls how long Centurion will wait after
+    seeing a container as up before moving on to the next one. This should be
+    slightly longer than your load balancer check interval. Value in seconds.
+    Defaults to 5 seconds.
+ * `rolling_deploy_wait_time` => The amount of time to wait between unsuccessful
+    health checks before retrying. Value in seconds. Defaults to 5 seconds.
+ * `rolling_deploy_retries` => The number of times to retry a health check on
+   the container once it is running. This count multiplied by the
+   `rolling_deployment_wait_time` is the total time Centurion will wait for
+   an individual container to come up before giving up as a failure. Defaults
+   to 24 attempts.
+
 ###Deploy a project to a fleet of Docker servers
 
 This will hard stop, then start containers on all the specified hosts. This
