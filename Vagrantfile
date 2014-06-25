@@ -9,8 +9,6 @@ require 'fileutils'
 
 # Defaults for config options defined in CONFIG
 $num_instances = 3
-$user_data_config_file = "./user-data"
-
 
 # Vagrantfile API/syntax version.
 VAGRANTFILE_API_VERSION = "2"

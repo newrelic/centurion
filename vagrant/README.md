@@ -21,5 +21,3 @@ It will do a bunch of stuff and after the command prompt returns to you you can 
     vagrant status
 
 At this point you can follow the instructions on how to use Centurion against this fleet of Docker server.
-
-
