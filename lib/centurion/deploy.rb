@@ -94,7 +94,10 @@ module Centurion::Deploy
     }
 
     if port_bindings
-      container_config['ExposedPorts'] = { port_bindings.keys.first => {} }
+      container_config['ExposedPorts'] ||= {}
+      port_bindings.keys.each do |port|
+        container_config['ExposedPorts'][port] = {}
+      end
     end
 
     if env_vars
