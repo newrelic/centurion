@@ -9,6 +9,7 @@ describe Centurion::Deploy do
   let(:port)            { 8484 }
   let(:container)       { { 'Ports' => [{ 'PublicPort' => port }, 'Created' => Time.now.to_i ], 'Id' => '21adfd2ef2ef2349494a', 'Names' => [ 'name1' ] } }
   let(:endpoint)        { '/status/check' }
+  let(:url)             { "http://#{server.hostname}:#{port}#{endpoint}" }
   let(:test_deploy) do 
     Object.new.tap do |o| 
       o.send(:extend, Centurion::Deploy)
@@ -20,25 +21,25 @@ describe Centurion::Deploy do
   describe '#http_status_ok?' do
     it 'validates HTTP status checks when the response is good' do
       expect(Excon).to receive(:get).and_return(mock_ok_status)
-      expect(test_deploy.http_status_ok?(server, port, endpoint)).to be_true
+      expect(test_deploy.http_status_ok?(url)).to be_true
     end
 
     it 'identifies bad HTTP responses' do
       expect(Excon).to receive(:get).and_return(mock_bad_status)
       test_deploy.stub(:warn)
-      expect(test_deploy.http_status_ok?(server, port, endpoint)).to be_false
+      expect(test_deploy.http_status_ok?(url)).to be_false
     end
 
     it 'outputs the HTTP status when it is not OK' do
       expect(Excon).to receive(:get).and_return(mock_bad_status)
       expect(test_deploy).to receive(:warn).with(/Got HTTP status: 500/)
-      expect(test_deploy.http_status_ok?(server, port, endpoint)).to be_false
+      expect(test_deploy.http_status_ok?(url)).to be_false
     end
 
     it 'handles SocketErrors and outputs a message' do
       expect(Excon).to receive(:get).and_raise(Excon::Errors::SocketError.new(RuntimeError.new()))
       expect(test_deploy).to receive(:warn).with(/Failed to connect/)
-      expect(test_deploy.http_status_ok?(server, port, endpoint)).to be_false
+      expect(test_deploy.http_status_ok?(url)).to be_false
     end
   end
 
@@ -73,7 +74,7 @@ describe Centurion::Deploy do
       test_deploy.stub(:container_up? => true)
       test_deploy.stub(:http_status_ok? => true)
 
-      test_deploy.wait_for_http_status_ok(server, port, '/foo', 'image_id', 'chaucer')
+      test_deploy.wait_for_http_status_ok(url, 'image_id', 'chaucer')
       expect(test_deploy).to have_received(:info).with(/Waiting for the port/)
       expect(test_deploy).to have_received(:info).with('Container is up!')
     end
@@ -85,7 +86,7 @@ describe Centurion::Deploy do
       expect(test_deploy).to receive(:exit)
       expect(test_deploy).to receive(:sleep).with(0)
        
-      test_deploy.wait_for_http_status_ok(server, port, '/foo', 'image_id', 'chaucer', 0, 1)
+      test_deploy.wait_for_http_status_ok(url, 'image_id', 'chaucer', 0, 1)
       expect(test_deploy).to have_received(:info).with(/Waiting for the port/)
     end
 
@@ -96,8 +97,42 @@ describe Centurion::Deploy do
       test_deploy.stub(:warn)
       expect(test_deploy).to receive(:exit)
        
-      test_deploy.wait_for_http_status_ok(server, port, '/foo', 'image_id', 'chaucer', 1, 0)
+      test_deploy.wait_for_http_status_ok(url, 'image_id', 'chaucer', 1, 0)
       expect(test_deploy).to have_received(:info).with(/Waiting for the port/)
+    end
+
+    context 'when a secondary status check URL is defined' do
+      let(:secondary_url) { 'http://somewhere/else' }
+
+      it 'identifies that a container is up' do
+        secondary_check = double('secondary_check').tap { |d| d.stub(call: true) }
+        test_deploy.stub(:container_up? => true)
+        test_deploy.stub(:http_status_ok?).with(url).and_return(true)
+        test_deploy.stub(define_secondary_check: secondary_check)
+
+        test_deploy.wait_for_http_status_ok(url, 'image_id', 'chaucer', 5, 12, secondary_url)
+        expect(test_deploy).to have_received(:http_status_ok?).with(url).twice
+        expect(secondary_check).to have_received(:call)
+        expect(test_deploy).to have_received(:info).with(/Waiting for the port/)
+        expect(test_deploy).to have_received(:info).with('Container is up!')
+      end
+
+      it 'identifies that a container is down by the secondary check URL' do
+        secondary_check = double('secondary_check').tap { |d| d.stub(call: false) }
+        test_deploy.stub(:container_up? => true)
+        test_deploy.stub(:http_status_ok?).with(url).and_return(true)
+        test_deploy.stub(define_secondary_check: secondary_check)
+        test_deploy.stub(:exit)
+        test_deploy.stub(:error)
+
+        test_deploy.wait_for_http_status_ok(url, 'image_id', 'chaucer', 0, 1, secondary_url)
+        expect(test_deploy).to have_received(:http_status_ok?).with(url).twice
+        expect(secondary_check).to have_received(:call).twice
+        expect(test_deploy).to have_received(:info).with(/Waiting for the port/)
+        expect(test_deploy).to have_received(:info).with(/Waiting 0 seconds/)
+        expect(test_deploy).to have_received(:info).with(/Waiting 0 seconds/)
+        expect(test_deploy).to have_received(:error).with(/Failed/)
+      end
     end
   end
 

@@ -81,14 +81,15 @@ namespace :deploy do
       )
 
       fetch(:port_bindings).each_pair do |container_port, host_ports|
+        port = host_ports.first['HostPort']
+        url = "http://#{server.hostname}:#{port}/#{fetch(:status_endpoint, '/')}"
         wait_for_http_status_ok(
-          server,
-          host_ports.first['HostPort'],
-          fetch(:status_endpoint, '/'),
+          url,
           fetch(:image),
           fetch(:tag),
           fetch(:rolling_deploy_wait_time, 5),
-          fetch(:rolling_deploy_retries, 24)
+          fetch(:rolling_deploy_retries, 24),
+          fetch(:rolling_deploy_secondary_url, nil)
         )
       end
 
