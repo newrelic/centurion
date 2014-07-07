@@ -34,7 +34,7 @@ class Centurion::DockerViaApi
 
   def old_containers_for_port(host_port)
     old_containers = ps(all: true).select do |container|
-      container["Status"] =~ /^Exit /
+      container["Status"] =~ /^(Exit |Exited)/
     end.select do |container|
       inspected = inspect_container container["Id"]
       container_listening_on_port?(inspected, host_port)
