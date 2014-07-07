@@ -104,7 +104,7 @@ class Centurion::DockerViaApi
     port_bindings = container['HostConfig']['PortBindings']
     return false unless port_bindings
 
-    port_bindings.values.flatten.any? do |port_binding|
+    port_bindings.values.flatten.compact.any? do |port_binding|
       port_binding['HostPort'].to_i == port.to_i
     end
   end
