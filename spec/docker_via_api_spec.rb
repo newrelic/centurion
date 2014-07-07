@@ -12,7 +12,7 @@ describe Centurion::DockerViaApi do
     [
       {"Id" => "123", "Status" => "Exit 0"},
       {"Id" => "456", "Status" => "Running blah blah"},
-      {"Id" => "789", "Status" => "Exit 1"},
+      {"Id" => "789", "Status" => "Exited 1 mins ago"},
     ]
   end
 
