@@ -101,7 +101,9 @@ module Centurion::Deploy
     end
 
     if env_vars
-      container_config['Env'] = env_vars.map { |k,v| "#{k}=#{v}" }
+      container_config['Env'] = env_vars.map do |k,v|
+        "#{k}=#{v.gsub('$DOCKER_HOSTNAME', target_server.hostname)}"
+      end
     end
 
     if volumes
