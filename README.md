@@ -134,6 +134,13 @@ environment variables.
 All of the DSL items (`host_port`, `host_volume`, `env_vars`, `host`) can be
 specified more than once and will append to the configuration.
 
+###Interpolation
+
+Currently there is one special feature for interpolation that can be added to
+any `env_var` value in the DSL. The string `%DOCKER_HOST%` will be replaced
+with the current server's hostname in the environment variable at deployment
+time.
+
 Deploying
 ---------
 
