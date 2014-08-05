@@ -1,11 +1,24 @@
+require_relative 'api'
 require_relative 'docker_server_group'
 require 'uri'
 
 module Centurion::DeployDSL
   def on_each_docker_host(&block)
-    Centurion::DockerServerGroup.new(fetch(:hosts, []), fetch(:docker_path)).tap do |hosts|
+    Centurion::DockerServerGroup.new(fetch(:hosts, [])).tap do |hosts|
       hosts.each { |host| block.call(host) }
     end
+  end
+
+  def registry_username(username)
+    set(:registry_username, username) 
+  end
+
+  def registry_password(password)
+    set(:registry_password, password)
+  end
+
+  def registry_email(email)
+    set(:registry_email, email)
   end
 
   def env_vars(new_vars)
@@ -59,10 +72,10 @@ module Centurion::DeployDSL
   end
 
   def get_current_tags_for(image)
-    hosts = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
-    hosts.inject([]) do |memo, target_server|
-      tags = target_server.current_tags_for(image)
-      memo += [{ server: target_server.hostname, tags: tags }] if tags
+    hosts = Centurion::DockerServerGroup.new(fetch(:hosts)) 
+    hosts.inject([]) do |memo, host|
+      tags = Centurion::Api.get_all_tags_for_image(host, image)
+      memo += [{ server: URI.parse(host.url).host, tags: tags }] if tags
       memo
     end
   end

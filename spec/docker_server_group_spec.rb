@@ -1,15 +1,14 @@
 require 'spec_helper'
-require 'centurion/docker_server'
 require 'centurion/docker_server_group'
 
 describe Centurion::DockerServerGroup do
   let(:docker_path) { 'docker' }
-  let(:group) { Centurion::DockerServerGroup.new(['host1', 'host2'], docker_path) }
+  let(:group) { Centurion::DockerServerGroup.new(['host1', 'host2']) }
 
   it 'takes a hostlist and instantiates DockerServers' do
     expect(group.hosts).to have(2).items
-    expect(group.hosts.first).to be_a(Centurion::DockerServer)
-    expect(group.hosts.last).to be_a(Centurion::DockerServer)
+    expect(group.hosts.first).to be_a(Docker::Connection)
+    expect(group.hosts.last).to be_a(Docker::Connection)
   end
 
   it 'implements Enumerable' do

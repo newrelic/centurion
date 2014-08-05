@@ -22,14 +22,15 @@ Dir.glob(File.join(task_dir, '*.rake')).each { |file| load file }
 require 'trollop'
 
 opts = Trollop::options do
-  opt :project,     'project (blog, forums...)',                   type: String, required: true,  short: '-p'
-  opt :environment, "environment (production, staging...)",        type: String, required: true,  short: '-e'
-  opt :action,      'action (deploy, list...)',                    type: String, default: 'list', short: '-a'
-  opt :image,       'image (yourco/project...)',                   type: String, required: false, short: '-i'
-  opt :tag,         'tag (latest...)',                             type: String, required: false, short: '-t'
-  opt :hosts,       'hosts, comma separated',                      type: String, required: false, short: '-h'
-  opt :docker_path, 'path to docker executable (default: docker)', type: String, default: 'docker', short: '-d'
-  opt :no_pull,     'Skip the pull_image step',                    type: :flag, default: false, long: '--no-pull'
+  opt :project,         'project (blog, forums...)',                   type: String, required: true,  short: '-p'
+  opt :environment,     'environment (production, staging...)',        type: String, required: true,  short: '-e'
+  opt :action,          'action (deploy, list...)',                    type: String, default: 'list', short: '-a'
+  opt :image,           'image (yourco/project...)',                   type: String, required: false, short: '-i'
+  opt :tag,             'tag (latest...)',                             type: String, required: false, short: '-t'
+  opt :hosts,           'hosts, comma separated',                      type: String, required: false, short: '-h'
+  opt :username,        'Docker registry username',                    type: String, required: false, short: '-u'
+  opt :password,        'Docker registry password',                    type: String, required: false 
+  opt :no_pull,         'Skip the pull_image step',                    type: :flag,  default:  false, long: '--no-pull'
 end
 
 set_current_environment(opts[:environment].to_sym)
@@ -52,13 +53,12 @@ invoke("environment:#{opts[:environment]}")
 set :image, opts[:image] if opts[:image]
 set :tag,   opts[:tag] if opts[:tag]
 set :hosts, opts[:hosts].split(",") if opts[:hosts]
+set :username, opts[:username] if opts[:username]
+set :password, opts[:password] if opts[:password]
 
 # Default tag should be "latest"
 set :tag, 'latest' unless any?(:tag)
 set :docker_registry, 'https://registry.hub.docker.com/'
-
-# Specify a path to docker executable
-set :docker_path, opts[:docker_path]
 
 set :no_pull, opts[:no_pull]
 

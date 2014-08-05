@@ -1,3 +1,4 @@
+require_relative 'api'
 require 'excon'
 
 module Centurion; end
@@ -5,58 +6,57 @@ module Centurion; end
 module Centurion::Deploy
   FAILED_CONTAINER_VALIDATION = 100
 
-  def stop_containers(target_server, port_bindings)
-    public_port    = public_port_for(port_bindings)
-    old_containers = target_server.find_containers_by_public_port(public_port)
-    info "Stopping container(s): #{old_containers.inspect}"
+  def stop_containers(host, port_bindings)
+    public_port = public_port_for(port_bindings)
 
-    old_containers.each do |old_container|
-      info "Stopping old container #{old_container['Id'][0..7]} (#{old_container['Names'].join(',')})"
-      target_server.stop_container(old_container['Id'])
+    Centurion::Api.get_containers_by_port(host, public_port).each do |container|
+      info "Stopping old container #{container.id[0..7]} (#{container.info["Name"]})"
+      container.kill
     end
   end
 
-  def wait_for_http_status_ok(target_server, port, endpoint, image_id, tag, sleep_time=5, retries=12)
+  def wait_for_http_status_ok(host, port, endpoint, image_id, tag, sleep_time=5, retries=12)
     info 'Waiting for the port to come up'
     1.upto(retries) do
-      if container_up?(target_server, port) && http_status_ok?(target_server, port, endpoint)
+      if container_up?(host, port) && http_status_ok?(host, port, endpoint)
         info 'Container is up!'
         break
       end
 
-      info "Waiting #{sleep_time} seconds to test the #{endpoint} endpoint..."
+      info "Waiting #{sleep_time} seconds to test the #{URI.parse(host.url).host}:#{port}#{endpoint} endpoint..."
       sleep(sleep_time)
     end
 
-    unless http_status_ok?(target_server, port, endpoint)
-      error "Failed to validate started container on #{target_server}:#{port}"
+    unless http_status_ok?(host, port, endpoint)
+      error "Failed to validate started container on #{host}:#{port}"
       exit(FAILED_CONTAINER_VALIDATION)
     end
   end
 
-  def container_up?(target_server, port)
+  def container_up?(host, public_port)
     # The API returns a record set like this:
     #[{"Command"=>"script/run ", "Created"=>1394470428, "Id"=>"41a68bda6eb0a5bb78bbde19363e543f9c4f0e845a3eb130a6253972051bffb0", "Image"=>"quay.io/newrelic/rubicon:5f23ac3fad7979cd1efdc9295e0d8c5707d1c806", "Names"=>["/happy_pike"], "Ports"=>[{"IP"=>"0.0.0.0", "PrivatePort"=>80, "PublicPort"=>8484, "Type"=>"tcp"}], "Status"=>"Up 13 seconds"}]
 
-    running_containers = target_server.find_containers_by_public_port(port)
+    running_containers = Centurion::Api.get_containers_by_port(host, public_port)
     container = running_containers.pop
 
     unless running_containers.empty?
       # This _should_ never happen, but...
-      error "More than one container is bound to port #{port} on #{target_server}!"
+      error "More than one container is bound to port #{public_port} on #{host}!"
       return false
     end
 
-    if container && container['Ports'].any? { |bind| bind['PublicPort'].to_i == port.to_i }
-      info "Found container up for #{Time.now.to_i - container['Created'].to_i} seconds"
+    if container
+      time = Time.now - Time.parse(container.json["State"]["StartedAt"])
+      info "Found container up for #{time.round(2)} seconds"
       return true
     end
 
     false
   end
 
-  def http_status_ok?(target_server, port, endpoint)
-    url      = "http://#{target_server.hostname}:#{port}#{endpoint}"
+  def http_status_ok?(host, port, endpoint)
+    url = "http://#{URI.parse(host.url).host}:#{port}#{endpoint}"
     response = begin
       Excon.get(url)
     rescue Excon::Errors::SocketError
@@ -75,22 +75,18 @@ module Centurion::Deploy
     sleep(fetch(:rolling_deploy_check_interval, 5))
   end
 
-  def cleanup_containers(target_server, port_bindings)
-    public_port    = public_port_for(port_bindings)
-    old_containers = target_server.old_containers_for_port(public_port)
-    old_containers.shift(2)
-
-    info "Public port #{public_port}"
-    old_containers.each do |old_container|
-      info "Removing old container #{old_container['Id'][0..7]} (#{old_container['Names'].join(',')})"
-      target_server.remove_container(old_container['Id'])
+  def cleanup_containers(host, public_port)
+    old_containers = Centurion::Api.get_non_running_containers(host)
+    old_containers.each do |container| 
+      info "Removing the following container - #{container.id[0..11]}"
+      container.remove
     end
   end
 
-  def container_config_for(target_server, image_id, port_bindings=nil, env_vars=nil, volumes=nil)
+  def container_config_for(host, image_id, port_bindings=nil, env_vars=nil, volumes=nil)
     container_config = {
       'Image'        => image_id,
-      'Hostname'     => target_server.hostname,
+      'Hostname'     => URI.parse(host.url).host,
     }
 
     if port_bindings
@@ -115,29 +111,27 @@ module Centurion::Deploy
     container_config
   end
 
-  def start_new_container(target_server, image_id, port_bindings, volumes, env_vars=nil)
-    container_config = container_config_for(target_server, image_id, port_bindings, env_vars, volumes)
-    start_container_with_config(target_server, volumes, port_bindings, container_config)
+  def start_new_container(host, image_id, port_bindings, volumes, env_vars=nil)
+    container_config = container_config_for(host, image_id, port_bindings, env_vars, volumes)
+    start_container_with_config(host, volumes, port_bindings, container_config)
   end
 
-  def launch_console(target_server, image_id, port_bindings, volumes, env_vars=nil)
-    container_config = container_config_for(target_server, image_id, port_bindings, env_vars, volumes).merge(
-      'Cmd'         => [ '/bin/bash' ],
-      'AttachStdin' => true,
-      'Tty'         => true,
-      'OpenStdin'   => true,
-    )
+  def launch_console(host, image_id, port_bindings, volumes, env_vars=nil)
+    container_config = container_config_for(host, image_id, port_bindings, env_vars, volumes).merge(
+      'Cmd'          => ['/bin/bash'],
+      'AttachStdin'  => true,
+      'Tty'          => true,
+      'OpenStdin'    => true)
 
-    container = start_container_with_config(target_server, volumes, port_bindings, container_config)
-
-    target_server.attach(container['Id'])
+    container = start_container_with_config(host, volumes, port_bindings, container_config)
+    # container.attach({:stream => true, :stdin => true, :stdout => true, :stderr => true, :tty => true})
   end
 
   private
   
-  def start_container_with_config(target_server, volumes, port_bindings, container_config)
-    info "Creating new container for #{container_config['Image'][0..7]}"
-    new_container = target_server.create_container(container_config)
+  def start_container_with_config(host, volumes, port_bindings, container_config)
+    info "Creating new container for image (#{container_config['Image'][0..7]})"
+    container = Docker::Container.create(container_config, host)
 
     host_config = {}
     # Map some host volumes if needed
@@ -145,12 +139,12 @@ module Centurion::Deploy
     # Bind the ports
     host_config['PortBindings'] = port_bindings 
 
-    info "Starting new container #{new_container['Id'][0..7]}"
-    target_server.start_container(new_container['Id'], host_config)
+    info "Starting new container #{container.id[0..11]}"
+    container = container.start!(host_config)
+    
+    info "Inspecting new container #{container.id[0..11]}:"
+    info container.top.inspect
 
-    info "Inspecting new container #{new_container['Id'][0..7]}:"
-    info target_server.inspect_container(new_container['Id'])
-
-    new_container
+    container
   end
 end
