@@ -18,11 +18,10 @@ class Centurion::DockerServer
                  :old_containers_for_port, :remove_container
   def_delegators :docker_via_cli, :pull, :tail, :attach
 
-  def initialize(host, docker_path, docker_http_version="v1.13")
+  def initialize(host, docker_path)
     @docker_path = docker_path
     @hostname, @port = host.split(':')
     @port ||= '4243'
-    @docker_http_version = docker_http_version
   end
 
   def current_tags_for(image)
@@ -45,7 +44,7 @@ class Centurion::DockerServer
   private
 
   def docker_via_api
-    @docker_via_api ||= Centurion::DockerViaApi.new(@hostname, @port, @docker_http_version)
+    @docker_via_api ||= Centurion::DockerViaApi.new(@hostname, @port)
   end
 
   def docker_via_cli

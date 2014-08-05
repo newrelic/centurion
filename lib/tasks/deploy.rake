@@ -126,7 +126,7 @@ namespace :deploy do
     end
     $stderr.puts "Fetching image #{fetch(:image)}:#{fetch(:tag)} IN PARALLEL\n"
 
-    target_servers = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path), fetch(:docker_http_version))
+    target_servers = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
     target_servers.each_in_parallel do |target_server|
       target_server.pull(fetch(:image), fetch(:tag))
     end

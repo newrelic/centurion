@@ -5,14 +5,14 @@ require 'uri'
 module Centurion; end
 
 class Centurion::DockerViaApi
-  def initialize(hostname, port, version="v1.13")
-    @base_uri = "http://#{hostname}:#{port}/#{version}"
+  def initialize(hostname, port)
+    @base_uri = "http://#{hostname}:#{port}"
 
     configure_excon_globally
   end
 
   def ps(options={})
-    path = "/containers/json"
+    path = "/v1.7/containers/json"
     path += "?all=1" if options[:all]
     response = Excon.get(@base_uri + path)
 
@@ -22,7 +22,7 @@ class Centurion::DockerViaApi
 
   def inspect_image(image, tag = "latest")
     repository = "#{image}:#{tag}"
-    path       = "/images/#{repository}/json"
+    path       = "/v1.7/images/#{repository}/json"
 
     response = Excon.get(
       @base_uri + path,
@@ -43,7 +43,7 @@ class Centurion::DockerViaApi
   end
 
   def remove_container(container_id)
-    path = "/containers/#{container_id}"
+    path = "/v1.7/containers/#{container_id}"
     response = Excon.delete(
       @base_uri + path,
     )
@@ -52,7 +52,7 @@ class Centurion::DockerViaApi
   end
 
   def stop_container(container_id)
-    path = "/containers/#{container_id}/stop?t=30"
+    path = "/v1.7/containers/#{container_id}/stop?t=30"
     response = Excon.post(
       @base_uri + path,
     )
@@ -61,7 +61,7 @@ class Centurion::DockerViaApi
   end
 
   def create_container(configuration)
-    path = "/containers/create"
+    path = "/v1.10/containers/create"
     response = Excon.post(
       @base_uri + path,
       :body => configuration.to_json,
@@ -72,7 +72,7 @@ class Centurion::DockerViaApi
   end
 
   def start_container(container_id, configuration)
-    path = "/containers/#{container_id}/start"
+    path = "/v1.10/containers/#{container_id}/start"
     response = Excon.post(
       @base_uri + path,
       :body => configuration.to_json,
@@ -89,7 +89,7 @@ class Centurion::DockerViaApi
   end
 
   def inspect_container(container_id)
-    path = "/containers/#{container_id}/json"
+    path = "/v1.7/containers/#{container_id}/json"
     response = Excon.get(
       @base_uri + path,
     )
