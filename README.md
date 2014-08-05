@@ -136,10 +136,9 @@ specified more than once and will append to the configuration.
 
 ###Interpolation
 
-Currently there is one special feature for interpolation that can be added to
-any `env_var` value in the DSL. The string `%DOCKER_HOST%` will be replaced
-with the current server's hostname in the environment variable at deployment
-time.
+Currently there is one special string for interpolation that can be added to
+any `env_var` value in the DSL. `%DOCKER_HOST%` will be replaced with the
+current server's hostname in the environment variable at deployment time.
 
 Deploying
 ---------
