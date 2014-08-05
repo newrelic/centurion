@@ -3,7 +3,7 @@ require 'uri'
 
 module Centurion::DeployDSL
   def on_each_docker_host(&block)
-    Centurion::DockerServerGroup.new(fetch(:hosts, []), fetch(:docker_path)).tap do |hosts|
+    Centurion::DockerServerGroup.new(fetch(:hosts, []), fetch(:docker_path), fetch(:docker_http_version)).tap do |hosts|
       hosts.each { |host| block.call(host) }
     end
   end
@@ -34,7 +34,7 @@ module Centurion::DeployDSL
     require_options_keys(options,  [ :container_port ])
 
     add_to_bindings(
-      options[:host_ip] || '0.0.0.0', 
+      options[:host_ip] || '0.0.0.0',
       options[:container_port],
       port,
       options[:type] || 'tcp'
@@ -59,7 +59,7 @@ module Centurion::DeployDSL
   end
 
   def get_current_tags_for(image)
-    hosts = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
+    hosts = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path), fetch(:docker_http_version))
     hosts.inject([]) do |memo, target_server|
       tags = target_server.current_tags_for(image)
       memo += [{ server: target_server.hostname, tags: tags }] if tags
