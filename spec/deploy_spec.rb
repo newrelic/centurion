@@ -160,9 +160,9 @@ describe Centurion::Deploy do
     end
 
     it 'interpolates the hostname into env_vars' do
-      config = test_deploy.container_config_for(server, 'image_id', {}, 'FOO' => '$DOCKER_HOSTNAME')
+      config = test_deploy.container_config_for(server, 'image_id', {}, 'FOO' => '%DOCKER_HOSTNAME%.example.com')
 
-      expect(config['Env']).to eq(['FOO=host1'])
+      expect(config['Env']).to eq(['FOO=host1.example.com'])
     end
 
     it 'handles mapping host volumes' do
