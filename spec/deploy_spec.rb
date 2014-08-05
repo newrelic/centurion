@@ -159,6 +159,12 @@ describe Centurion::Deploy do
       expect(config.keys).to match_array(%w{ Hostname Image })
     end
 
+    it 'interpolates the hostname into env_vars' do
+      config = test_deploy.container_config_for(server, 'image_id', {}, 'FOO' => '$DOCKER_HOSTNAME')
+
+      expect(config['Env']).to eq(['FOO=host1'])
+    end
+
     it 'handles mapping host volumes' do
       config = test_deploy.container_config_for(server, 'image_id', nil, nil, ["/tmp/foo:/tmp/chaucer"])
 
