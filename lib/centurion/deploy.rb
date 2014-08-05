@@ -115,12 +115,12 @@ module Centurion::Deploy
     container_config
   end
 
-  def start_new_container(target_server, image_id, port_bindings, volumes, env_vars=nil)
+  def start_new_container(target_server, image_id, port_bindings, volumes, env_vars=nil, cidfile=nil)
     container_config = container_config_for(target_server, image_id, port_bindings, env_vars, volumes)
-    start_container_with_config(target_server, volumes, port_bindings, container_config)
+    start_container_with_config(target_server, volumes, port_bindings, container_config, cidfile)
   end
 
-  def launch_console(target_server, image_id, port_bindings, volumes, env_vars=nil)
+  def launch_console(target_server, image_id, port_bindings, volumes, env_vars=nil, cidfile=nil)
     container_config = container_config_for(target_server, image_id, port_bindings, env_vars, volumes).merge(
       'Cmd'         => [ '/bin/bash' ],
       'AttachStdin' => true,
@@ -128,14 +128,14 @@ module Centurion::Deploy
       'OpenStdin'   => true,
     )
 
-    container = start_container_with_config(target_server, volumes, port_bindings, container_config)
+    container = start_container_with_config(target_server, volumes, port_bindings, container_config, cidfile)
 
     target_server.attach(container['Id'])
   end
 
   private
 
-  def start_container_with_config(target_server, volumes, port_bindings, container_config)
+  def start_container_with_config(target_server, volumes, port_bindings, container_config, cidfile)
     info "Creating new container for #{container_config['Image'][0..7]}"
     new_container = target_server.create_container(container_config)
 
@@ -148,7 +148,7 @@ module Centurion::Deploy
     host_config['PortBindings'] = port_bindings
 
     # Assign cidfile
-    host_config['ContainerIDFile'] = '/tmp/cidfile'
+    host_config['ContainerIDFile'] = cidfile if cidfile
 
     info "Starting new container #{new_container['Id'][0..7]}"
     target_server.start_container(new_container['Id'], host_config)
