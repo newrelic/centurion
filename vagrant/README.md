@@ -3,6 +3,19 @@ Vagrant Usage
 
 The vagrant setup deploys a fleet of Docker servers ready for Centurion to deploy into.
 
+## Requirements
+
+* [VirtualBox](https://www.virtualbox.org/wiki/Downloads) 4.2+
+* [Vagrant](https://www.vagrantup.com/downloads.html) 1.6+
+
+## Quick Start
+
+1. [Install VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+
+1. [Install Vagrant](http://www.vagrantup.com/downloads.html)
+
+1. Clone this repository
+
 Usage
 ---------
 
