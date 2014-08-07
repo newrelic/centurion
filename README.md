@@ -128,12 +128,13 @@ end
 This sets up a staging and production environment and defines a `common` task
 that will be run in either case. Note the dependency call in the task
 definition for the `production` and `staging` tasks.  Additionally, it
-defines some host ports to map and sets which servers to deploy to. Some
-configuration will provided to the containers at startup time, in the form of
-environment variables.
+defines some host ports to map, sets which servers to deploy to, and sets a
+custom command. Some configuration will provided to the containers at startup
+time, in the form of environment variables.
 
-All of the DSL items (`host_port`, `host_volume`, `env_vars`, `host`) can be
-specified more than once and will append to the configuration.
+Most of the DSL items (`host_port`, `host_volume`, `env_vars`, `host`) can be
+specified more than once and will append to the configuration. However, there
+can only be one `command`; the last one will take priority.
 
 ###Interpolation
 
