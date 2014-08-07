@@ -22,7 +22,7 @@ Gem::Specification.new do |spec|
     runs them on a fleet of hosts with the correct environment variables, host
     mappings, and port mappings. Supports rolling deployments out of the box, and
     makes it easy to ship applications to Docker servers.
-    
+
     We're using it to run our production infrastructure.
   EOS
   spec.homepage      = 'https://github.com/newrelic/centurion'
@@ -39,7 +39,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'rake'
-  spec.add_development_dependency 'rspec'
+  spec.add_development_dependency 'rspec', '~> 2.14.0'
   spec.add_development_dependency 'pry'
   spec.add_development_dependency 'simplecov'
 
