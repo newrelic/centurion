@@ -22,6 +22,12 @@ describe Centurion::DeployDSL do
     DeployDSLTest.on_each_docker_host { |h| recipient.ping(h.hostname) }
   end
 
+  it 'has a DSL method for specifying the start command' do
+    command = ['/bin/echo', 'hi']
+    DeployDSLTest.command command
+    expect(DeployDSLTest.fetch(:command)).to equal(command)
+  end
+
   it 'adds new env_vars to the existing ones' do
     DeployDSLTest.set(:env_vars, { 'SHAKESPEARE' => 'Hamlet' })
     DeployDSLTest.env_vars('DICKENS' => 'David Copperfield')

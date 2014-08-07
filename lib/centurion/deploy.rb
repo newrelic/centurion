@@ -87,11 +87,13 @@ module Centurion::Deploy
     end
   end
 
-  def container_config_for(target_server, image_id, port_bindings=nil, env_vars=nil, volumes=nil)
+  def container_config_for(target_server, image_id, port_bindings=nil, env_vars=nil, volumes=nil, command=nil)
     container_config = {
       'Image'        => image_id,
       'Hostname'     => target_server.hostname,
     }
+
+    container_config.merge!('Cmd' => command) if command
 
     if port_bindings
       container_config['ExposedPorts'] ||= {}
@@ -117,14 +119,13 @@ module Centurion::Deploy
     container_config
   end
 
-  def start_new_container(target_server, image_id, port_bindings, volumes, env_vars=nil)
-    container_config = container_config_for(target_server, image_id, port_bindings, env_vars, volumes)
+  def start_new_container(target_server, image_id, port_bindings, volumes, env_vars=nil, command=nil)
+    container_config = container_config_for(target_server, image_id, port_bindings, env_vars, volumes, command)
     start_container_with_config(target_server, volumes, port_bindings, container_config)
   end
 
   def launch_console(target_server, image_id, port_bindings, volumes, env_vars=nil)
-    container_config = container_config_for(target_server, image_id, port_bindings, env_vars, volumes).merge(
-      'Cmd'         => [ '/bin/bash' ],
+    container_config = container_config_for(target_server, image_id, port_bindings, env_vars, volumes, ['/bin/bash']).merge(
       'AttachStdin' => true,
       'Tty'         => true,
       'OpenStdin'   => true,
@@ -136,7 +137,7 @@ module Centurion::Deploy
   end
 
   private
-  
+
   def start_container_with_config(target_server, volumes, port_bindings, container_config)
     info "Creating new container for #{container_config['Image'][0..7]}"
     new_container = target_server.create_container(container_config)
@@ -145,7 +146,7 @@ module Centurion::Deploy
     # Map some host volumes if needed
     host_config['Binds'] = volumes if volumes && !volumes.empty?
     # Bind the ports
-    host_config['PortBindings'] = port_bindings 
+    host_config['PortBindings'] = port_bindings
 
     info "Starting new container #{new_container['Id'][0..7]}"
     target_server.start_container(new_container['Id'], host_config)

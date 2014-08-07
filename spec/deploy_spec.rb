@@ -144,51 +144,84 @@ describe Centurion::Deploy do
   end
 
   describe '#container_config_for' do
-    it 'works with env_vars provided' do
-      config = test_deploy.container_config_for(server, 'image_id', {}, 'FOO' => 'BAR')
+    let(:image_id) { 'image_id' }
+    let(:port_bindings) { nil }
+    let(:env) { nil }
+    let(:volumes) { nil }
+    let(:command) { nil }
 
-      expect(config).to be_a(Hash)
-      expect(config.keys).to match_array(%w{ Hostname Image Env ExposedPorts })
-      expect(config['Env']).to eq(['FOO=BAR'])
-    end
-
-    it 'works without env_vars or port_bindings' do
-      config = test_deploy.container_config_for(server, 'image_id')
+    it 'works without env_vars, port_bindings, or a command' do
+      config = test_deploy.container_config_for(server, image_id)
 
       expect(config).to be_a(Hash)
       expect(config.keys).to match_array(%w{ Hostname Image })
     end
 
-    it 'interpolates the hostname into env_vars' do
-      config = test_deploy.container_config_for(server, 'image_id', {}, 'FOO' => '%DOCKER_HOSTNAME%.example.com')
+    context 'when port bindings are specified' do
+      let(:port_bindings) { {1234 => 80, 9876 => 80} }
 
-      expect(config['Env']).to eq(['FOO=host1.example.com'])
+      it 'sets the ExposedPorts key in the config correctly' do
+        config = test_deploy.container_config_for(server, image_id, port_bindings)
+
+        expect(config['ExposedPorts']).to be_a(Hash)
+        expect(config['ExposedPorts'].keys).to eq port_bindings.keys
+      end
     end
 
-    it 'handles mapping host volumes' do
-      config = test_deploy.container_config_for(server, 'image_id', nil, nil, ["/tmp/foo:/tmp/chaucer"])
+    context 'when env vars are specified' do
+      let(:env) { { 'FOO' => 'BAR', 'BAZ' => '%DOCKER_HOSTNAME%.example.com' } }
 
-      expect(config).to be_a(Hash)
-      expect(config.keys).to match_array(%w{ Hostname Image Volumes VolumesFrom })
-      expect(config['Volumes']['/tmp/chaucer']).to eq({})
+      it 'sets the Env key in the config' do
+        config = test_deploy.container_config_for(server, image_id, port_bindings, env)
+
+        expect(config).to be_a(Hash)
+        expect(config.keys).to match_array(%w{ Hostname Image Env })
+        expect(config['Env']).to include('FOO=BAR')
+      end
+
+      it 'interpolates the hostname into env_vars' do
+        config = test_deploy.container_config_for(server, image_id, port_bindings, env)
+
+        expect(config['Env']).to include('BAZ=host1.example.com')
+      end
     end
 
-    it "exposes all ports" do
-      config = test_deploy.container_config_for(server, 'image_id', {1234 => 80, 9876 => 80})
+    context 'when volumes are specified' do
+      let(:volumes) { ["/tmp/foo:/tmp/chaucer"] }
 
-      expect(config['ExposedPorts']).to be_a(Hash)
-      expect(config['ExposedPorts'].keys).to eq [1234, 9876]
+      it 'sets the Volumes key in the config' do
+        config = test_deploy.container_config_for(server, image_id, port_bindings, env, volumes)
+
+        expect(config).to be_a(Hash)
+        expect(config.keys).to match_array(%w{ Hostname Image Volumes VolumesFrom })
+        expect(config['Volumes']['/tmp/chaucer']).to eq({})
+      end
+    end
+
+    context 'when a custom command is specified' do
+      let(:command) { ['/bin/echo', 'hi'] }
+
+      it 'sets the Cmd key in the config' do
+        config = test_deploy.container_config_for(server, image_id, port_bindings, env, volumes, command)
+
+        expect(config).to be_a(Hash)
+        expect(config.keys).to match_array(%w{ Hostname Image Cmd })
+        expect(config['Cmd']).to eq(command)
+      end
     end
   end
 
   describe '#start_new_container' do
     let(:bindings) { {'80/tcp'=>[{'HostIp'=>'0.0.0.0', 'HostPort'=>'80'}]} }
+    let(:env) { { 'FOO' => 'BAR' } }
+    let(:volumes) { ['/foo:/bar'] }
+    let(:command) { ['/bin/echo', 'hi'] }
 
     it 'configures the container' do
-      expect(test_deploy).to receive(:container_config_for).with(server, 'image_id', bindings, nil, {}).once
+      expect(test_deploy).to receive(:container_config_for).with(server, 'image_id', bindings, env, volumes, command).once
       test_deploy.stub(:start_container_with_config)
 
-      test_deploy.start_new_container(server, 'image_id', bindings, {})
+      test_deploy.start_new_container(server, 'image_id', bindings, volumes, env, command)
     end
 
     it 'starts the container' do
@@ -199,42 +232,52 @@ describe Centurion::Deploy do
 
     it 'ultimately asks the server object to do the work' do
       server.should_receive(:create_container).with(
-        hash_including({'Image'=>'image_id', 'Hostname'=>'host1', 'ExposedPorts'=>{'80/tcp'=>{}}})
+        hash_including(
+          'Image'=>'image_id',
+          'Hostname'=>'host1',
+          'ExposedPorts'=>{'80/tcp'=>{}},
+          'Cmd' => command,
+          'Env' => ['FOO=BAR'],
+          'Volumes' => {'/bar' => {}},
+        )
       ).and_return(container)
 
       server.should_receive(:start_container)
       server.should_receive(:inspect_container)
 
-      new_container = test_deploy.start_new_container(server, 'image_id', bindings, {})
+      new_container = test_deploy.start_new_container(server, 'image_id', bindings, volumes, env, command)
       expect(new_container).to eq(container)
     end
   end
 
   describe '#launch_console' do
     let(:bindings) { {'80/tcp'=>[{'HostIp'=>'0.0.0.0', 'HostPort'=>'80'}]} }
+    let(:volumes) { nil }
+    let(:env) { nil }
+    let(:command) { nil }
 
     it 'configures the container' do
-      expect(test_deploy).to receive(:container_config_for).with(server, 'image_id', bindings, nil, {}).once
+      expect(test_deploy).to receive(:container_config_for).with(server, 'image_id', bindings, env, volumes, command).once
       test_deploy.stub(:start_container_with_config)
 
-      test_deploy.start_new_container(server, 'image_id', bindings, {})
+      test_deploy.start_new_container(server, 'image_id', bindings, volumes, env, command)
     end
 
     it 'augments the container_config' do
-      expect(test_deploy).to receive(:start_container_with_config).with(server, {},
+      expect(test_deploy).to receive(:start_container_with_config).with(server, volumes,
         anything(),
         hash_including('Cmd' => [ '/bin/bash' ], 'AttachStdin' => true , 'Tty' => true , 'OpenStdin' => true)
       ).and_return({'Id' => 'shakespeare'})
 
-      test_deploy.launch_console(server, 'image_id', bindings, {})
+      test_deploy.launch_console(server, 'image_id', bindings, volumes, env)
     end
 
     it 'starts the console' do
       expect(test_deploy).to receive(:start_container_with_config).with(
-        server, {}, anything(), anything()
+        server, volumes, anything(), anything()
       ).and_return({'Id' => 'shakespeare'})
 
-      test_deploy.launch_console(server, 'image_id', bindings, {})
+      test_deploy.launch_console(server, 'image_id', bindings, volumes, env)
       expect(server).to have_received(:attach).with('shakespeare')
     end
   end

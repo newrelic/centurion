@@ -55,7 +55,7 @@ class Centurion::DockerViaCli
     validate_status(command)
   end
 
-  def run_with_echo( command )
+  def run_with_echo(command)
     $stdout.sync = true
     $stderr.sync = true
     IO.popen(command) do |io|

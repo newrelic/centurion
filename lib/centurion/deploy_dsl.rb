@@ -22,6 +22,10 @@ module Centurion::DeployDSL
     set(:hosts, current)
   end
 
+  def command(command)
+    set(:command, command)
+  end
+
   def localhost
     # DOCKER_HOST is like 'tcp://127.0.0.1:4243'
     docker_host_uri = URI.parse(ENV['DOCKER_HOST'] || "tcp://127.0.0.1")
