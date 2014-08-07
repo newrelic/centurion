@@ -100,26 +100,27 @@ namespace :environment do
   task :common do
     set :image, 'example.com/newrelic/radio-radio'
     host 'docker-server-1.example.com'
-	host 'docker-server-2.example.com'
+    host 'docker-server-2.example.com'
   end
 
   desc 'Staging environment'
   task :staging => :common do
-	set_current_environment(:staging)
-	env_vars YOUR_ENV: 'staging'
-	env_vars MY_DB: 'radio-db.example.com'
+    set_current_environment(:staging)
+    env_vars YOUR_ENV: 'staging'
+    env_vars MY_DB: 'radio-db.example.com'
     host_port 10234, container_port: 9292
     host_port 10235, container_port: 9293
-	host_volume '/mnt/volume1', container_volume: '/mnt/volume2'
+    host_volume '/mnt/volume1', container_volume: '/mnt/volume2'
   end
 
   desc 'Production environment'
   task :production => :common do
-	set_current_environment(:production)
-	env_vars YOUR_ENV: 'production'
-	env_vars MY_DB: 'radio-db-prod.example.com'
+    set_current_environment(:production)
+    env_vars YOUR_ENV: 'production'
+    env_vars MY_DB: 'radio-db-prod.example.com'
     host_port 22234, container_port: 9292
     host_port 23235, container_port: 9293
+    command ['/bin/bash', '-c', '/path/to/server -e production']
   end
 end
 ```
