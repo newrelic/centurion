@@ -1,4 +1,5 @@
 require 'excon'
+require 'uri'
 
 module Centurion; end
 
@@ -16,20 +17,23 @@ module Centurion::Deploy
     end
   end
 
-  def wait_for_http_status_ok(target_server, port, endpoint, image_id, tag, sleep_time=5, retries=12)
+  def wait_for_http_status_ok(url, image_id, tag, sleep_time=5, retries=12, secondary_url=nil)
+    uri = URI.parse(url)
+    secondary_check = define_secondary_check(secondary_url)
+
     info 'Waiting for the port to come up'
     1.upto(retries) do
-      if container_up?(target_server, port) && http_status_ok?(target_server, port, endpoint)
+      if container_up?(uri.host, uri.port) && http_status_ok?(url) && secondary_check.call
         info 'Container is up!'
         break
       end
 
-      info "Waiting #{sleep_time} seconds to test the #{endpoint} endpoint..."
+      info "Waiting #{sleep_time} seconds to test the #{uri.path} endpoint..."
       sleep(sleep_time)
     end
 
-    unless http_status_ok?(target_server, port, endpoint)
-      error "Failed to validate started container on #{target_server}:#{port}"
+    unless http_status_ok?(url) && secondary_check.call
+      error "Failed to validate started container on #{uri.host}:#{uri.port}"
       exit(FAILED_CONTAINER_VALIDATION)
     end
   end
@@ -55,8 +59,7 @@ module Centurion::Deploy
     false
   end
 
-  def http_status_ok?(target_server, port, endpoint)
-    url      = "http://#{target_server.hostname}:#{port}#{endpoint}"
+  def http_status_ok?(url)
     response = begin
       Excon.get(url)
     rescue Excon::Errors::SocketError
@@ -154,5 +157,10 @@ module Centurion::Deploy
     info target_server.inspect_container(new_container['Id'])
 
     new_container
+  end
+
+  def define_secondary_check(secondary_url)
+    return lambda { true } if secondary_url.nil?
+    lambda { http_status_ok?(secondary_url) }
   end
 end
