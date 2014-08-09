@@ -1,5 +1,5 @@
-require_relative 'docker_server'
 require_relative 'logging'
+require 'docker'
 
 module Centurion; end
 
@@ -9,14 +9,18 @@ class Centurion::DockerServerGroup
 
   attr_reader :hosts
   
-  def initialize(hosts, docker_path)
+  def initialize(hosts)
     raise ArgumentError.new('Bad Host list!') if hosts.nil? || hosts.empty?
-    @hosts = hosts.map { |hostname| Centurion::DockerServer.new(hostname, docker_path) }
+    @hosts = hosts.map do |hostname|
+      hostname = "http://#{hostname}" unless hostname.start_with? "http"
+      Docker::Connection.new(hostname, {})
+    end
+    configure_excon_globally
   end
 
   def each(&block)
     @hosts.each do |host|
-      info "----- Connecting to Docker on #{host.hostname} -----"
+      info "----- Connecting to Docker on #{URI.parse(host.url).host}:#{URI.parse(host.url).port} -----"
       block.call(host)
     end
   end
@@ -27,5 +31,15 @@ class Centurion::DockerServerGroup
     end
 
     threads.each { |t| t.join }
+  end
+
+  def configure_excon_globally
+    Excon.defaults[:connect_timeout] = 120
+    Excon.defaults[:read_timeout]    = 120
+    Excon.defaults[:write_timeout]   = 120
+    Excon.defaults[:debug_request]   = true
+    Excon.defaults[:debug_response]  = true
+    Excon.defaults[:nonblock]        = false
+    Excon.defaults[:tcp_nodelay]     = true
   end
 end

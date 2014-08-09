@@ -1,6 +1,7 @@
 require 'spec_helper'
 require 'centurion/deploy_dsl'
 require 'capistrano_dsl'
+require 'centurion/api'
 
 class DeployDSLTest
   extend Capistrano::DSL
@@ -19,7 +20,7 @@ describe Centurion::DeployDSL do
     expect(recipient).to receive(:ping).with('host2')
 
     DeployDSLTest.set(:hosts, %w{ host1 host2 })
-    DeployDSLTest.on_each_docker_host { |h| recipient.ping(h.hostname) }
+    DeployDSLTest.on_each_docker_host { |h| recipient.ping(URI.parse(h.url).host) }
   end
 
   it 'adds new env_vars to the existing ones' do
@@ -96,9 +97,8 @@ describe Centurion::DeployDSL do
   end
 
   it 'gets current tags for an image' do
-    Centurion::DockerServer.any_instance.stub(current_tags_for: [ 'foo' ])
+    Centurion::Api.should_receive(:get_all_tags_for_image).with(any_args()).and_return(['foo'])
     DeployDSLTest.set(:hosts, [ 'host1' ])
-
     expect(DeployDSLTest.get_current_tags_for('asdf')).to eq [ { server: 'host1', tags: [ 'foo'] } ]
   end
 end

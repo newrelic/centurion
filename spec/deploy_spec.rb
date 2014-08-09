@@ -5,7 +5,7 @@ require 'centurion/logging'
 describe Centurion::Deploy do
   let(:mock_ok_status)  { double('http_status_ok').tap { |s| s.stub(status: 200) } }
   let(:mock_bad_status) { double('http_status_ok').tap { |s| s.stub(status: 500) } }
-  let(:server)          { double('docker_server').tap { |s| s.stub(hostname: 'host1'); s.stub(:attach) } }
+  let(:server)          { double('connection').tap  { |s| s.stub(url: 'http://host1:4243'); s.stub(:attach) } }
   let(:port)            { 8484 }
   let(:container)       { { 'Ports' => [{ 'PublicPort' => port }, 'Created' => Time.now.to_i ], 'Id' => '21adfd2ef2ef2349494a', 'Names' => [ 'name1' ] } }
   let(:endpoint)        { '/status/check' }
@@ -44,20 +44,20 @@ describe Centurion::Deploy do
 
   describe '#container_up?' do
     it 'recognizes when no containers are running' do
-      expect(server).to receive(:find_containers_by_public_port).and_return([])
-
+      Centurion::Api.should_receive(:get_containers_by_port).with(any_args()).and_return([])
       test_deploy.container_up?(server, port).should be_false
     end
 
     it 'complains when more than one container is bound to this port' do
-      expect(server).to receive(:find_containers_by_public_port).and_return([1,2])
+      Centurion::Api.should_receive(:get_containers_by_port).with(any_args()).and_return([1,2])
       expect(test_deploy).to receive(:error).with /More than one container/
 
       test_deploy.container_up?(server, port).should be_false
     end
 
     it 'recognizes when the container is actually running' do
-      expect(server).to receive(:find_containers_by_public_port).and_return([container])
+      Centurion::Api.should_receive(:get_containers_by_port).with(any_args()).and_return([container])
+      expect(container).to receive(:json).and_return({ "State" => { "StartedAt" => "#{Time.now}" } })
       expect(test_deploy).to receive(:info).with /Found container/
 
       test_deploy.container_up?(server, port).should be_true
@@ -103,17 +103,12 @@ describe Centurion::Deploy do
 
   describe '#cleanup_containers' do
     it 'deletes all but two containers' do
-      expect(server).to receive(:old_containers_for_port).with(port.to_s).and_return([
-        {'Id' => '123', 'Names' => ['foo']},
-        {'Id' => '456', 'Names' => ['foo']},
-        {'Id' => '789', 'Names' => ['foo']},
-        {'Id' => '0ab', 'Names' => ['foo']},
-        {'Id' => 'cde', 'Names' => ['foo']},
-      ])
-      expect(server).to receive(:remove_container).with('789')
-      expect(server).to receive(:remove_container).with('0ab')
-      expect(server).to receive(:remove_container).with('cde')
+      Centurion::Api.should_receive(:get_non_running_containers).with(any_args()).and_return([container])
+      expect(container).to receive(:id).and_return(container["Id"])
 
+      expect(container).to receive(:remove)
+
+      #this is changing because we no longer can clean up containers by port...
       test_deploy.cleanup_containers(server, {'80/tcp' => [{'HostIp' => '0.0.0.0', 'HostPort' => port.to_s}]})
     end
   end
@@ -124,11 +119,16 @@ describe Centurion::Deploy do
       containers = [ container, second_container ]
       bindings = {'80/tcp'=>[{'HostIp'=>'0.0.0.0', 'HostPort'=>'80'}]}
 
-      expect(server).to receive(:find_containers_by_public_port).and_return(containers)
-      expect(test_deploy).to receive(:public_port_for).with(bindings).and_return('80')
-      expect(server).to receive(:stop_container).with(container['Id']).once
-      expect(server).to receive(:stop_container).with(second_container['Id']).once
+      Centurion::Api.should_receive(:get_containers_by_port).and_return(containers)
+      expect(container).to receive(:id).and_return(container["Id"])
+      expect(second_container).to receive(:id).and_return(second_container["Id"])
+      expect(container).to receive(:info).and_return({ "Name" => "container" })
+      expect(second_container).to receive(:info).and_return({ "Name" => "second_container" })
 
+      expect(test_deploy).to receive(:public_port_for).with(bindings).and_return('80')
+
+      expect(container).to receive(:kill).once
+      expect(second_container).to receive(:kill).once
       test_deploy.stop_containers(server, bindings)
     end
   end
@@ -198,13 +198,11 @@ describe Centurion::Deploy do
     end
 
     it 'ultimately asks the server object to do the work' do
-      server.should_receive(:create_container).with(
-        hash_including({'Image'=>'image_id', 'Hostname'=>'host1', 'ExposedPorts'=>{'80/tcp'=>{}}})
-      ).and_return(container)
-
-      server.should_receive(:start_container)
-      server.should_receive(:inspect_container)
-
+      Docker::Container.should_receive(:create).with(any_args()).and_return(container)
+      expect(container).to receive(:start!).with(any_args()).and_return(container)
+      expect(container).to receive(:top)
+      
+      expect(container).to receive(:id).and_return(container["Id"]).twice
       new_container = test_deploy.start_new_container(server, 'image_id', bindings, {})
       expect(new_container).to eq(container)
     end
@@ -230,12 +228,18 @@ describe Centurion::Deploy do
     end
 
     it 'starts the console' do
-      expect(test_deploy).to receive(:start_container_with_config).with(
-        server, {}, anything(), anything()
-      ).and_return({'Id' => 'shakespeare'})
+      # expect(test_deploy).to receive(:start_container_with_config).with(
+      #   server, {}, anything(), anything()
+      # ).and_return({'Id' => 'shakespeare'})
 
+      Docker::Container.should_receive(:create).with(any_args()).and_return(container)
+      expect(container).to receive(:start!).with(any_args()).and_return(container)
+      expect(container).to receive(:top)
+      
+      expect(container).to receive(:id).and_return(container["Id"]).twice
+  
       test_deploy.launch_console(server, 'image_id', bindings, {})
-      expect(server).to have_received(:attach).with('shakespeare')
+      # expect(server).to have_received(:attach).with('shakespeare')
     end
   end
 end

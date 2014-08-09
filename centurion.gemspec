@@ -36,6 +36,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'trollop'
   spec.add_dependency 'excon', '~> 0.33'
   spec.add_dependency 'logger-colors'
+  spec.add_dependency 'docker-api', '~> 1.13'
 
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'rake'

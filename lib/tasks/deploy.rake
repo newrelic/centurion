@@ -1,6 +1,7 @@
 require 'thread'
 require 'excon'
 require 'centurion/deploy'
+require 'centurion/api'
 
 task :deploy do
   invoke 'deploy:get_image'
@@ -29,7 +30,6 @@ namespace :deploy do
 
   task :get_image do
     invoke 'deploy:pull_image'
-    invoke 'deploy:determine_image_id_from_first_server'
     invoke 'deploy:verify_image'
   end
 
@@ -96,26 +96,10 @@ namespace :deploy do
     end
   end
 
+  #This should clean up all old containers by their name
   task :cleanup do
-    on_each_docker_host do |target_server|
-      cleanup_containers(target_server, fetch(:port_bindings))
-    end
-  end
-
-  task :determine_image_id do
-    registry = Centurion::DockerRegistry.new(fetch(:docker_registry))
-    exact_image = registry.digest_for_tag(fetch(:image), fetch(:tag))
-    set :image_id, exact_image
-    $stderr.puts "RESOLVED #{fetch(:image)}:#{fetch(:tag)} => #{exact_image[0..11]}"
-  end
-
-  task :determine_image_id_from_first_server do
-    on_each_docker_host do |target_server|
-      image_detail = target_server.inspect_image(fetch(:image), fetch(:tag))
-      exact_image = image_detail["id"]
-      set :image_id, exact_image
-      $stderr.puts "RESOLVED #{fetch(:image)}:#{fetch(:tag)} => #{exact_image[0..11]}"
-      break
+    on_each_docker_host do |host|
+      cleanup_containers(host, fetch(:port_bindings))
     end
   end
 
@@ -126,33 +110,36 @@ namespace :deploy do
     end
     $stderr.puts "Fetching image #{fetch(:image)}:#{fetch(:tag)} IN PARALLEL\n"
 
-    target_servers = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
-    target_servers.each_in_parallel do |target_server|
-      target_server.pull(fetch(:image), fetch(:tag))
+    auth = {}
+    auth[:username] = fetch(:registry_username) if fetch(:registry_username)
+    auth[:password] = fetch(:registry_password) if fetch(:registry_password)
+    auth[:email]    = fetch(:registry_email)    if fetch(:registry_email)
+    Centurion::DockerServerGroup.new(fetch(:hosts)).each_in_parallel do |host|
+      image = Docker::Image.create({:fromImage => fetch(:image), :tag => fetch(:tag)}, auth, host)
+      set :image_id, image.id
     end
   end
 
   task :verify_image do
-    on_each_docker_host do |target_server|
-      image_detail = target_server.inspect_image(fetch(:image), fetch(:tag))
-      found_image_id = image_detail["id"]
-
-      if found_image_id == fetch(:image_id)
-        $stderr.puts "Image #{found_image_id[0..7]} found on #{target_server.hostname}"
+    on_each_docker_host do |host|
+      image = Docker::Image.get(fetch(:image_id), {}, host)
+      
+      if image.id[0..11] == fetch(:image_id)
+        debug "Image #{image.id[0..11]} found on #{host.url}"
       else
-        raise "Did not find image #{fetch(:image_id)} on host #{target_server.hostname}!"
+        raise "Did not find image #{fetch(:image_id)} on host #{host.url}!"
       end
 
       # Print the container config
-      image_detail["container_config"].each_pair do |key,value|
-        $stderr.puts "\t#{key} => #{value.inspect}"
+      image.info["ContainerConfig"].each_pair do |key,value|
+        debug "\t#{key} => #{value.inspect}"
       end
     end
   end
 
   task :promote_from_staging do
     if fetch(:environment) == 'staging'
-      $stderr.puts "\n\nYour target environment needs to not be 'staging' to promote from staging."
+      error "\n\nYour target environment needs to not be 'staging' to promote from staging."
       exit(1)
     end
 
@@ -164,17 +151,17 @@ namespace :deploy do
     staging_tags = get_current_tags_for(fetch(:image)).map { |t| t[:tags] }.flatten.uniq
 
     if staging_tags.size != 1
-      $stderr.puts "\n\nUh, oh: Not sure which staging tag to deploy! Found:(#{staging_tags.join(', ')})"
+      error "\n\nUh, oh: Not sure which staging tag to deploy! Found:(#{staging_tags.join(', ')})"
       exit(1)
     end
 
-    $stderr.puts "Staging environment has #{staging_tags.first} deployed."
+    info "Staging environment has #{staging_tags.first} deployed."
 
     # Make sure that we set our env back to production, then update the tag.
     set_current_environment(starting_environment)
     set :tag, staging_tags.first
 
-    $stderr.puts "Deploying #{fetch(:tag)} to the #{starting_environment} environment"
+    info "Deploying #{fetch(:tag)} to the #{starting_environment} environment"
 
     invoke 'deploy'
   end
