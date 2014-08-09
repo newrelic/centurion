@@ -64,7 +64,7 @@ set :hosts, opts[:hosts].split(",") if opts[:hosts]
 
 # Default tag should be "latest"
 set :tag, 'latest' unless any?(:tag)
-set :docker_registry, 'https://registry.hub.docker.com/'
+set :docker_registry, Centurion::DockerRegistry::OFFICIAL_URL
 
 # Specify a path to docker executable
 set :docker_path, opts[:docker_path]
