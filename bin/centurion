@@ -16,11 +16,6 @@ Rake.application.options.trace = true
 task_dir = File.expand_path(File.join(File.dirname(__FILE__), *%w{.. lib tasks}))
 Dir.glob(File.join(task_dir, '*.rake')).each { |file| load file }
 
-possible_environments = %w[development integration staging production local_integration]
-def possible_environments.to_s
-  join(', ').sub(/, (\w+)$/, ', or \1')
-end
-
 #
 # Trollop option setup
 #
@@ -28,17 +23,13 @@ require 'trollop'
 
 opts = Trollop::options do
   opt :project,     'project (blog, forums...)',                   type: String, required: true,  short: '-p'
-  opt :environment, "environment (#{possible_environments})",      type: String, required: true,  short: '-e'
+  opt :environment, "environment (production, staging...)",        type: String, required: true,  short: '-e'
   opt :action,      'action (deploy, list...)',                    type: String, default: 'list', short: '-a'
   opt :image,       'image (yourco/project...)',                   type: String, required: false, short: '-i'
   opt :tag,         'tag (latest...)',                             type: String, required: false, short: '-t'
   opt :hosts,       'hosts, comma separated',                      type: String, required: false, short: '-h'
   opt :docker_path, 'path to docker executable (default: docker)', type: String, default: 'docker', short: '-d'
   opt :no_pull,     'Skip the pull_image step',                    type: :flag, default: false, long: '--no-pull'
-end
-
-unless possible_environments.include?(opts[:environment])
-  Trollop::die :environment, "is unknown; must be #{possible_environments}"
 end
 
 set_current_environment(opts[:environment].to_sym)
