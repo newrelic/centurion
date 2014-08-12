@@ -63,3 +63,5 @@ Contributor                                   | Commits    | Additions | Deletio
 [intjonathan]: https://github.com/intjonathan
 [duien]: https://github.com/duien
 [frankywahl]: https://github.com/frankywahl
+[tdooner]: https://github.com/tdooner
+[jchauncey]: https://github.com/jchauncey
