@@ -6,6 +6,8 @@ Post-release
 
 Your name could be here!
 
+[Tom Dooner](https://github.com/tdooner)
+
 Pre-release
 -----------
 
