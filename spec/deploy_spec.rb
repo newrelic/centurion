@@ -9,8 +9,8 @@ describe Centurion::Deploy do
   let(:port)            { 8484 }
   let(:container)       { { 'Ports' => [{ 'PublicPort' => port }, 'Created' => Time.now.to_i ], 'Id' => '21adfd2ef2ef2349494a', 'Names' => [ 'name1' ] } }
   let(:endpoint)        { '/status/check' }
-  let(:test_deploy) do 
-    Object.new.tap do |o| 
+  let(:test_deploy) do
+    Object.new.tap do |o|
       o.send(:extend, Centurion::Deploy)
       o.send(:extend, Centurion::DeployDSL)
       o.send(:extend, Centurion::Logging)
@@ -84,7 +84,7 @@ describe Centurion::Deploy do
       test_deploy.stub(:warn)
       expect(test_deploy).to receive(:exit)
       expect(test_deploy).to receive(:sleep).with(0)
-       
+
       test_deploy.wait_for_http_status_ok(server, port, '/foo', 'image_id', 'chaucer', 0, 1)
       expect(test_deploy).to have_received(:info).with(/Waiting for the port/)
     end
@@ -95,7 +95,7 @@ describe Centurion::Deploy do
       test_deploy.stub(:error)
       test_deploy.stub(:warn)
       expect(test_deploy).to receive(:exit)
-       
+
       test_deploy.wait_for_http_status_ok(server, port, '/foo', 'image_id', 'chaucer', 1, 0)
       expect(test_deploy).to have_received(:info).with(/Waiting for the port/)
     end
@@ -211,6 +211,33 @@ describe Centurion::Deploy do
     end
   end
 
+  describe '#start_container_with_config' do
+    let(:bindings) { {'80/tcp'=>[{'HostIp'=>'0.0.0.0', 'HostPort'=>'80'}]} }
+
+    it 'pass host_config to start_container' do
+      server.stub(:container_config_for).and_return({
+        'Image'        => 'image_id',
+        'Hostname'     => server.hostname,
+      })
+
+      server.stub(:create_container).and_return({
+        'Id' => 'abc123456'
+      })
+
+      server.stub(:inspect_container)
+
+      expect(server).to receive(:start_container).with(
+        'abc123456',
+        {
+          'PortBindings' => bindings,
+          'ContainerIDFile' => '/etc/cidfile'
+        }
+      ).once
+
+      test_deploy.start_new_container(server, 'image_id', bindings, {}, nil, nil, '/etc/cidfile')
+    end
+  end
+
   describe '#start_new_container' do
     let(:bindings) { {'80/tcp'=>[{'HostIp'=>'0.0.0.0', 'HostPort'=>'80'}]} }
     let(:env) { { 'FOO' => 'BAR' } }
@@ -218,14 +245,23 @@ describe Centurion::Deploy do
     let(:command) { ['/bin/echo', 'hi'] }
 
     it 'configures the container' do
-      expect(test_deploy).to receive(:container_config_for).with(server, 'image_id', bindings, env, volumes, command).once
+      expect(test_deploy).to receive(:container_config_for).with(server, 'image_id', bindings, nil, {}, nil).once
+
       test_deploy.stub(:start_container_with_config)
 
-      test_deploy.start_new_container(server, 'image_id', bindings, volumes, env, command)
+      test_deploy.start_new_container(server, 'image_id', bindings, {}, nil)
+    end
+
+    it 'pass cidfile to start_container_with_config method' do
+      test_deploy.stub(:container_config_for)
+
+      expect(test_deploy).to receive(:start_container_with_config).with(server, anything(), bindings, nil, '/etc/cidfile').once
+
+      test_deploy.start_new_container(server, 'image_id', bindings, {}, nil, nil, '/etc/cidfile')
     end
 
     it 'starts the container' do
-      expect(test_deploy).to receive(:start_container_with_config).with(server, {}, anything(), anything())
+      expect(test_deploy).to receive(:start_container_with_config).with(server, {}, anything(), anything(), anything())
 
       test_deploy.start_new_container(server, 'image_id', bindings, {})
     end
@@ -252,21 +288,23 @@ describe Centurion::Deploy do
 
   describe '#launch_console' do
     let(:bindings) { {'80/tcp'=>[{'HostIp'=>'0.0.0.0', 'HostPort'=>'80'}]} }
-    let(:volumes) { nil }
-    let(:env) { nil }
-    let(:command) { nil }
+    let(:volumes)  { nil }
+    let(:env)      { nil }
+    let(:command)  { nil }
+    let(:cidfile)  { nil }
 
     it 'configures the container' do
       expect(test_deploy).to receive(:container_config_for).with(server, 'image_id', bindings, env, volumes, command).once
       test_deploy.stub(:start_container_with_config)
 
-      test_deploy.start_new_container(server, 'image_id', bindings, volumes, env, command)
+      test_deploy.start_new_container(server, 'image_id', bindings, volumes, env, command, cidfile)
     end
 
     it 'augments the container_config' do
       expect(test_deploy).to receive(:start_container_with_config).with(server, volumes,
         anything(),
-        hash_including('Cmd' => [ '/bin/bash' ], 'AttachStdin' => true , 'Tty' => true , 'OpenStdin' => true)
+        hash_including('Cmd' => [ '/bin/bash' ], 'AttachStdin' => true , 'Tty' => true , 'OpenStdin' => true),
+        anything()
       ).and_return({'Id' => 'shakespeare'})
 
       test_deploy.launch_console(server, 'image_id', bindings, volumes, env)
@@ -274,7 +312,7 @@ describe Centurion::Deploy do
 
     it 'starts the console' do
       expect(test_deploy).to receive(:start_container_with_config).with(
-        server, volumes, anything(), anything()
+        server, nil, anything(), anything(), anything()
       ).and_return({'Id' => 'shakespeare'})
 
       test_deploy.launch_console(server, 'image_id', bindings, volumes, env)

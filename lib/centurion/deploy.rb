@@ -67,7 +67,7 @@ module Centurion::Deploy
     return false unless response
     return true if response.status >= 200 && response.status < 300
 
-    warn "Got HTTP status: #{response.status}" 
+    warn "Got HTTP status: #{response.status}"
     false
   end
 
@@ -119,34 +119,39 @@ module Centurion::Deploy
     container_config
   end
 
-  def start_new_container(target_server, image_id, port_bindings, volumes, env_vars=nil, command=nil)
+  def start_new_container(target_server, image_id, port_bindings, volumes, env_vars=nil, command=nil, cidfile=nil)
     container_config = container_config_for(target_server, image_id, port_bindings, env_vars, volumes, command)
-    start_container_with_config(target_server, volumes, port_bindings, container_config)
+    start_container_with_config(target_server, volumes, port_bindings, container_config, cidfile)
   end
 
-  def launch_console(target_server, image_id, port_bindings, volumes, env_vars=nil)
+  def launch_console(target_server, image_id, port_bindings, volumes, env_vars=nil, cidfile=nil)
     container_config = container_config_for(target_server, image_id, port_bindings, env_vars, volumes, ['/bin/bash']).merge(
       'AttachStdin' => true,
       'Tty'         => true,
       'OpenStdin'   => true,
     )
 
-    container = start_container_with_config(target_server, volumes, port_bindings, container_config)
+    container = start_container_with_config(target_server, volumes, port_bindings, container_config, cidfile)
 
     target_server.attach(container['Id'])
   end
 
   private
 
-  def start_container_with_config(target_server, volumes, port_bindings, container_config)
+  def start_container_with_config(target_server, volumes, port_bindings, container_config, cidfile)
     info "Creating new container for #{container_config['Image'][0..7]}"
     new_container = target_server.create_container(container_config)
 
     host_config = {}
+
     # Map some host volumes if needed
     host_config['Binds'] = volumes if volumes && !volumes.empty?
+
     # Bind the ports
     host_config['PortBindings'] = port_bindings
+
+    # Assign cidfile
+    host_config['ContainerIDFile'] = cidfile if cidfile
 
     info "Starting new container #{new_container['Id'][0..7]}"
     target_server.start_container(new_container['Id'], host_config)
