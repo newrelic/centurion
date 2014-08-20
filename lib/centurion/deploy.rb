@@ -87,7 +87,7 @@ module Centurion::Deploy
     end
   end
 
-  def container_config_for(target_server, image_id, port_bindings=nil, env_vars=nil, volumes=nil)
+  def container_config_for(target_server, image_id, port_bindings=nil, env_vars=nil, volumes=nil, parameters=nil)
     container_config = {
       'Image'        => image_id,
       'Hostname'     => target_server.hostname,
@@ -112,11 +112,15 @@ module Centurion::Deploy
       container_config['VolumesFrom'] = 'parent'
     end
 
+    if parameters
+      container_config.merge!(parameters)
+    end
+
     container_config
   end
 
-  def start_new_container(target_server, image_id, port_bindings, volumes, env_vars=nil)
-    container_config = container_config_for(target_server, image_id, port_bindings, env_vars, volumes)
+  def start_new_container(target_server, image_id, port_bindings, volumes, env_vars=nil, parameters=nil)
+    container_config = container_config_for(target_server, image_id, port_bindings, env_vars, volumes, parameters)
     start_container_with_config(target_server, volumes, port_bindings, container_config)
   end
 

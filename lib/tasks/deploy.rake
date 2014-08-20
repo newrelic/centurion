@@ -51,7 +51,8 @@ namespace :deploy do
         fetch(:image_id),
         fetch(:port_bindings),
         fetch(:binds),
-        fetch(:env_vars)
+        fetch(:env_vars),
+        fetch(:parameters)
       )
     end
   end
@@ -77,7 +78,8 @@ namespace :deploy do
         fetch(:image_id),
         fetch(:port_bindings),
         fetch(:binds),
-        fetch(:env_vars)
+        fetch(:env_vars),
+        fetch(:parameters)
       )
 
       fetch(:port_bindings).each_pair do |container_port, host_ports|
