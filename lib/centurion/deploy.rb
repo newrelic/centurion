@@ -89,8 +89,7 @@ module Centurion::Deploy
 
   def container_config_for(target_server, image_id, port_bindings=nil, env_vars=nil, volumes=nil, command=nil)
     container_config = {
-      'Image'        => image_id,
-      'Hostname'     => target_server.hostname,
+      'Image'        => image_id
     }
 
     container_config.merge!('Cmd' => command) if command
