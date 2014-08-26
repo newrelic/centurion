@@ -62,6 +62,13 @@ describe Centurion::DockerViaApi do
 
   it 'stops a container' do
     expect(Excon).to receive(:post).
+                     with(excon_uri + "v1.7" + "/containers/12345/stop?t=300").
+                     and_return(double(status: 204))
+    api.stop_container('12345', 300)
+  end
+
+  it 'stops a container with a custom timeout' do
+    expect(Excon).to receive(:post).
                      with(excon_uri + "v1.7" + "/containers/12345/stop?t=30").
                      and_return(double(status: 204))
     api.stop_container('12345')
