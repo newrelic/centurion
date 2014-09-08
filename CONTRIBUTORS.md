@@ -6,8 +6,9 @@ Post-release
 
 Your name could be here!
 
-[Tom Dooner][tdooner]
-[Jonathan Chauncey][jchauncey]
+ * [Tom Dooner][tdooner]
+ * [Jonathan Chauncey][jchauncey]
+ * [Matt Sanford][mzsanford]
 
 Pre-release
 -----------
@@ -65,3 +66,4 @@ Contributor                                   | Commits    | Additions | Deletio
 [frankywahl]: https://github.com/frankywahl
 [tdooner]: https://github.com/tdooner
 [jchauncey]: https://github.com/jchauncey
+[mzsanford]: https://github.com/mzsanford
