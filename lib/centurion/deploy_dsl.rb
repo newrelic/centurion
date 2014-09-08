@@ -38,7 +38,7 @@ module Centurion::DeployDSL
     require_options_keys(options,  [ :container_port ])
 
     add_to_bindings(
-      options[:host_ip] || '0.0.0.0', 
+      options[:host_ip] || '0.0.0.0',
       options[:container_port],
       port,
       options[:type] || 'tcp'

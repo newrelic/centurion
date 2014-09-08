@@ -5,7 +5,7 @@ require 'uri'
 module Centurion; end
 
 class Centurion::DockerRegistry
-  OFFICIAL_URL = 'https://registry.hub.docker.com/'
+  OFFICIAL_URL = 'https://registry.hub.docker.com'
 
   def initialize(base_uri)
     @base_uri = base_uri
@@ -13,9 +13,10 @@ class Centurion::DockerRegistry
 
   def digest_for_tag(repository, tag)
     path = "/v1/repositories/#{repository}/tags/#{tag}"
-    $stderr.puts "GET: #{path.inspect}"
+    uri = uri_for_repository_path(repository, path)
+    $stderr.puts "GET: #{uri}"
     response = Excon.get(
-      @base_uri + path,
+      uri,
       :headers => { "Content-Type" => "application/json" }
     )
     raise response.inspect unless response.status == 200
@@ -28,8 +29,9 @@ class Centurion::DockerRegistry
 
   def repository_tags(repository)
     path = "/v1/repositories/#{repository}/tags"
-    $stderr.puts "GET: #{@base_uri + path}"
-    response = Excon.get(@base_uri + path)
+    uri = uri_for_repository_path(repository, path)
+    $stderr.puts "GET: #{uri.inspect}"
+    response = Excon.get(uri)
     raise response.inspect unless response.status == 200
 
     tags = JSON.load(response.body)
@@ -43,7 +45,7 @@ class Centurion::DockerRegistry
     #
     # [1]: https://docs.docker.com/v1.1/reference/api/registry_api/
 
-    if @base_uri == OFFICIAL_URL
+    if is_official_registry?(repository)
       {}.tap do |hash|
         tags.each do |tag|
           hash[tag['name']] = tag['layer']
@@ -51,6 +53,25 @@ class Centurion::DockerRegistry
       end
     else
       tags
+    end
+  end
+
+  private
+
+  def is_official_registry?(repository)
+    if @base_uri == OFFICIAL_URL
+      return !repository.match(/^[a-z0-9-]+.[a-z]+\//)
+    end
+    false
+  end
+
+  def uri_for_repository_path(repository, path)
+    if repository.match(/\A([a-z0-9-]+.[a-z]+)\/(.*)\z/)
+      host = $1
+      short_image_name = $2
+      "https://#{host}#{path.gsub(repository, short_image_name)}"
+    else
+      @base_uri + path
     end
   end
 end
