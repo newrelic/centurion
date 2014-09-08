@@ -29,7 +29,7 @@ opts = Trollop::options do
   opt :tag,         'tag (latest...)',                             type: String, required: false, short: '-t'
   opt :hosts,       'hosts, comma separated',                      type: String, required: false, short: '-h'
   opt :docker_path, 'path to docker executable (default: docker)', type: String, default: 'docker', short: '-d'
-  opt :no_pull,     'Skip the pull_image step',                    type: :flag, default: false, long: '--no-pull'
+  opt :nopull,      'Skip the pull_image step',                    type: :flag, default: false, long: '--no-pull'
 end
 
 set_current_environment(opts[:environment].to_sym)
@@ -60,6 +60,6 @@ set :docker_registry, Centurion::DockerRegistry::OFFICIAL_URL
 # Specify a path to docker executable
 set :docker_path, opts[:docker_path]
 
-set :no_pull, opts[:no_pull]
+set :no_pull, opts[:nopull]
 
 invoke(opts[:action])
