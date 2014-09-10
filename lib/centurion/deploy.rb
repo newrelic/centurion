@@ -5,14 +5,14 @@ module Centurion; end
 module Centurion::Deploy
   FAILED_CONTAINER_VALIDATION = 100
 
-  def stop_containers(target_server, port_bindings)
+  def stop_containers(target_server, port_bindings, timeout = 30)
     public_port    = public_port_for(port_bindings)
     old_containers = target_server.find_containers_by_public_port(public_port)
     info "Stopping container(s): #{old_containers.inspect}"
 
     old_containers.each do |old_container|
       info "Stopping old container #{old_container['Id'][0..7]} (#{old_container['Names'].join(',')})"
-      target_server.stop_container(old_container['Id'])
+      target_server.stop_container(old_container['Id'], timeout)
     end
   end
 

@@ -126,8 +126,8 @@ describe Centurion::Deploy do
 
       expect(server).to receive(:find_containers_by_public_port).and_return(containers)
       expect(test_deploy).to receive(:public_port_for).with(bindings).and_return('80')
-      expect(server).to receive(:stop_container).with(container['Id']).once
-      expect(server).to receive(:stop_container).with(second_container['Id']).once
+      expect(server).to receive(:stop_container).with(container['Id'], 30).once
+      expect(server).to receive(:stop_container).with(second_container['Id'], 30).once
 
       test_deploy.stop_containers(server, bindings)
     end

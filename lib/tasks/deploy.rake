@@ -37,7 +37,9 @@ namespace :deploy do
   # - remote: list
   # - remote: stop
   task :stop do
-    on_each_docker_host { |server| stop_containers(server, fetch(:port_bindings)) }
+    on_each_docker_host do |server|
+      stop_containers(server, fetch(:port_bindings), fetch(:stop_timeout, 30))
+    end
   end
 
   # start
@@ -72,7 +74,7 @@ namespace :deploy do
 
   task :rolling_deploy do
     on_each_docker_host do |server|
-      stop_containers(server, fetch(:port_bindings))
+      stop_containers(server, fetch(:port_bindings), fetch(:stop_timeout, 30))
 
       start_new_container(
         server,

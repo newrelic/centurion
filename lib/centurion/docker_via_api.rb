@@ -51,8 +51,8 @@ class Centurion::DockerViaApi
     true
   end
 
-  def stop_container(container_id)
-    path = "/v1.7/containers/#{container_id}/stop?t=30"
+  def stop_container(container_id, timeout = 30)
+    path = "/v1.7/containers/#{container_id}/stop?t=#{timeout}"
     response = Excon.post(
       @base_uri + path,
     )
