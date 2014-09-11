@@ -54,6 +54,7 @@ namespace :deploy do
         fetch(:port_bindings),
         fetch(:binds),
         fetch(:env_vars),
+        fetch(:command),
         fetch(:cidfile, '/etc/cidfile')
       )
     end
@@ -67,6 +68,7 @@ namespace :deploy do
         fetch(:port_bindings),
         fetch(:binds),
         fetch(:env_vars),
+        fetch(:command),
         fetch(:cidfile, '/etc/cidfile')
       )
     end
@@ -82,6 +84,7 @@ namespace :deploy do
         fetch(:port_bindings),
         fetch(:binds),
         fetch(:env_vars),
+        fetch(:command),
         fetch(:cidfile, '/etc/cidfile')
       )
 
