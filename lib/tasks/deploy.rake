@@ -53,8 +53,7 @@ namespace :deploy do
         fetch(:image_id),
         fetch(:port_bindings),
         fetch(:binds),
-        fetch(:env_vars),
-        fetch(:cidfile, '/etc/cidfile')
+        fetch(:env_vars)
       )
     end
   end
@@ -66,8 +65,7 @@ namespace :deploy do
         fetch(:image_id),
         fetch(:port_bindings),
         fetch(:binds),
-        fetch(:env_vars),
-        fetch(:cidfile, '/etc/cidfile')
+        fetch(:env_vars)
       )
     end
   end
@@ -81,8 +79,7 @@ namespace :deploy do
         fetch(:image_id),
         fetch(:port_bindings),
         fetch(:binds),
-        fetch(:env_vars),
-        fetch(:cidfile, '/etc/cidfile')
+        fetch(:env_vars)
       )
 
       fetch(:port_bindings).each_pair do |container_port, host_ports|
