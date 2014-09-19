@@ -28,13 +28,15 @@ describe Centurion::DeployDSL do
     expect(DeployDSLTest.fetch(:command)).to equal(command)
   end
 
-  it 'adds new env_vars to the existing ones' do
+  it 'adds new env_vars to the existing ones, as strings' do
     DeployDSLTest.set(:env_vars, { 'SHAKESPEARE' => 'Hamlet' })
-    DeployDSLTest.env_vars('DICKENS' => 'David Copperfield')
+    DeployDSLTest.env_vars('DICKENS' => 'David Copperfield',
+                           :DICKENS_BIRTH_YEAR => 1812)
 
     expect(DeployDSLTest.fetch(:env_vars)).to include(
-      'SHAKESPEARE' => 'Hamlet',
-      'DICKENS'     => 'David Copperfield'
+      'SHAKESPEARE'        => 'Hamlet',
+      'DICKENS'            => 'David Copperfield',
+      'DICKENS_BIRTH_YEAR' => '1812'
     )
   end
 
