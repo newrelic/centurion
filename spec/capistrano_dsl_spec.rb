@@ -27,7 +27,7 @@ describe Capistrano::DSL do
     end
   end
 
-  context 'with a current environment set' do 
+  context 'with a current environment set' do
     before do
       DSLTest.set_current_environment(:test)
     end
@@ -46,11 +46,11 @@ describe Capistrano::DSL do
 
     it 'returns true for any? when the value exists' do
       DSLTest.set(:foo, 'bar')
-      expect(DSLTest.any?(:foo)).to be_true
+      expect(DSLTest.any?(:foo)).to be_truthy
     end
 
     it 'returns false for any? when the value does not exist' do
-      expect(DSLTest.any?(:foo)).to be_false
+      expect(DSLTest.any?(:foo)).to be_falsey
     end
 
     it 'passes through the any? method to values that support it' do
