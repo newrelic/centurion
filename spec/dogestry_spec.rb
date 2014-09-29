@@ -47,4 +47,10 @@ describe Centurion::Dogestry do
       registry.exec_command('pull', repo).should start_with('dogestry')
     end
   end
+
+  describe '#which' do
+    it 'finds dogestry command line' do
+      registry.which('dogestry').should_not == nil
+    end
+  end
 end
