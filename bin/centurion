@@ -30,6 +30,7 @@ opts = Trollop::options do
   opt :hosts,       'hosts, comma separated',                      type: String, required: false, short: '-h'
   opt :docker_path, 'path to docker executable (default: docker)', type: String, default: 'docker', short: '-d'
   opt :nopull,      'Skip the pull_image step',                    type: :flag, default: false, long: '--no-pull'
+  opt :from_s3,     'Pull image from S3 via Dogestry',             type: :flag, default: false, long: '--from-s3'
 end
 
 set_current_environment(opts[:environment].to_sym)
@@ -61,5 +62,7 @@ set :docker_registry, Centurion::DockerRegistry::OFFICIAL_URL unless any?(:docke
 set :docker_path, opts[:docker_path]
 
 set :no_pull, opts[:nopull]
+
+set :from_s3, opts[:from_s3]
 
 invoke(opts[:action])

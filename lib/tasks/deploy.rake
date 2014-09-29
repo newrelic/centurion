@@ -130,7 +130,19 @@ namespace :deploy do
 
     target_servers = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
     target_servers.each_in_parallel do |target_server|
-      target_server.pull(fetch(:image), fetch(:tag))
+      if fetch(:from_s3)
+        registry = Centurion::Dogestry.new({
+          aws_access_key: fetch(:aws_access_key),
+          aws_secret_key: fetch(:aws_secret_key),
+          s3_bucket: fetch(:s3_bucket),
+          s3_region: fetch(:s3_region),
+          docker_host: target_server.hostname
+        })
+
+        registry.pull("#{fetch(:image)}:#{fetch(:tag)}")
+      else
+        target_server.pull(fetch(:image), fetch(:tag))
+      end
     end
   end
 
