@@ -139,7 +139,12 @@ namespace :deploy do
           docker_host: target_server.hostname
         })
 
-        registry.pull("#{fetch(:image)}:#{fetch(:tag)}")
+        # When pulling from S3, if any failures happened, pull from regular docker server.
+        begin
+          registry.pull("#{fetch(:image)}:#{fetch(:tag)}")
+        rescue RuntimeError
+          target_server.pull(fetch(:image), fetch(:tag))
+        end
       else
         target_server.pull(fetch(:image), fetch(:tag))
       end

@@ -69,8 +69,15 @@ class Centurion::Dogestry
     set_envs
 
     output = `#{exec_command('pull', repo)}`
-    info output
-    output
+    exit_status = $?.to_i
+
+    if exit_status == 0
+      info output
+      return output
+    else
+      error output
+      raise output
+    end
   end
 
   def push(repo)
@@ -78,7 +85,14 @@ class Centurion::Dogestry
     set_envs
 
     output = `#{exec_command('push', repo)}`
-    info output
-    output
+    exit_status = $?.to_i
+
+    if exit_status == 0
+      info output
+      return output
+    else
+      error output
+      raise output
+    end
   end
 end
