@@ -4,7 +4,7 @@ require 'centurion/dogestry'
 describe Centurion::Dogestry do
   let(:dogestry_options) {
     {
-      aws_access_key: "abc",
+      aws_access_key_id: "abc",
       aws_secret_key: "xyz",
       s3_bucket: "s3-registry-test"
     }
@@ -12,9 +12,9 @@ describe Centurion::Dogestry do
   let(:registry) { Centurion::Dogestry.new(dogestry_options) }
   let(:repo) { 'google/golang' }
 
-  describe '#aws_access_key' do
+  describe '#aws_access_key_id' do
     it 'returns correct value' do
-      registry.aws_access_key.should == dogestry_options[:aws_access_key]
+      registry.aws_access_key_id.should == dogestry_options[:aws_access_key_id]
     end
   end
 
