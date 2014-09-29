@@ -30,8 +30,8 @@ class Centurion::Dogestry
     end
   end
 
-  def aws_access_key
-    @options[:aws_access_key]
+  def aws_access_key_id
+    @options[:aws_access_key_id]
   end
 
   def aws_secret_key
@@ -56,7 +56,7 @@ class Centurion::Dogestry
 
   def set_envs
     ENV['DOCKER_HOST'] = docker_host
-    ENV['AWS_ACCESS_KEY'] = aws_access_key
+    ENV['AWS_ACCESS_KEY'] = aws_access_key_id
     ENV['AWS_SECRET_KEY'] = aws_secret_key
   end
 

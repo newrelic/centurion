@@ -71,6 +71,10 @@ module Centurion::DeployDSL
     end
   end
 
+  def registry(type)
+    set(:registry, type)
+  end
+
   private
 
   def add_to_bindings(host_ip, container_port, port, type='tcp')
