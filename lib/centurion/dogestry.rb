@@ -58,10 +58,14 @@ class Centurion::Dogestry
     ENV['DOCKER_HOST'] = docker_host
     ENV['AWS_ACCESS_KEY'] = aws_access_key_id
     ENV['AWS_SECRET_KEY'] = aws_secret_key
+
+    info "Dogestry ENV: #{ENV.inspect}"
   end
 
   def exec_command(command, repo)
-    "dogestry #{command} #{s3_url} #{repo}"
+    command = "dogestry #{command} #{s3_url} #{repo}"
+    info "Executing: #{command}"
+    command
   end
 
   def pull(repo)

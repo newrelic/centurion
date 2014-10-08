@@ -25,10 +25,19 @@ unless File.exists?(project_file)
         # Point this to an appropriate health check endpoint for rolling deploys (defaults to '/')
         # set :status_endpoint, '/status/check'
 
-        # Change docker registry example, this requires:
-        # aws keys, s3 bucket, and optional s3_region
+        # Example on how to change docker registry to Dogestry.
+        # This requires:
+        # - aws_access_key_id
+        # - aws_secret_key
+        # - s3_bucket
+        #
+        # And optionally:
+        # - s3_region (default to us-east-1)
+        #
         # registry :dogestry
         # set :aws_access_key_id, 'abc123'
+        # set :aws_secret_key, 'xyz'
+        # set :s3_bucket, 'bucket-for-docker-images'
       end
 
       desc 'Staging environment'
