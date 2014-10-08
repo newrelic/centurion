@@ -27,6 +27,38 @@ task :stop => ['deploy:stop']
 namespace :deploy do
   include Centurion::Deploy
 
+  namespace :dogestry do
+    task :validate_pull_image do
+      ['aws_access_key_id', 'aws_secret_key', 's3_bucket'].each do |env_var|
+        unless fetch(env_var.to_sym)
+          $stderr.puts "\n\n#{env_var} is not defined."
+          exit(1)
+        end
+      end
+    end
+
+    task :pull_image do
+      invoke 'deploy:dogestry:validate_pull_image'
+
+      target_servers = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
+      target_servers.each_in_parallel do |target_server|
+        dogestry_options = {
+          aws_access_key_id: fetch(:aws_access_key_id),
+          aws_secret_key: fetch(:aws_secret_key),
+          s3_bucket: fetch(:s3_bucket),
+          s3_region: fetch(:s3_region) || 'us-east-1',
+          docker_host: "tcp://#{target_server.hostname}:#{target_server.port}"
+        }
+
+        $stdout.puts "** Pulling image(#{fetch(:image)}:#{fetch(:tag)}) from Dogestry: #{dogestry_options.inspect}"
+
+        registry = Centurion::Dogestry.new(dogestry_options)
+
+        registry.pull("#{fetch(:image)}:#{fetch(:tag)}")
+      end
+    end
+  end
+
   task :get_image do
     invoke 'deploy:pull_image'
     invoke 'deploy:determine_image_id_from_first_server'
@@ -126,22 +158,14 @@ namespace :deploy do
       info "--no-pull option specified: skipping pull"
       next
     end
+
     $stderr.puts "Fetching image #{fetch(:image)}:#{fetch(:tag)} IN PARALLEL\n"
 
-    target_servers = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
-    target_servers.each_in_parallel do |target_server|
-
-      if fetch(:registry) == :dogestry
-        registry = Centurion::Dogestry.new({
-          aws_access_key_id: fetch(:aws_access_key_id),
-          aws_secret_key: fetch(:aws_secret_key),
-          s3_bucket: fetch(:s3_bucket),
-          s3_region: fetch(:s3_region),
-          docker_host: target_server.hostname
-        })
-
-        registry.pull("#{fetch(:image)}:#{fetch(:tag)}")
-      else
+    if fetch(:registry) == 'dogestry'
+      invoke 'deploy:dogestry:pull_image'
+    else
+      target_servers = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
+      target_servers.each_in_parallel do |target_server|
         target_server.pull(fetch(:image), fetch(:tag))
       end
     end
