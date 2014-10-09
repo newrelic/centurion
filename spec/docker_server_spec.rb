@@ -11,7 +11,7 @@ describe Centurion::DockerServer do
   end
 
   it 'knows its port' do
-    expect(server.port).to eq('4243')
+    expect(server.port).to eq('2375')
   end
 
   describe 'when host includes a port' do
