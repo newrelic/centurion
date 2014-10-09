@@ -47,6 +47,9 @@ unless File.exists?(project_file)
         # host_port 10234, container_port: 9292
         # host 'docker-server-staging-1.example.com'
         # host 'docker-server-staging-2.example.com'
+
+        # You can assign different docker daemon port. Example:
+        # host 'docker-server-staging-3.example.com:4243'
       end
 
       desc 'Production environment'

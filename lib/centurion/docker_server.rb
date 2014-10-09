@@ -21,7 +21,7 @@ class Centurion::DockerServer
   def initialize(host, docker_path)
     @docker_path = docker_path
     @hostname, @port = host.split(':')
-    @port ||= '4243'
+    @port ||= '2375'
   end
 
   def current_tags_for(image)
