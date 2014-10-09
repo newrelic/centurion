@@ -72,31 +72,13 @@ class Centurion::Dogestry
     validate_before_exec
     set_envs
 
-    output = `#{exec_command('pull', repo)}`
-    exit_status = $?.to_i
-
-    if exit_status == 0
-      info output
-      return output
-    else
-      error output
-      raise output
-    end
+    echo(exec_command('pull', repo))
   end
 
   def push(repo)
     validate_before_exec
     set_envs
 
-    output = `#{exec_command('push', repo)}`
-    exit_status = $?.to_i
-
-    if exit_status == 0
-      info output
-      return output
-    else
-      error output
-      raise output
-    end
+    echo(exec_command('push', repo))
   end
 end
