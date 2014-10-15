@@ -60,13 +60,13 @@ class Centurion::DockerRegistry
 
   def is_official_registry?(repository)
     if @base_uri == OFFICIAL_URL
-      return !repository.match(/^[a-z0-9-]+.[a-z]+\//)
+      return !repository.match(/^[a-z0-9]+[a-z0-9\-\.]+(?::[1-9][0-9]*)?\//)
     end
     false
   end
 
   def uri_for_repository_path(repository, path)
-    if repository.match(/\A([a-z0-9-]+.[a-z]+)\/(.*)\z/)
+    if repository.match(/\A([a-z0-9]+[a-z0-9\-\.]+(?::[1-9][0-9]*)?)\/(.*)\z/)
       host = $1
       short_image_name = $2
       "https://#{host}#{path.gsub(repository, short_image_name)}"
