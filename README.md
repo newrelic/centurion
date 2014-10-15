@@ -228,6 +228,26 @@ Returns a list of all the images for this project in the registry.
 $ bundle exec centurion -p radio-radio -e staging -a list
 ````
 
+###Changing docker registry
+
+Centurion have the ability to use different registry.
+
+The current alternative registry is `dogestry`. Dogestry allows centurion to push/pull docker images on S3.
+
+See example below to use `dogestry`:
+
+```ruby
+namespace :environment do
+  task :common do
+    registry :dogestry                       # Required
+    set :aws_access_key_id, 'abc123'         # Required
+    set :aws_secret_key, 'xyz'               # Required
+    set :s3_bucket, 'docker-images-bucket'   # Required
+    set :s3_region, 'us-east-1'              # Optional
+  end
+end
+```
+
 Future Additions
 ----------------
 
