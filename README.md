@@ -90,6 +90,13 @@ will have the following effects:
 Any time you add a new project you can scaffold it in the same manner even
 in the same repo.
 
+####Access to the registry
+Centurion needs to access the docker registry hosting your images directly
+to retrive image ids and tags.
+
+If the registry requires authentication specify the credentials in
+`REGISTRY_USER` and `REGISTRY_PASSWORD` environment variables.
+
 ###Writing configs
 
 If you used `centurionize` you will have a base config scaffolded for you.
