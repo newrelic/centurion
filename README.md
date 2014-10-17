@@ -235,8 +235,8 @@ substantially in coordination with the Centurion support.
 
 Dogestry uses the Docker daemon's import/export functionality in combination with Amazon S3 to provide reliable hosting of images.  Setting Centurion up to use Dogestry is pretty trivial:
 
- # Install Dogestry binaries on the client from which Dogestry is run. Binaries are provided in the GitHub release.
- # Add the settings necessary to get Centurion to pull from Dogestry. A config example is provided below:
+ 1. Install Dogestry binaries on the client from which Dogestry is run. Binaries are provided in the GitHub release.
+ 1. Add the settings necessary to get Centurion to pull from Dogestry. A config example is provided below:
 
 See example below to use `dogestry`:
 
