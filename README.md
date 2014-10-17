@@ -21,6 +21,9 @@ Alternatively, you can [host your
 own](https://github.com/dotcloud/docker-registry), or
 [Quay.io](https://quay.io) is another commercial option.
 
+Centurion also now supports [Dogestry](https://github.com/newrelic-forks/dogestry)!
+See details below for more information.
+
 Status
 ------
 
