@@ -7,7 +7,7 @@ describe Centurion::DockerServerGroup do
   let(:group) { Centurion::DockerServerGroup.new(['host1', 'host2'], docker_path) }
 
   it 'takes a hostlist and instantiates DockerServers' do
-    expect(group.hosts).to have(2).items
+    expect(group.hosts.length).to equal(2)
     expect(group.hosts.first).to be_a(Centurion::DockerServer)
     expect(group.hosts.last).to be_a(Centurion::DockerServer)
   end

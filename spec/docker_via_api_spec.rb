@@ -3,7 +3,7 @@ require 'centurion/docker_via_api'
 
 describe Centurion::DockerViaApi do
   let(:hostname) { 'example.com' }
-  let(:port) { '4243' }
+  let(:port) { '2375' }
   let(:api) { Centurion::DockerViaApi.new(hostname, port) }
   let(:excon_uri) { "http://#{hostname}:#{port}/" }
   let(:json_string) { '[{ "Hello": "World" }]' }

@@ -27,7 +27,7 @@ module Centurion::DeployDSL
   end
 
   def localhost
-    # DOCKER_HOST is like 'tcp://127.0.0.1:4243'
+    # DOCKER_HOST is like 'tcp://127.0.0.1:2375'
     docker_host_uri = URI.parse(ENV['DOCKER_HOST'] || "tcp://127.0.0.1")
     host_and_port = [docker_host_uri.host, docker_host_uri.port].compact.join(':')
     host(host_and_port)
@@ -69,6 +69,10 @@ module Centurion::DeployDSL
       memo += [{ server: target_server.hostname, tags: tags }] if tags
       memo
     end
+  end
+
+  def registry(type)
+    set(:registry, type)
   end
 
   private

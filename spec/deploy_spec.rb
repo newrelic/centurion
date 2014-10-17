@@ -9,8 +9,8 @@ describe Centurion::Deploy do
   let(:port)            { 8484 }
   let(:container)       { { 'Ports' => [{ 'PublicPort' => port }, 'Created' => Time.now.to_i ], 'Id' => '21adfd2ef2ef2349494a', 'Names' => [ 'name1' ] } }
   let(:endpoint)        { '/status/check' }
-  let(:test_deploy) do 
-    Object.new.tap do |o| 
+  let(:test_deploy) do
+    Object.new.tap do |o|
       o.send(:extend, Centurion::Deploy)
       o.send(:extend, Centurion::DeployDSL)
       o.send(:extend, Centurion::Logging)
@@ -20,25 +20,25 @@ describe Centurion::Deploy do
   describe '#http_status_ok?' do
     it 'validates HTTP status checks when the response is good' do
       expect(Excon).to receive(:get).and_return(mock_ok_status)
-      expect(test_deploy.http_status_ok?(server, port, endpoint)).to be_true
+      expect(test_deploy.http_status_ok?(server, port, endpoint)).to be_truthy
     end
 
     it 'identifies bad HTTP responses' do
       expect(Excon).to receive(:get).and_return(mock_bad_status)
       test_deploy.stub(:warn)
-      expect(test_deploy.http_status_ok?(server, port, endpoint)).to be_false
+      expect(test_deploy.http_status_ok?(server, port, endpoint)).to be_falsey
     end
 
     it 'outputs the HTTP status when it is not OK' do
       expect(Excon).to receive(:get).and_return(mock_bad_status)
       expect(test_deploy).to receive(:warn).with(/Got HTTP status: 500/)
-      expect(test_deploy.http_status_ok?(server, port, endpoint)).to be_false
+      expect(test_deploy.http_status_ok?(server, port, endpoint)).to be_falsey
     end
 
     it 'handles SocketErrors and outputs a message' do
       expect(Excon).to receive(:get).and_raise(Excon::Errors::SocketError.new(RuntimeError.new()))
       expect(test_deploy).to receive(:warn).with(/Failed to connect/)
-      expect(test_deploy.http_status_ok?(server, port, endpoint)).to be_false
+      expect(test_deploy.http_status_ok?(server, port, endpoint)).to be_falsey
     end
   end
 
@@ -46,21 +46,21 @@ describe Centurion::Deploy do
     it 'recognizes when no containers are running' do
       expect(server).to receive(:find_containers_by_public_port).and_return([])
 
-      test_deploy.container_up?(server, port).should be_false
+      test_deploy.container_up?(server, port).should be_falsey
     end
 
     it 'complains when more than one container is bound to this port' do
       expect(server).to receive(:find_containers_by_public_port).and_return([1,2])
       expect(test_deploy).to receive(:error).with /More than one container/
 
-      test_deploy.container_up?(server, port).should be_false
+      test_deploy.container_up?(server, port).should be_falsey
     end
 
     it 'recognizes when the container is actually running' do
       expect(server).to receive(:find_containers_by_public_port).and_return([container])
       expect(test_deploy).to receive(:info).with /Found container/
 
-      test_deploy.container_up?(server, port).should be_true
+      test_deploy.container_up?(server, port).should be_truthy
     end
   end
 
@@ -84,7 +84,7 @@ describe Centurion::Deploy do
       test_deploy.stub(:warn)
       expect(test_deploy).to receive(:exit)
       expect(test_deploy).to receive(:sleep).with(0)
-       
+
       test_deploy.wait_for_http_status_ok(server, port, '/foo', 'image_id', 'chaucer', 0, 1)
       expect(test_deploy).to have_received(:info).with(/Waiting for the port/)
     end
@@ -95,7 +95,7 @@ describe Centurion::Deploy do
       test_deploy.stub(:error)
       test_deploy.stub(:warn)
       expect(test_deploy).to receive(:exit)
-       
+
       test_deploy.wait_for_http_status_ok(server, port, '/foo', 'image_id', 'chaucer', 1, 0)
       expect(test_deploy).to have_received(:info).with(/Waiting for the port/)
     end
