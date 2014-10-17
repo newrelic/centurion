@@ -228,11 +228,15 @@ Returns a list of all the images for this project in the registry.
 $ bundle exec centurion -p radio-radio -e staging -a list
 ````
 
-###Changing docker registry
+###Alternative Docker Registry
 
-Centurion have the ability to use different registry.
+Centurion normally uses the built-in registry support in the Docker daemon to handle pushing and pulling images.But Centurion also has the ability to use external tooling to support hosting your registry on Amazon S3. That tooling is from a project called [Dogestry](https://github.com/newrelic-forks/dogestry). We have recently improved that tooling
+substantially in coordination with the Centurion support.
 
-The current alternative registry is `dogestry`. Dogestry allows centurion to push/pull docker images on S3.
+Dogestry uses the Docker daemon's import/export functionality in combination with Amazon S3 to provide reliable hosting of images.  Setting Centurion up to use Dogestry is pretty trivial:
+
+ # Install Dogestry binaries on the client from which Dogestry is run. Binaries are provided in the GitHub release.
+ # Add the settings necessary to get Centurion to pull from Dogestry. A config example is provided below:
 
 See example below to use `dogestry`:
 
