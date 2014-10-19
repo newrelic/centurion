@@ -24,7 +24,11 @@ namespace :list do
 
   task :tags do
     begin
-      registry = Centurion::DockerRegistry.new(fetch(:docker_registry))
+      registry = Centurion::DockerRegistry.new(
+        fetch(:docker_registry),
+        fetch(:registry_user),
+        fetch(:registry_password)
+      )
       tags = registry.repository_tags(fetch(:image))
       tags.each do |tag|
         puts "\t#{tag[0]}\t-> #{tag[1][0..11]}"
