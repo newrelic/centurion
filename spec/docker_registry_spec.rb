@@ -83,8 +83,9 @@ describe Centurion::DockerRegistry do
     let(:image_id)   { 'deadbeef0000' }
     let(:user)       { 'user_foo' }
     let(:password)   { 'pass_bar' }
+    let(:registry)     { Centurion::DockerRegistry.new(registry_url, user, password) }
 
-    context 'when authentication data is provided in environment variables' do
+    context 'when authentication data is provided to the DockerRegistry object' do
       let(:registry_url) { Centurion::DockerRegistry::OFFICIAL_URL }
       let(:repository)   { 'docker-reg.example.com/foobar' }
       let(:response)     { <<-JSON.strip }
@@ -96,9 +97,7 @@ describe Centurion::DockerRegistry do
           double(status: 200, body: response)
         )
       end
-      it 'fetches from the data and uses it to connect to the registry' do
-        expect(ENV).to receive(:[]).with('REGISTRY_USER').twice.and_return(user)
-        expect(ENV).to receive(:[]).with('REGISTRY_PASSWORD').and_return(password)
+      it 'uses it to connect to the registry' do
 	registry.repository_tags(repository)
       end
     end
