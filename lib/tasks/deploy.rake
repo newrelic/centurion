@@ -105,7 +105,11 @@ namespace :deploy do
   end
 
   task :determine_image_id do
-    registry = Centurion::DockerRegistry.new(fetch(:docker_registry))
+    registry = Centurion::DockerRegistry.new(
+      fetch(:docker_registry),
+      fetch(:registry_user),
+      fetch(:registry_password)
+    )
     exact_image = registry.digest_for_tag(fetch(:image), fetch(:tag))
     set :image_id, exact_image
     $stderr.puts "RESOLVED #{fetch(:image)}:#{fetch(:tag)} => #{exact_image[0..11]}"

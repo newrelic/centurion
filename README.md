@@ -90,8 +90,8 @@ in the same repo.
 Centurion needs to access the docker registry hosting your images directly
 to retrive image ids and tags.
 
-If the registry requires authentication specify the credentials in
-`REGISTRY_USER` and `REGISTRY_PASSWORD` environment variables.
+If the registry requires authentication specify the credentials using the
+`--registry-user` and `--registry-password` options of `centurion` command.
 
 ###Writing configs
 
