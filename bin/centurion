@@ -63,7 +63,7 @@ set :docker_registry, Centurion::DockerRegistry::OFFICIAL_URL unless any?(:docke
 set :docker_path, opts[:docker_path]
 
 set :no_pull, opts[:registry_user]
-set :registry_user, opts[:registry_user]
-set :registry_password, opts[:registry_password]
+set :registry_user, opts[:registry_user] if opts[:registry_user]
+set :registry_password, opts[:registry_password] if opts[:registry_password]
 
 invoke(opts[:action])
