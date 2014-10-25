@@ -142,7 +142,7 @@ can only be one `command`; the last one will take priority.
 ###Interpolation
 
 Currently there is one special string for interpolation that can be added to
-any `env_var` value in the DSL. `%DOCKER_HOST%` will be replaced with the
+any `env_var` value in the DSL. `%DOCKER_HOSTNAME%` will be replaced with the
 current server's hostname in the environment variable at deployment time.
 
 Deploying
