@@ -15,14 +15,15 @@ tools directly so you can use anything they currently support via the normal
 registry mechanism.
 
 If you haven't been using a registry, you should read up on how to do that
-before trying to deploy anything with Centurion.  Docker, Inc [provide
-repositories](https://index.docker.io/), including the main public repository.
-Alternatively, you can [host your
-own](https://github.com/dotcloud/docker-registry), or
-[Quay.io](https://quay.io) is another commercial option.
+before trying to deploy anything with Centurion.  
 
-Centurion also now supports [Dogestry](https://github.com/newrelic-forks/dogestry)!
-See details below for more information.
+Commercial Docker Registry Providers:
+- Docker, Inc. [provides repositories](https://index.docker.io/), and hosts the main public docker repository.
+- [Quay.io](https://quay.io)
+
+Open-source:
+- The official [docker registry](https://github.com/dotcloud/docker-registry) project built and maintained by Docker.
+- (NEW!) [Dogestry](https://github.com/newrelic-forks/dogestry) is a s3-backed docker registry alternative that removes the requirement to set up a centralized registry service.
 
 Status
 ------
