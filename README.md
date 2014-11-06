@@ -18,7 +18,7 @@ If you haven't been using a registry, you should read up on how to do that
 before trying to deploy anything with Centurion.  
 
 Commercial Docker Registry Providers:
-- Docker, Inc. [provides repositories](https://index.docker.io/), and hosts the main public docker repository.
+- Docker, Inc. [provides repositories](https://index.docker.io/), and hosts the main public Docker repository.
 - [Quay.io](https://quay.io) from the CoreOS team
 
 Open-source:
