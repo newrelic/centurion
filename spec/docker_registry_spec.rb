@@ -77,4 +77,29 @@ describe Centurion::DockerRegistry do
       end
     end
   end
+
+  describe '#repository_auth' do
+    let(:tag_name)   { 'arbitrary_tag' }
+    let(:image_id)   { 'deadbeef0000' }
+    let(:user)       { 'user_foo' }
+    let(:password)   { 'pass_bar' }
+    let(:registry)     { Centurion::DockerRegistry.new(registry_url, user, password) }
+
+    context 'when authentication data is provided to the DockerRegistry object' do
+      let(:registry_url) { Centurion::DockerRegistry::OFFICIAL_URL }
+      let(:repository)   { 'docker-reg.example.com/foobar' }
+      let(:response)     { <<-JSON.strip }
+        {"#{tag_name}": "#{image_id}"}
+      JSON
+
+      before do
+        expect(Excon).to receive(:get).with(kind_of(String), hash_including(:user => user, :password => password)).and_return(
+          double(status: 200, body: response)
+        )
+      end
+      it 'uses it to connect to the registry' do
+	registry.repository_tags(repository)
+      end
+    end
+  end
 end

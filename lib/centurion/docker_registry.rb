@@ -7,17 +7,24 @@ module Centurion; end
 class Centurion::DockerRegistry
   OFFICIAL_URL = 'https://registry.hub.docker.com'
 
-  def initialize(base_uri)
+  def initialize(base_uri, registry_user=nil, registry_password=nil)
     @base_uri = base_uri
+    @user = registry_user
+    @password = registry_password
   end
 
   def digest_for_tag(repository, tag)
     path = "/v1/repositories/#{repository}/tags/#{tag}"
     uri = uri_for_repository_path(repository, path)
     $stderr.puts "GET: #{uri}"
+    options = { :headers => { "Content-Type" => "application/json" } }
+    if @user
+      options[:user] = @user
+      options[:password] = @password
+    end
     response = Excon.get(
       uri,
-      :headers => { "Content-Type" => "application/json" }
+      options
     )
     raise response.inspect unless response.status == 200
 
@@ -31,7 +38,15 @@ class Centurion::DockerRegistry
     path = "/v1/repositories/#{repository}/tags"
     uri = uri_for_repository_path(repository, path)
     $stderr.puts "GET: #{uri.inspect}"
-    response = Excon.get(uri)
+    options = {}
+    if @user
+      options[:user] = @user
+      options[:password] = @password
+    end
+    response = Excon.get(
+      uri,
+      options
+    )
     raise response.inspect unless response.status == 200
 
     tags = JSON.load(response.body)
