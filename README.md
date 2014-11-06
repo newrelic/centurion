@@ -19,11 +19,11 @@ before trying to deploy anything with Centurion.
 
 Commercial Docker Registry Providers:
 - Docker, Inc. [provides repositories](https://index.docker.io/), and hosts the main public docker repository.
-- [Quay.io](https://quay.io)
+- [Quay.io](https://quay.io) from the CoreOS team
 
 Open-source:
-- The official [docker registry](https://github.com/dotcloud/docker-registry) project built and maintained by Docker.
-- (NEW!) [Dogestry](https://github.com/newrelic-forks/dogestry) is a s3-backed docker registry alternative that removes the requirement to set up a centralized registry service.
+- The [Docker registry](https://github.com/dotcloud/docker-registry) project, built and maintained by Docker. You host this yourself.
+- (*NEW!*) [Dogestry](https://github.com/newrelic-forks/dogestry) is an s3-backed Docker registry alternative that removes the requirement to set up a centralized registry service or host anything yourself.
 
 Status
 ------
