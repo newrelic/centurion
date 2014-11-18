@@ -50,7 +50,6 @@ describe Centurion::Dogestry do
 
   describe '#which' do
     it 'finds dogestry command line' do
-      allow(File).to receive(:executable?).and_return(true)
       registry.which('dogestry').should_not == nil
     end
   end
