@@ -60,10 +60,7 @@ class Centurion::DockerRegistry
   private
 
   def is_official_registry?(repository)
-    if @base_uri == OFFICIAL_URL
-      return !repository.match(/^[a-z0-9]+[a-z0-9\-\.]+(?::[1-9][0-9]*)?\//)
-    end
-    false
+    return @base_uri == OFFICIAL_URL
   end
 
   def uri_for_repository_path(repository, path)
