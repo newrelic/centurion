@@ -103,7 +103,7 @@ class Centurion::Dogestry
   end
 
   def create_tmp_dir(length)
-    tmp_dir = "/tmp/#{rand(36**length).to_s(36)}"
+    tmp_dir = "/tmp/dogestry-#{rand(36**length).to_s(36)}"
     FileUtils::mkdir_p(tmp_dir)
     tmp_dir
   end
