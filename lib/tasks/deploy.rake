@@ -42,13 +42,12 @@ namespace :deploy do
       invoke 'deploy:dogestry:validate_pull_image'
 
       # Create Centurion::Dogestry instance
-      dogestry_options = {
+      registry = Centurion::Dogestry.new(
         aws_access_key_id: fetch(:aws_access_key_id),
         aws_secret_key: fetch(:aws_secret_key),
         s3_bucket: fetch(:s3_bucket),
         s3_region: fetch(:s3_region) || 'us-east-1',
-      }
-      registry = Centurion::Dogestry.new(dogestry_options)
+      )
 
       # Download image from S3 to local /tmp/directory
       Dir.mktmpdir("dogestry") do |local_dir|
