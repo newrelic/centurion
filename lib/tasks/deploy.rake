@@ -117,9 +117,12 @@ namespace :deploy do
       )
 
       fetch(:port_bindings).each_pair do |container_port, host_ports|
+        port = host_ports.first['HostPort']
+        next if fetch(:rolling_deploy_skip_ports, []).include?(port)
+
         wait_for_http_status_ok(
           server,
-          host_ports.first['HostPort'],
+          port,
           fetch(:status_endpoint, '/'),
           fetch(:image),
           fetch(:tag),
