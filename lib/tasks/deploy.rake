@@ -40,22 +40,33 @@ namespace :deploy do
     task :pull_image do
       invoke 'deploy:dogestry:validate_pull_image'
 
+      # Create Centurion::Dogestry instance
+      dogestry_options = {
+        aws_access_key_id: fetch(:aws_access_key_id),
+        aws_secret_key: fetch(:aws_secret_key),
+        s3_bucket: fetch(:s3_bucket),
+        s3_region: fetch(:s3_region) || 'us-east-1',
+      }
+      registry = Centurion::Dogestry.new(dogestry_options)
+
+      # Download image from S3 to local /tmp/directory
+      local_dir = registry.create_tmp_dir(9)
+
+      $stdout.puts "** Downloading image(#{fetch(:image)}:#{fetch(:tag)}) from S3 to local directory"
+      registry.download_image_to_temp_dir("#{fetch(:image)}:#{fetch(:tag)}", local_dir)
+
+      # Upload image from local /tmp/directory to specified Docker hosts
       target_servers = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
       target_servers.each_in_parallel do |target_server|
-        dogestry_options = {
-          aws_access_key_id: fetch(:aws_access_key_id),
-          aws_secret_key: fetch(:aws_secret_key),
-          s3_bucket: fetch(:s3_bucket),
-          s3_region: fetch(:s3_region) || 'us-east-1',
-          docker_host: "tcp://#{target_server.hostname}:#{target_server.port}"
-        }
+        dogestry_options['docker_host'] = "tcp://#{target_server.hostname}:#{target_server.port}"
 
-        $stdout.puts "** Pulling image(#{fetch(:image)}:#{fetch(:tag)}) from Dogestry: #{dogestry_options.inspect}"
+        $stdout.puts "** Pushing image(#{fetch(:image)}:#{fetch(:tag)}) from #{local_dir} to Docker: #{dogestry_options['docker_host']}"
 
-        registry = Centurion::Dogestry.new(dogestry_options)
-
-        registry.pull("#{fetch(:image)}:#{fetch(:tag)}")
+        registry.upload_temp_dir_image_to_docker("#{fetch(:image)}:#{fetch(:tag)}", local_dir)
       end
+
+      # Cleanup local_dir
+      FileUtils.rmdir(local_dir)
     end
   end
 
