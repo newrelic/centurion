@@ -116,9 +116,11 @@ namespace :deploy do
         fetch(:command)
       )
 
+      skip_ports = Array(fetch(:rolling_deploy_skip_ports, [])).map(&:to_s)
+
       fetch(:port_bindings).each_pair do |container_port, host_ports|
         port = host_ports.first['HostPort']
-        next if Array(fetch(:rolling_deploy_skip_ports, [])).include?(port.to_i)
+        next if skip_ports.include?(port)
 
         wait_for_http_status_ok(
           server,
