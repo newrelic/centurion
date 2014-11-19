@@ -1,6 +1,7 @@
 require 'thread'
 require 'excon'
 require 'centurion/deploy'
+require 'tmpdir'
 
 task :deploy do
   invoke 'deploy:get_image'
@@ -50,28 +51,26 @@ namespace :deploy do
       registry = Centurion::Dogestry.new(dogestry_options)
 
       # Download image from S3 to local /tmp/directory
-      local_dir = registry.create_tmp_dir(9)
+      Dir.mktmpdir("dogestry") do |local_dir|
 
-      $stdout.puts "** Downloading image(#{fetch(:image)}:#{fetch(:tag)}) from S3 to local directory"
-      registry.download_image_to_temp_dir("#{fetch(:image)}:#{fetch(:tag)}", local_dir)
+        $stdout.puts "** Downloading image(#{fetch(:image)}:#{fetch(:tag)}) from S3 to local directory"
+        registry.download_image_to_temp_dir("#{fetch(:image)}:#{fetch(:tag)}", local_dir)
 
-      # Upload image from local /tmp/directory to specified Docker hosts
-      target_servers = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
-      target_servers.each do |target_server| # Do not use each_in_parallel, using it cause race condition when setting :docker_host
+        # Upload image from local /tmp/directory to specified Docker hosts
+        target_servers = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
+        target_servers.each do |target_server| # Do not use each_in_parallel, using it cause race condition when setting :docker_host
 
-        registry.options[:docker_host] = "tcp://#{target_server.hostname}:#{target_server.port}"
+          registry.options[:docker_host] = "tcp://#{target_server.hostname}:#{target_server.port}"
 
-        image_and_tag = "#{fetch(:image)}:#{fetch(:tag)}"
+          image_and_tag = "#{fetch(:image)}:#{fetch(:tag)}"
 
-        $stdout.puts "** Pushing image(#{image_and_tag}) from #{local_dir} to Docker: #{registry.options[:docker_host]}"
+          $stdout.puts "** Pushing image(#{image_and_tag}) from #{local_dir} to Docker: #{registry.options[:docker_host]}"
 
-        Thread.new {
-          registry.upload_temp_dir_image_to_docker(image_and_tag, local_dir)
-        }.join
+          Thread.new {
+            registry.upload_temp_dir_image_to_docker(image_and_tag, local_dir)
+          }.join
+        end
       end
-
-      # Cleanup local_dir
-      FileUtils.rmdir(local_dir)
     end
   end
 
