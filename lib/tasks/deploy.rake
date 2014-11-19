@@ -112,7 +112,7 @@ namespace :deploy do
         fetch(:image_id),
         fetch(:port_bindings),
         fetch(:binds),
-        fetch(:env_vars)
+        fetch(:env_vars),
         fetch(:command)
       )
 
