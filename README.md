@@ -183,11 +183,11 @@ are the same everywhere. Settings are per-project.
    `rolling_deployment_wait_time` is the total time Centurion will wait for
    an individual container to come up before giving up as a failure. Defaults
    to 24 attempts.
- * `rolling_deploy_skip_ports` => An array of ports (as strings) that should be
-   skipped for status checks. Status checking assumes an HTTP server is on the
-   other end and if you are deploying a container where some ports are not
-   HTTP services, this allows you to only health check the ports that are.
-   The default is an empty array.
+ * `rolling_deploy_skip_ports` => Either a single port, or an array of ports
+   that should be skipped for status checks. Status checking assumes an HTTP 
+   server is on the other end and if you are deploying a container where some 
+   ports are not HTTP services, this allows you to only health check the ports 
+   that are. The default is an empty array.
 
 ###Deploy a project to a fleet of Docker servers
 
