@@ -72,7 +72,7 @@ module Centurion::DeployDSL
   end
 
   def registry(type)
-    set(:registry, type)
+    set(:registry, type.to_s)
   end
 
   private
