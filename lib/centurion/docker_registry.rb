@@ -31,7 +31,8 @@ class Centurion::DockerRegistry
     path = "/v1/repositories/#{repository}/tags"
     uri = uri_for_repository_path(repository, path)
     $stderr.puts "GET: #{uri.inspect}"
-    response = Excon.get(uri)
+    # Need to workaround a bug in Docker Hub to now pass port in Host header
+    response = Excon.get(uri, headers: { 'Host' => URI.parse(uri).host })
     raise response.inspect unless response.status == 200
 
     tags = JSON.load(response.body)
@@ -59,10 +60,7 @@ class Centurion::DockerRegistry
   private
 
   def is_official_registry?(repository)
-    if @base_uri == OFFICIAL_URL
-      return !repository.match(/^[a-z0-9]+[a-z0-9\-\.]+(?::[1-9][0-9]*)?\//)
-    end
-    false
+    return @base_uri == OFFICIAL_URL
   end
 
   def uri_for_repository_path(repository, path)

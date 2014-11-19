@@ -96,7 +96,8 @@ namespace :deploy do
         fetch(:image_id),
         fetch(:port_bindings),
         fetch(:binds),
-        fetch(:env_vars)
+        fetch(:env_vars),
+        fetch(:command)
       )
     end
   end
@@ -122,13 +123,19 @@ namespace :deploy do
         fetch(:image_id),
         fetch(:port_bindings),
         fetch(:binds),
-        fetch(:env_vars)
+        fetch(:env_vars),
+        fetch(:command)
       )
 
+      skip_ports = Array(fetch(:rolling_deploy_skip_ports, [])).map(&:to_s)
+
       fetch(:port_bindings).each_pair do |container_port, host_ports|
+        port = host_ports.first['HostPort']
+        next if skip_ports.include?(port)
+
         wait_for_http_status_ok(
           server,
-          host_ports.first['HostPort'],
+          port,
           fetch(:status_endpoint, '/'),
           fetch(:image),
           fetch(:tag),

@@ -73,7 +73,6 @@ class Centurion::Dogestry
     validate_before_exec
     set_envs
 
-
     echo(exec_command('pull', repo))
   end
 
