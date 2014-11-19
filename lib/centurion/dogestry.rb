@@ -5,6 +5,7 @@ module Centurion; end
 
 class Centurion::Dogestry
   include Centurion::Logging
+  attr_accessor :options
 
   def initialize(options = {})
     @options = options

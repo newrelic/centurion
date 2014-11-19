@@ -57,12 +57,17 @@ namespace :deploy do
 
       # Upload image from local /tmp/directory to specified Docker hosts
       target_servers = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
-      target_servers.each_in_parallel do |target_server|
-        dogestry_options['docker_host'] = "tcp://#{target_server.hostname}:#{target_server.port}"
+      target_servers.each do |target_server| # Do not use each_in_parallel, using it cause race condition when setting :docker_host
 
-        $stdout.puts "** Pushing image(#{fetch(:image)}:#{fetch(:tag)}) from #{local_dir} to Docker: #{dogestry_options['docker_host']}"
+        registry.options[:docker_host] = "tcp://#{target_server.hostname}:#{target_server.port}"
 
-        registry.upload_temp_dir_image_to_docker("#{fetch(:image)}:#{fetch(:tag)}", local_dir)
+        image_and_tag = "#{fetch(:image)}:#{fetch(:tag)}"
+
+        $stdout.puts "** Pushing image(#{image_and_tag}) from #{local_dir} to Docker: #{registry.options[:docker_host]}"
+
+        Thread.new {
+          registry.upload_temp_dir_image_to_docker(image_and_tag, local_dir)
+        }.join
       end
 
       # Cleanup local_dir
