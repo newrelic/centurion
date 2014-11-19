@@ -96,9 +96,10 @@ class Centurion::Dogestry
     validate_before_exec
     set_envs
 
-    repo_and_local_dir = "#{local_dir} #{repo}"
+    command = "dogestry upload #{local_dir} #{repo}"
+    info "Executing: #{command}"
 
-    echo(exec_command('upload', repo_and_local_dir))
+    echo(command)
   end
 
   def create_tmp_dir(length)
