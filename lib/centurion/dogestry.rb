@@ -56,7 +56,7 @@ class Centurion::Dogestry
     @options[:docker_host] || 'tcp://localhost:2375'
   end
 
-  def set_envs
+  def set_envs(docker_host)
     ENV['DOCKER_HOST'] = docker_host
     ENV['AWS_ACCESS_KEY'] = aws_access_key_id
     ENV['AWS_SECRET_KEY'] = aws_secret_key
@@ -70,32 +70,18 @@ class Centurion::Dogestry
     command
   end
 
-  def pull(repo)
-    validate_before_exec
-    set_envs
-
-    echo(exec_command('pull', repo))
-  end
-
-  def push(repo)
-    validate_before_exec
-    set_envs
-
-    echo(exec_command('push', repo))
-  end
-
   def download_image_to_temp_dir(repo, local_dir)
     validate_before_exec
-    set_envs
+    set_envs("")
 
     flags = "-tempdir #{File.expand_path(local_dir)}"
 
     echo(exec_command('download', repo, flags=flags))
   end
 
-  def upload_temp_dir_image_to_docker(repo, local_dir)
+  def upload_temp_dir_image_to_docker(repo, local_dir, docker_host)
     validate_before_exec
-    set_envs
+    set_envs(docker_host)
 
     command = "dogestry upload #{local_dir} #{repo}"
     info "Executing: #{command}"
