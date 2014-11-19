@@ -64,7 +64,7 @@ class Centurion::Dogestry
   end
 
   def exec_command(command, repo, flags="")
-    command = "dogestry #{command} #{flags} #{s3_url} #{repo}"
+    command = "dogestry #{flags} #{command} #{s3_url} #{repo}"
     info "Executing: #{command}"
     command
   end
