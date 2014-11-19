@@ -226,10 +226,13 @@ describe Centurion::Deploy do
 
       server.stub(:inspect_container)
 
+      allow(test_deploy).to receive(:fetch).with(:custom_dns).and_return('8.8.8.8')
+
       expect(server).to receive(:start_container).with(
         'abc123456',
         {
-          'PortBindings' => bindings
+          'PortBindings' => bindings,
+          'Dns' => '8.8.8.8'
         }
       ).once
 
@@ -258,6 +261,8 @@ describe Centurion::Deploy do
     end
 
     it 'ultimately asks the server object to do the work' do
+      allow(test_deploy).to receive(:fetch).with(:custom_dns).and_return(nil)
+
       server.should_receive(:create_container).with(
         hash_including(
           'Image'=>'image_id',
