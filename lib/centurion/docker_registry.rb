@@ -38,15 +38,16 @@ class Centurion::DockerRegistry
     path = "/v1/repositories/#{repository}/tags"
     uri = uri_for_repository_path(repository, path)
     $stderr.puts "GET: #{uri.inspect}"
-    options = {}
+
+    # Need to workaround a bug in Docker Hub to now pass port in Host header
+    options = { omit_default_port: true }
+
     if @user
       options[:user] = @user
       options[:password] = @password
     end
-    response = Excon.get(
-      uri,
-      options
-    )
+
+    response = Excon.get(uri, options)
     raise response.inspect unless response.status == 200
 
     tags = JSON.load(response.body)
