@@ -18,12 +18,16 @@ If you haven't been using a registry, you should read up on how to do that
 before trying to deploy anything with Centurion.  
 
 Commercial Docker Registry Providers:
-- Docker, Inc. [provides repositories](https://index.docker.io/), and hosts the main public Docker repository.
+- Docker, Inc. [provides repositories](https://index.docker.io/), and hosts the
+  main public Docker repository.
 - [Quay.io](https://quay.io) from the CoreOS team
 
 Open-source:
-- The [Docker registry](https://github.com/dotcloud/docker-registry) project, built and maintained by Docker. You host this yourself.
-- (*NEW!*) [Dogestry](https://github.com/newrelic-forks/dogestry) is an s3-backed Docker registry alternative that removes the requirement to set up a centralized registry service or host anything yourself.
+- The [Docker registry](https://github.com/dotcloud/docker-registry) project,
+  built and maintained by Docker. You host this yourself.
+- (*NEW!*) [Dogestry](https://github.com/newrelic-forks/dogestry) is an
+  s3-backed Docker registry alternative that removes the requirement to set up
+  a centralized registry service or host anything yourself.
 
 Status
 ------
@@ -89,13 +93,6 @@ will have the following effects:
 
 Any time you add a new project you can scaffold it in the same manner even
 in the same repo.
-
-####Access to the registry
-Centurion needs to access the docker registry hosting your images directly
-to retrive image ids and tags.
-
-If the registry requires authentication specify the credentials using the
-`--registry-user` and `--registry-password` options of `centurion` command.
 
 ###Writing configs
 
@@ -253,15 +250,45 @@ Returns a list of all the images for this project in the registry.
 $ bundle exec centurion -p radio-radio -e staging -a list
 ````
 
-###Alternative Docker Registry
+### Registry
 
-Centurion normally uses the built-in registry support in the Docker daemon to handle pushing and pulling images.But Centurion also has the ability to use external tooling to support hosting your registry on Amazon S3. That tooling is from a project called [Dogestry](https://github.com/newrelic-forks/dogestry). We have recently improved that tooling
-substantially in coordination with the Centurion support.
+Centurion needs to have access to some registry in order to pull images to
+remote Docker servers. This needs to be either a hosted registry (public or
+private), or [Dogestry](https://github.com/newrelic-forks/dogestry).
 
-Dogestry uses the Docker daemon's import/export functionality in combination with Amazon S3 to provide reliable hosting of images.  Setting Centurion up to use Dogestry is pretty trivial:
+#### Access to the registry 
 
- 1. Install Dogestry binaries on the client from which Dogestry is run. Binaries are provided in the GitHub release.
- 1. Add the settings necessary to get Centurion to pull from Dogestry. A config example is provided below:
+If you are not using either Dogestry, or the public registry, you may need to
+provide authentication credentials.  Centurion needs to access the Docker
+registry hosting your images directly to retrive image ids and tags.This is
+supported in both the config file and also as command line arguments.
+
+The command line arguments are: 
+ * `--registry-user` => The username to pass to the registry
+ * `--registry-password` => The password
+
+These correspond to the following settings:
+
+ * `registry_user`
+ * `registry_password`
+
+#### Alternative Docker Registry
+
+Centurion normally uses the built-in registry support in the Docker daemon to
+handle pushing and pulling images.But Centurion also has the ability to use
+external tooling to support hosting your registry on Amazon S3. That tooling is
+from a project called [Dogestry](https://github.com/newrelic-forks/dogestry).
+We have recently improved that tooling substantially in coordination with the
+Centurion support.
+
+Dogestry uses the Docker daemon's import/export functionality in combination
+with Amazon S3 to provide reliable hosting of images.  Setting Centurion up to
+use Dogestry is pretty trivial:
+
+ 1. Install Dogestry binaries on the client from which Dogestry is run.
+    Binaries are provided in the GitHub release.
+ 1. Add the settings necessary to get Centurion to pull from Dogestry. A config
+    example is provided below:
 
 See example below to use `dogestry`:
 
