@@ -89,7 +89,7 @@ describe Centurion::DockerRegistry do
       let(:registry_url) { Centurion::DockerRegistry::OFFICIAL_URL }
       let(:repository)   { 'docker-reg.example.com/foobar' }
       let(:response)     { <<-JSON.strip }
-        {"#{tag_name}": "#{image_id}"}
+        [{"layer": "#{image_id}", "name": "#{tag_name}"}]
       JSON
 
       before do
@@ -98,7 +98,7 @@ describe Centurion::DockerRegistry do
         )
       end
       it 'uses it to connect to the registry' do
-	registry.repository_tags(repository)
+        registry.repository_tags(repository)
       end
     end
   end
