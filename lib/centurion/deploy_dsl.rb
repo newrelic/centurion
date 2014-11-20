@@ -38,7 +38,7 @@ module Centurion::DeployDSL
     require_options_keys(options,  [ :container_port ])
 
     add_to_bindings(
-      options[:host_ip] || '0.0.0.0',
+      options[:host_ip],
       options[:container_port],
       port,
       options[:type] || 'tcp'
@@ -79,9 +79,10 @@ module Centurion::DeployDSL
 
   def add_to_bindings(host_ip, container_port, port, type='tcp')
     set(:port_bindings, fetch(:port_bindings, {}).tap do |bindings|
-      bindings["#{container_port.to_s}/#{type}"] = [
-        {'HostIp' => host_ip, 'HostPort' => port.to_s}
-      ]
+      binding = { 'HostPort' => port.to_s }.tap do |b|
+        b['HostIp'] = host_ip if host_ip
+      end
+      bindings["#{container_port.to_s}/#{type}"] = [ binding ]
       bindings
     end)
   end

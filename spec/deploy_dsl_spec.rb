@@ -73,6 +73,17 @@ describe Centurion::DeployDSL do
 
       expect(DeployDSLTest).to have_key_and_value(
         :port_bindings,
+        dummy_value.merge('80/tcp' => [{ 'HostPort' => '999' }])
+      )
+    end
+
+    it 'adds new bind ports to the list with an IP binding when supplied' do
+      dummy_value = { '666/tcp' => ['value'] }
+      DeployDSLTest.set(:port_bindings, dummy_value)
+      DeployDSLTest.host_port(999, container_port: 80, host_ip: '0.0.0.0')
+
+      expect(DeployDSLTest).to have_key_and_value(
+        :port_bindings,
         dummy_value.merge('80/tcp' => [{ 'HostIp' => '0.0.0.0', 'HostPort' => '999' }])
       )
     end
