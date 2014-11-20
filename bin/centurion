@@ -50,6 +50,9 @@ else
 end
 invoke("environment:#{opts[:environment]}")
 
+# Override/supplement config settings with environment variables
+ENV.keys.grep(/^CENTURION_/).each { |k| set(k.sub(/CENTURION_/, '').downcase.to_sym, ENV[k]) }
+
 # Override the config with command line values if given
 set :image, opts[:image] if opts[:image]
 set :tag,   opts[:tag] if opts[:tag]
