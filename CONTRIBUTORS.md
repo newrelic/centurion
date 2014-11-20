@@ -9,6 +9,8 @@ Your name could be here!
  * [Tom Dooner][tdooner]
  * [Jonathan Chauncey][jchauncey]
  * [Matt Sanford][mzsanford]
+ * [Suren Karapetyan][skarap]
+ * [Jon Wood][jellybob]
 
 Pre-release
 -----------
@@ -67,3 +69,5 @@ Contributor                                   | Commits    | Additions | Deletio
 [tdooner]: https://github.com/tdooner
 [jchauncey]: https://github.com/jchauncey
 [mzsanford]: https://github.com/mzsanford
+[skarap]: https://github.com/skarap
+[jellybob]: https://github.com/jellybob
