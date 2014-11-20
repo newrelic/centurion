@@ -67,7 +67,7 @@ module Centurion::Deploy
     return false unless response
     return true if response.status >= 200 && response.status < 300
 
-    warn "Got HTTP status: #{response.status}" 
+    warn "Got HTTP status: #{response.status}"
     false
   end
 
@@ -137,7 +137,7 @@ module Centurion::Deploy
   end
 
   private
-  
+
   def start_container_with_config(target_server, volumes, port_bindings, container_config)
     info "Creating new container for #{container_config['Image'][0..7]}"
     new_container = target_server.create_container(container_config)
@@ -146,7 +146,10 @@ module Centurion::Deploy
     # Map some host volumes if needed
     host_config['Binds'] = volumes if volumes && !volumes.empty?
     # Bind the ports
-    host_config['PortBindings'] = port_bindings 
+    host_config['PortBindings'] = port_bindings
+    # DNS if specified
+    dns = fetch(:custom_dns)
+    host_config['Dns'] = dns if dns
 
     info "Starting new container #{new_container['Id'][0..7]}"
     target_server.start_container(new_container['Id'], host_config)
