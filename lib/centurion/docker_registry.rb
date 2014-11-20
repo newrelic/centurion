@@ -30,6 +30,7 @@ class Centurion::DockerRegistry
   def repository_tags(repository)
     path = "/v1/repositories/#{repository}/tags"
     uri = uri_for_repository_path(repository, path)
+
     $stderr.puts "GET: #{uri.inspect}"
     # Need to workaround a bug in Docker Hub to now pass port in Host header
     response = Excon.get(uri, omit_default_port: true)
@@ -47,10 +48,8 @@ class Centurion::DockerRegistry
     # [1]: https://docs.docker.com/v1.1/reference/api/registry_api/
 
     if is_official_registry?(repository)
-      {}.tap do |hash|
-        tags.each do |tag|
-          hash[tag['name']] = tag['layer']
-        end
+      tags.each_with_object({}) do |tag, hash|
+        hash[tag['name']] = tag['layer']
       end
     else
       tags
