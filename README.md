@@ -94,7 +94,7 @@ will have the following effects:
 Any time you add a new project you can scaffold it in the same manner even
 in the same repo.
 
-###Writing configs
+### Writing configs
 
 If you used `centurionize` you will have a base config scaffolded for you.
 But you'll still need to specify all of your configuration.
@@ -153,11 +153,12 @@ IP address (the equivalent of `docker run --dns 172.17.42.1 ...`) like this:
   end
 ```
 
-###Interpolation
+### Interpolation
 
 Currently there is one special string for interpolation that can be added to
 any `env_var` value in the DSL. `%DOCKER_HOSTNAME%` will be replaced with the
 current server's hostname in the environment variable at deployment time.
+
 
 Deploying
 ---------
