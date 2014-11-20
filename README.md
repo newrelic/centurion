@@ -140,6 +140,15 @@ Most of the DSL items (`host_port`, `host_volume`, `env_vars`, `host`) can be
 specified more than once and will append to the configuration. However, there
 can only be one `command`; the last one will take priority.
 
+You can cause your container to be started with a specific DNS server
+IP address (the equivalent of `docker run --dns 172.17.42.1 ...`) like this:
+```ruby
+  task :production => :common do
+    set :custom_dns, '172.17.42.1'
+    # ...
+  end
+```
+
 ###Interpolation
 
 Currently there is one special string for interpolation that can be added to
