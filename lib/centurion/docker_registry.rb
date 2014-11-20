@@ -32,7 +32,7 @@ class Centurion::DockerRegistry
     uri = uri_for_repository_path(repository, path)
     $stderr.puts "GET: #{uri.inspect}"
     # Need to workaround a bug in Docker Hub to now pass port in Host header
-    response = Excon.get(uri, headers: { 'Host' => URI.parse(uri).host })
+    response = Excon.get(uri, omit_default_port: true)
     raise response.inspect unless response.status == 200
 
     tags = JSON.load(response.body)
