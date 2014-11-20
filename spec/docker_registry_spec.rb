@@ -46,7 +46,7 @@ describe Centurion::DockerRegistry do
       let(:registry_url) { Centurion::DockerRegistry::OFFICIAL_URL }
       let(:repository)   { 'docker-reg.example.com/foobar' }
       let(:response)     { <<-JSON.strip }
-        {"#{tag_name}": "#{image_id}"}
+        [{"layer": "#{image_id}", "name": "#{tag_name}"}]
       JSON
 
       it 'fetches from the image-referenced registry' do
