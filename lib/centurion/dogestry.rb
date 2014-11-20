@@ -1,9 +1,11 @@
 require_relative 'logging'
+require 'fileutils'
 
 module Centurion; end
 
 class Centurion::Dogestry
   include Centurion::Logging
+  attr_accessor :options
 
   def initialize(options = {})
     @options = options
@@ -54,7 +56,7 @@ class Centurion::Dogestry
     @options[:docker_host] || 'tcp://localhost:2375'
   end
 
-  def set_envs
+  def set_envs(docker_host)
     ENV['DOCKER_HOST'] = docker_host
     ENV['AWS_ACCESS_KEY'] = aws_access_key_id
     ENV['AWS_SECRET_KEY'] = aws_secret_key
@@ -62,23 +64,28 @@ class Centurion::Dogestry
     info "Dogestry ENV: #{ENV.inspect}"
   end
 
-  def exec_command(command, repo)
-    command = "dogestry #{command} #{s3_url} #{repo}"
+  def exec_command(command, repo, flags="")
+    command = "dogestry #{flags} #{command} #{s3_url} #{repo}"
     info "Executing: #{command}"
     command
   end
 
-  def pull(repo)
+  def download_image_to_temp_dir(repo, local_dir)
     validate_before_exec
-    set_envs
+    set_envs("")
 
-    echo(exec_command('pull', repo))
+    flags = "-tempdir #{File.expand_path(local_dir)}"
+
+    echo(exec_command('download', repo, flags=flags))
   end
 
-  def push(repo)
+  def upload_temp_dir_image_to_docker(repo, local_dir, docker_host)
     validate_before_exec
-    set_envs
+    set_envs(docker_host)
 
-    echo(exec_command('push', repo))
+    command = "dogestry upload #{local_dir} #{repo}"
+    info "Executing: #{command}"
+
+    echo(command)
   end
 end
