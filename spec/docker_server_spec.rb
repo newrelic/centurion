@@ -28,7 +28,7 @@ describe Centurion::DockerServer do
       it "delegates '#{method}' to #{delegate}" do
         dummy_result = double
         dummy_delegate = double(method => dummy_result)
-        server.stub(delegate => dummy_delegate)
+        allow(server).to receive(delegate).and_return(dummy_delegate)
         expect(dummy_delegate).to receive(method)
         expect(server.send(method)).to be(dummy_result)
       end
@@ -37,7 +37,7 @@ describe Centurion::DockerServer do
 
   it 'returns tags associated with an image' do
     image_names = %w[target:latest target:production other:latest]
-    server.stub(ps: image_names.map {|name| { 'Image' => name } })
+    allow(server).to receive(:ps).and_return(image_names.map {|name| { 'Image' => name } })
     expect(server.current_tags_for('target')).to eq(%w[latest production])
   end
 end

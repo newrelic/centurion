@@ -23,7 +23,7 @@ describe Centurion::DockerServerGroup do
   end
 
   it 'can run parallel operations' do
-    item = double('item').tap { |i| i.stub(:dummy_method) }
+    item = double('item').tap { |i| allow(i).to receive(:dummy_method) }
     expect(item).to receive(:dummy_method).twice
 
     expect { group.each_in_parallel { |host| item.dummy_method } }.not_to raise_error

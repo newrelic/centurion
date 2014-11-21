@@ -115,7 +115,7 @@ describe Centurion::DeployDSL do
   end
 
   it 'gets current tags for an image' do
-    Centurion::DockerServer.any_instance.stub(current_tags_for: [ 'foo' ])
+    allow_any_instance_of(Centurion::DockerServer).to receive(:current_tags_for).and_return([ 'foo' ])
     DeployDSLTest.set(:hosts, [ 'host1' ])
 
     expect(DeployDSLTest.get_current_tags_for('asdf')).to eq [ { server: 'host1', tags: [ 'foo'] } ]
