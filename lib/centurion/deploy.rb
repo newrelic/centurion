@@ -87,13 +87,15 @@ module Centurion::Deploy
     end
   end
 
-  def container_config_for(target_server, image_id, port_bindings=nil, env_vars=nil, volumes=nil, command=nil)
+  def container_config_for(target_server, image_id, port_bindings=nil, env_vars=nil, volumes=nil, command=nil, memory=nil, cpu_shares=nil)
     container_config = {
       'Image'        => image_id,
       'Hostname'     => target_server.hostname,
     }
 
     container_config.merge!('Cmd' => command) if command
+    container_config.merge!('Memory' => memory) if memory
+    container_config.merge!('CpuShares' => cpu_shares) if cpu_shares
 
     if port_bindings
       container_config['ExposedPorts'] ||= {}
@@ -119,8 +121,8 @@ module Centurion::Deploy
     container_config
   end
 
-  def start_new_container(target_server, image_id, port_bindings, volumes, env_vars=nil, command=nil)
-    container_config = container_config_for(target_server, image_id, port_bindings, env_vars, volumes, command)
+  def start_new_container(target_server, image_id, port_bindings, volumes, env_vars=nil, command=nil, memory=nil, cpu_shares=nil)
+    container_config = container_config_for(target_server, image_id, port_bindings, env_vars, volumes, command, memory, cpu_shares)
     start_container_with_config(target_server, volumes, port_bindings, container_config)
   end
 

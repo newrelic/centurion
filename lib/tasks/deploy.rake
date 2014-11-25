@@ -98,7 +98,9 @@ namespace :deploy do
         fetch(:port_bindings),
         fetch(:binds),
         fetch(:env_vars),
-        fetch(:command)
+        fetch(:command),
+        fetch(:memory),
+        fetch(:cpu_shares)
       )
     end
   end
@@ -125,7 +127,9 @@ namespace :deploy do
         fetch(:port_bindings),
         fetch(:binds),
         fetch(:env_vars),
-        fetch(:command)
+        fetch(:command),
+        fetch(:memory),
+        fetch(:cpu_shares)
       )
 
       skip_ports = Array(fetch(:rolling_deploy_skip_ports, [])).map(&:to_s)
