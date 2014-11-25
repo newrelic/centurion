@@ -187,7 +187,9 @@ namespace :deploy do
     if fetch(:registry) == 'dogestry'
       invoke 'deploy:dogestry:pull_image'
     else
-      target_servers = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
+      hosts, docker_path = fetch(:hosts, []), fetch(:docker_path)
+      target_servers = Centurion::DockerServerGroup.new(hosts, docker_path,
+                                                        build_tls_params)
       target_servers.each_in_parallel do |target_server|
         target_server.pull(fetch(:image), fetch(:tag))
       end
