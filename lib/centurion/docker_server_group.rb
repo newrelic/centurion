@@ -8,10 +8,12 @@ class Centurion::DockerServerGroup
   include Centurion::Logging
 
   attr_reader :hosts
-  
-  def initialize(hosts, docker_path)
+
+  def initialize(hosts, docker_path, tls_params = {})
     raise ArgumentError.new('Bad Host list!') if hosts.nil? || hosts.empty?
-    @hosts = hosts.map { |hostname| Centurion::DockerServer.new(hostname, docker_path) }
+    @hosts = hosts.map do |hostname|
+      Centurion::DockerServer.new(hostname, docker_path, tls_params)
+    end
   end
 
   def each(&block)
