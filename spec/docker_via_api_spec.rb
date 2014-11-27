@@ -43,10 +43,23 @@ describe Centurion::DockerViaApi do
     configuration = double(:to_json => configuration_as_json)
     expect(Excon).to receive(:post).
                          with(excon_uri + "v1.10" + "/containers/create",
+                              query: nil,
                               body: configuration_as_json,
                               headers: {'Content-Type' => 'application/json'}).
                          and_return(double(body: json_string, status: 201))
     api.create_container(configuration)
+  end
+
+  it 'creates a container with a name' do
+    configuration_as_json = double
+    configuration = double(:to_json => configuration_as_json)
+    expect(Excon).to receive(:post).
+                         with(excon_uri + "v1.10" + "/containers/create",
+                              query: {:name => match(/^app1-[a-f0-9]+$/)},
+                              body: configuration_as_json,
+                              headers: {'Content-Type' => 'application/json'}).
+                         and_return(double(body: json_string, status: 201))
+    api.create_container(configuration, 'app1')
   end
 
   it 'starts a container' do

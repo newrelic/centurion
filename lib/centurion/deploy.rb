@@ -140,7 +140,7 @@ module Centurion::Deploy
 
   def start_container_with_config(target_server, volumes, port_bindings, container_config)
     info "Creating new container for #{container_config['Image'][0..7]}"
-    new_container = target_server.create_container(container_config)
+    new_container = target_server.create_container(container_config, fetch(:name))
 
     host_config = {}
     # Map some host volumes if needed
