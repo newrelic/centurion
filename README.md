@@ -170,6 +170,37 @@ Currently there is one special string for interpolation that can be added to
 any `env_var` value in the DSL. `%DOCKER_HOSTNAME%` will be replaced with the
 current server's hostname in the environment variable at deployment time.
 
+### Use TLS certificate
+
+Centurion can use your certificate in order to execute the Docker commands.
+In order to do so you have 2 choices.
+
+#### Your certificate files are in ~/.docker/
+
+You just need to enable the tls mode as the following:
+
+```ruby
+  task :production => :common do
+    set :tls, true
+    # ...
+  end
+```
+
+Centurion will only set the `--tlsverify` to true and Docker will read your certificate from the `~/.docker/` path.
+
+#### Your certificate files are not in ~/.docker/
+
+Given your files are in `/usr/local/certs/`
+You have to set the following keys:
+
+```ruby
+  task :production => :common do
+    set :tlscacert, '/usr/local/certs/ca.pem'
+    set :tlscert, '/usr/local/certs/ssl.crt'
+    set :tlskey, '/usr/local/certs/ssl.key'
+    # ...
+  end
+```
 
 Deploying
 ---------
