@@ -343,7 +343,6 @@ We're currently looking at the following feature additions:
 
  * [etcd](https://github.com/coreos/etcd) integration for configs and discovery
  * Add the ability to show all the available tasks on the command line
- * Certificate authentication
  * Customized tasks
  * Dynamic host allocation to a pool of servers
 
