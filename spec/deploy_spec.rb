@@ -3,9 +3,11 @@ require 'centurion/deploy_dsl'
 require 'centurion/logging'
 
 describe Centurion::Deploy do
-  let(:mock_ok_status)  { double('http_status_ok').tap { |s| s.stub(status: 200) } }
-  let(:mock_bad_status) { double('http_status_ok').tap { |s| s.stub(status: 500) } }
-  let(:server)          { double('docker_server').tap { |s| s.stub(hostname: 'host1'); s.stub(:attach) } }
+  let(:mock_ok_status)  { double('http_status_ok').tap { |s| allow(s).to receive(:status).and_return(200) } }
+  let(:mock_bad_status) { double('http_status_ok').tap { |s| allow(s).to receive(:status).and_return(500) } }
+  let(:server)          { double('docker_server').tap { |s| 
+                            allow(s).to receive(:hostname).and_return('host1')
+                            allow(s).to receive(:attach) } }
   let(:port)            { 8484 }
   let(:container)       { { 'Ports' => [{ 'PublicPort' => port }, 'Created' => Time.now.to_i ], 'Id' => '21adfd2ef2ef2349494a', 'Names' => [ 'name1' ] } }
   let(:endpoint)        { '/status/check' }
@@ -25,7 +27,7 @@ describe Centurion::Deploy do
 
     it 'identifies bad HTTP responses' do
       expect(Excon).to receive(:get).and_return(mock_bad_status)
-      test_deploy.stub(:warn)
+      allow(test_deploy).to receive(:warn)
       expect(test_deploy.http_status_ok?(server, port, endpoint)).to be_falsey
     end
 
@@ -46,32 +48,32 @@ describe Centurion::Deploy do
     it 'recognizes when no containers are running' do
       expect(server).to receive(:find_containers_by_public_port).and_return([])
 
-      test_deploy.container_up?(server, port).should be_falsey
+      expect(test_deploy.container_up?(server, port)).to be_falsey
     end
 
     it 'complains when more than one container is bound to this port' do
       expect(server).to receive(:find_containers_by_public_port).and_return([1,2])
       expect(test_deploy).to receive(:error).with /More than one container/
 
-      test_deploy.container_up?(server, port).should be_falsey
+      expect(test_deploy.container_up?(server, port)).to be_falsey
     end
 
     it 'recognizes when the container is actually running' do
       expect(server).to receive(:find_containers_by_public_port).and_return([container])
       expect(test_deploy).to receive(:info).with /Found container/
 
-      test_deploy.container_up?(server, port).should be_truthy
+      expect(test_deploy.container_up?(server, port)).to be_truthy
     end
   end
 
   describe '#wait_for_http_status_ok?' do
     before do
-      test_deploy.stub(:info)
+      allow(test_deploy).to receive(:info)
     end
 
     it 'identifies that a container is up' do
-      test_deploy.stub(:container_up? => true)
-      test_deploy.stub(:http_status_ok? => true)
+      allow(test_deploy).to receive(:container_up?).and_return(true)
+      allow(test_deploy).to receive(:http_status_ok?).and_return(true)
 
       test_deploy.wait_for_http_status_ok(server, port, '/foo', 'image_id', 'chaucer')
       expect(test_deploy).to have_received(:info).with(/Waiting for the port/)
@@ -79,9 +81,9 @@ describe Centurion::Deploy do
     end
 
     it 'waits when the container is not yet up' do
-      test_deploy.stub(:container_up? => false)
-      test_deploy.stub(:error)
-      test_deploy.stub(:warn)
+      allow(test_deploy).to receive(:container_up?).and_return(false)
+      allow(test_deploy).to receive(:error)
+      allow(test_deploy).to receive(:warn)
       expect(test_deploy).to receive(:exit)
       expect(test_deploy).to receive(:sleep).with(0)
 
@@ -90,10 +92,10 @@ describe Centurion::Deploy do
     end
 
     it 'waits when the HTTP status is not OK' do
-      test_deploy.stub(:container_up? => true)
-      test_deploy.stub(:http_status_ok? => false)
-      test_deploy.stub(:error)
-      test_deploy.stub(:warn)
+      allow(test_deploy).to receive(:container_up?).and_return(true)
+      allow(test_deploy).to receive(:http_status_ok?).and_return(false)
+      allow(test_deploy).to receive(:error)
+      allow(test_deploy).to receive(:warn)
       expect(test_deploy).to receive(:exit)
 
       test_deploy.wait_for_http_status_ok(server, port, '/foo', 'image_id', 'chaucer', 1, 0)
@@ -215,16 +217,16 @@ describe Centurion::Deploy do
     let(:bindings) { {'80/tcp'=>[{'HostIp'=>'0.0.0.0', 'HostPort'=>'80'}]} }
 
     it 'pass host_config to start_container' do
-      server.stub(:container_config_for).and_return({
+      allow(server).to receive(:container_config_for).and_return({
         'Image'        => 'image_id',
         'Hostname'     => server.hostname,
       })
 
-      server.stub(:create_container).and_return({
+      allow(server).to receive(:create_container).and_return({
         'Id' => 'abc123456'
       })
 
-      server.stub(:inspect_container)
+      allow(server).to receive(:inspect_container)
 
       allow(test_deploy).to receive(:fetch).with(:custom_dns).and_return('8.8.8.8')
 
@@ -249,7 +251,7 @@ describe Centurion::Deploy do
     it 'configures the container' do
       expect(test_deploy).to receive(:container_config_for).with(server, 'image_id', bindings, nil, {}, nil).once
 
-      test_deploy.stub(:start_container_with_config)
+      allow(test_deploy).to receive(:start_container_with_config)
 
       test_deploy.start_new_container(server, 'image_id', bindings, {}, nil)
     end
@@ -263,7 +265,7 @@ describe Centurion::Deploy do
     it 'ultimately asks the server object to do the work' do
       allow(test_deploy).to receive(:fetch).with(:custom_dns).and_return(nil)
 
-      server.should_receive(:create_container).with(
+      expect(server).to receive(:create_container).with(
         hash_including(
           'Image'=>'image_id',
           'Hostname'=>'host1',
@@ -274,8 +276,8 @@ describe Centurion::Deploy do
         )
       ).and_return(container)
 
-      server.should_receive(:start_container)
-      server.should_receive(:inspect_container)
+      expect(server).to receive(:start_container)
+      expect(server).to receive(:inspect_container)
 
       new_container = test_deploy.start_new_container(server, 'image_id', bindings, volumes, env, command)
       expect(new_container).to eq(container)
@@ -290,7 +292,7 @@ describe Centurion::Deploy do
 
     it 'configures the container' do
       expect(test_deploy).to receive(:container_config_for).with(server, 'image_id', bindings, env, volumes, command).once
-      test_deploy.stub(:start_container_with_config)
+      allow(test_deploy).to receive(:start_container_with_config)
 
       test_deploy.start_new_container(server, 'image_id', bindings, volumes, env, command)
     end

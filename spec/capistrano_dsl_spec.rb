@@ -61,7 +61,7 @@ describe Capistrano::DSL do
       end
 
       DSLTest.set(:foo, NoAny.new)
-      DSLTest.any?(:foo).should eq('oh no')
+      expect(DSLTest.any?(:foo)).to eq('oh no')
     end
   end
 end
