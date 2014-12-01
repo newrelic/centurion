@@ -29,7 +29,7 @@ opts = Trollop::options do
   opt :tag,              'tag (latest...)',                             type: String, required: false, short: '-t'
   opt :hosts,            'hosts, comma separated',                      type: String, required: false, short: '-h'
   opt :docker_path,      'path to docker executable (default: docker)', type: String, default: 'docker', short: '-d'
-  opt :nopull,           'Skip the pull_image step',                    type: :flag, default: false, long: '--no-pull'
+  opt :no_pull,          'Skip the pull_image step',                    type: :flag, default: false, short: '-n'
   opt :registry_user,    'user for registry auth (default: nil)',       type: String, default: nil, short: :none
   opt :registry_password,'password for registry auth (default: nil)',   type: String, default: nil, short: :none
 end
@@ -62,7 +62,7 @@ set :docker_registry, Centurion::DockerRegistry::OFFICIAL_URL unless any?(:docke
 # Specify a path to docker executable
 set :docker_path, opts[:docker_path]
 
-set :no_pull, opts[:registry_user]
+set :no_pull, opts[:no_pull_given]
 set :registry_user, opts[:registry_user] if opts[:registry_user]
 set :registry_password, opts[:registry_password] if opts[:registry_password]
 
