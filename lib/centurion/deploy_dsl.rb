@@ -3,9 +3,7 @@ require 'uri'
 
 module Centurion::DeployDSL
   def on_each_docker_host(&block)
-    Centurion::DockerServerGroup.new(fetch(:hosts, []), fetch(:docker_path)).tap do |hosts|
-      hosts.each { |host| block.call(host) }
-    end
+    build_server_group.tap { |hosts| hosts.each { |host| block.call(host) } }
   end
 
   def env_vars(new_vars)
@@ -63,8 +61,7 @@ module Centurion::DeployDSL
   end
 
   def get_current_tags_for(image)
-    hosts = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
-    hosts.inject([]) do |memo, target_server|
+    build_server_group.inject([]) do |memo, target_server|
       tags = target_server.current_tags_for(image)
       memo += [{ server: target_server.hostname, tags: tags }] if tags
       memo
@@ -76,6 +73,11 @@ module Centurion::DeployDSL
   end
 
   private
+
+  def build_server_group
+    hosts, docker_path = fetch(:hosts, []), fetch(:docker_path)
+    Centurion::DockerServerGroup.new(hosts, docker_path, build_tls_params)
+  end
 
   def add_to_bindings(host_ip, container_port, port, type='tcp')
     set(:port_bindings, fetch(:port_bindings, {}).tap do |bindings|
@@ -99,5 +101,18 @@ module Centurion::DeployDSL
     unless missing.empty?
       raise ArgumentError.new("Options must contain #{missing.inspect}")
     end
+  end
+
+  def tls_paths_available?
+    Centurion::DockerViaCli.tls_keys.all? { |key| fetch(key).present? }
+  end
+
+  def build_tls_params
+    {
+      tls: fetch(:tlsverify || tls_paths_available?),
+      tlscacert: fetch(:tlscacert),
+      tlscert: fetch(:tlscert),
+      tlskey: fetch(:tlskey)
+    }
   end
 end
