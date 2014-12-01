@@ -276,7 +276,7 @@ These correspond to the following settings:
 #### Alternative Docker Registry
 
 Centurion normally uses the built-in registry support in the Docker daemon to
-handle pushing and pulling images.But Centurion also has the ability to use
+handle pushing and pulling images. But Centurion also has the ability to use
 external tooling to support hosting your registry on Amazon S3. That tooling is
 from a project called [Dogestry](https://github.com/newrelic-forks/dogestry).
 We have recently improved that tooling substantially in coordination with the
@@ -287,11 +287,9 @@ with Amazon S3 to provide reliable hosting of images.  Setting Centurion up to
 use Dogestry is pretty trivial:
 
  1. Install Dogestry binaries on the client from which Dogestry is run.
-    Binaries are provided in the GitHub release.
+    Binaries are provided in the [GitHub release](https://github.com/newrelic-forks/dogestry).
  1. Add the settings necessary to get Centurion to pull from Dogestry. A config
     example is provided below:
-
-See example below to use `dogestry`:
 
 ```ruby
 namespace :environment do
