@@ -5,8 +5,8 @@ require 'centurion/logging'
 describe Centurion::Deploy do
   let(:mock_ok_status)  { double('http_status_ok').tap { |s| allow(s).to receive(:status).and_return(200) } }
   let(:mock_bad_status) { double('http_status_ok').tap { |s| allow(s).to receive(:status).and_return(500) } }
-  let(:server)          { double('docker_server').tap { |s| 
-                            allow(s).to receive(:hostname).and_return('host1')
+  let(:server)          { double('docker_server').tap { |s|
+                            allow(s).to receive(:hostname).and_return(hostname)
                             allow(s).to receive(:attach) } }
   let(:port)            { 8484 }
   let(:container)       { { 'Ports' => [{ 'PublicPort' => port }, 'Created' => Time.now.to_i ], 'Id' => '21adfd2ef2ef2349494a', 'Names' => [ 'name1' ] } }
@@ -17,6 +17,12 @@ describe Centurion::Deploy do
       o.send(:extend, Centurion::DeployDSL)
       o.send(:extend, Centurion::Logging)
     end
+  end
+  let(:hostname) { 'host1' }
+
+  before do
+    allow(test_deploy).to receive(:fetch).and_return nil
+    allow(test_deploy).to receive(:fetch).with(:container_hostname, hostname).and_return(hostname)
   end
 
   describe '#http_status_ok?' do
@@ -245,9 +251,9 @@ describe Centurion::Deploy do
 
   describe '#start_new_container' do
     let(:bindings) { {'80/tcp'=>[{'HostIp'=>'0.0.0.0', 'HostPort'=>'80'}]} }
-    let(:env) { { 'FOO' => 'BAR' } }
-    let(:volumes) { ['/foo:/bar'] }
-    let(:command) { ['/bin/echo', 'hi'] }
+    let(:env)      { { 'FOO' => 'BAR' } }
+    let(:volumes)  { ['/foo:/bar'] }
+    let(:command)  { ['/bin/echo', 'hi'] }
 
     it 'configures the container' do
       expect(test_deploy).to receive(:container_config_for).with(server, 'image_id', bindings, nil, {}, nil).once
@@ -263,18 +269,38 @@ describe Centurion::Deploy do
       test_deploy.start_new_container(server, 'image_id', bindings, {})
     end
 
+    it 'sets the container hostname when asked' do
+      allow(test_deploy).to receive(:fetch).with(:container_hostname, anything()).and_return('chaucer')
+
+      expect(server).to receive(:create_container).with(
+        hash_including(
+          'Image'        => 'image_id',
+          'Hostname'     => 'chaucer',
+          'ExposedPorts' => {'80/tcp'=>{}},
+          'Cmd'          => command,
+          'Env'          => ['FOO=BAR'],
+          'Volumes'      => {'/bar' => {}},
+        ),
+        nil
+      ).and_return(container)
+
+      expect(server).to receive(:start_container)
+      expect(server).to receive(:inspect_container)
+      test_deploy.start_new_container(server, 'image_id', bindings, volumes, env, command)
+    end
+
     it 'ultimately asks the server object to do the work' do
       allow(test_deploy).to receive(:fetch).with(:custom_dns).and_return(nil)
       allow(test_deploy).to receive(:fetch).with(:name).and_return('app1')
 
       expect(server).to receive(:create_container).with(
         hash_including(
-          'Image'=>'image_id',
-          'Hostname'=>'host1',
-          'ExposedPorts'=>{'80/tcp'=>{}},
-          'Cmd' => command,
-          'Env' => ['FOO=BAR'],
-          'Volumes' => {'/bar' => {}},
+          'Image'        => 'image_id',
+          'Hostname'     => hostname,
+          'ExposedPorts' => {'80/tcp'=>{}},
+          'Cmd'          => command,
+          'Env'          => ['FOO=BAR'],
+          'Volumes'      => {'/bar' => {}},
         ),
         'app1'
       ).and_return(container)
