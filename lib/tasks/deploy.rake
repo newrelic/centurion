@@ -53,7 +53,7 @@ namespace :deploy do
       Dir.mktmpdir("dogestry") do |local_dir|
 
         info "** Downloading image(#{fetch(:image)}:#{fetch(:tag)}) from S3 to local directory"
-        registry.download_image_to_temp_dir("#{fetch(:image)}:#{fetch(:tag)}", local_dir)
+        registry.download_image_to_temp_dir("#{fetch(:image)}:#{fetch(:tag)}", local_dir, ENV["DOCKER_HOST"])
 
         # Upload image from local /tmp/directory to specified Docker hosts
         target_servers = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
