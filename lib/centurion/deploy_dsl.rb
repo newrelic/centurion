@@ -108,6 +108,7 @@ module Centurion::DeployDSL
   end
 
   def build_tls_params
+    return nil unless fetch(:tlsverify)
     {
       tls: fetch(:tlsverify || tls_paths_available?),
       tlscacert: fetch(:tlscacert),
