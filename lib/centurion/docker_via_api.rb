@@ -65,7 +65,7 @@ class Centurion::DockerViaApi
     path = "/v1.10/containers/create"
     response = Excon.post(
       @base_uri + path,
-      :query => name ? {:name => "#{name}-#{SecureRandom.hex(4)}"} : nil,
+      :query => name ? {:name => "#{name}-#{SecureRandom.hex(7)}"} : nil,
       :body => configuration.to_json,
       :headers => { "Content-Type" => "application/json" }
     )
