@@ -153,6 +153,17 @@ IP address (the equivalent of `docker run --dns 172.17.42.1 ...`) like this:
   end
 ```
 
+If you want to name your container, use the `name` DSL item. The
+actual name for the created container will have a random hex string
+appended, to avoid name conflicts when you repeatedly deploy an image:
+```ruby
+  task :common do
+    set :name, 'backend'
+    # ...
+  end
+```
+With this, the container will be named something like `backend-4f692997`.
+
 ### Interpolation
 
 Currently there is one special string for interpolation that can be added to

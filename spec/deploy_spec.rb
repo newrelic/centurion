@@ -229,6 +229,7 @@ describe Centurion::Deploy do
       allow(server).to receive(:inspect_container)
 
       allow(test_deploy).to receive(:fetch).with(:custom_dns).and_return('8.8.8.8')
+      allow(test_deploy).to receive(:fetch).with(:name).and_return(nil)
 
       expect(server).to receive(:start_container).with(
         'abc123456',
@@ -264,6 +265,7 @@ describe Centurion::Deploy do
 
     it 'ultimately asks the server object to do the work' do
       allow(test_deploy).to receive(:fetch).with(:custom_dns).and_return(nil)
+      allow(test_deploy).to receive(:fetch).with(:name).and_return('app1')
 
       expect(server).to receive(:create_container).with(
         hash_including(
@@ -273,7 +275,8 @@ describe Centurion::Deploy do
           'Cmd' => command,
           'Env' => ['FOO=BAR'],
           'Volumes' => {'/bar' => {}},
-        )
+        ),
+        'app1'
       ).and_return(container)
 
       expect(server).to receive(:start_container)

@@ -1,6 +1,7 @@
 require 'excon'
 require 'json'
 require 'uri'
+require 'securerandom'
 
 module Centurion; end
 
@@ -60,10 +61,11 @@ class Centurion::DockerViaApi
     true
   end
 
-  def create_container(configuration)
+  def create_container(configuration, name = nil)
     path = "/v1.10/containers/create"
     response = Excon.post(
       @base_uri + path,
+      :query => name ? {:name => "#{name}-#{SecureRandom.hex(4)}"} : nil,
       :body => configuration.to_json,
       :headers => { "Content-Type" => "application/json" }
     )
