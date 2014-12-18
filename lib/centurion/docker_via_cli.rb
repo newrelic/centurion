@@ -13,7 +13,7 @@ class Centurion::DockerViaCli
   end
 
   def pull(image, tag='latest')
-    info "Using CLI to pull"
+    info 'Using CLI to pull'
     echo(build_command(:pull, "#{image}:#{tag}"))
   end
 
