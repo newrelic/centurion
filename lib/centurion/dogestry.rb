@@ -52,10 +52,6 @@ class Centurion::Dogestry
     "s3://#{s3_bucket}/?region=#{s3_region}"
   end
 
-  def docker_host
-    @options[:docker_host] || 'tcp://localhost:2375'
-  end
-
   def set_envs(docker_host)
     ENV['DOCKER_HOST'] = docker_host
     ENV['AWS_ACCESS_KEY'] = aws_access_key_id
@@ -70,9 +66,9 @@ class Centurion::Dogestry
     command
   end
 
-  def download_image_to_temp_dir(repo, local_dir)
+  def download_image_to_temp_dir(repo, local_dir, docker_host)
     validate_before_exec
-    set_envs("")
+    set_envs(docker_host)
 
     flags = "-tempdir #{File.expand_path(local_dir)}"
 
