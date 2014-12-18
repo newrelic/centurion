@@ -153,7 +153,12 @@ IP address (the equivalent of `docker run --dns 172.17.42.1 ...`) like this:
   end
 ```
 
-If you want to name your container, use the `name` DSL item. The
+### Container Names
+
+This is the name that shows up in the `docker ps` output. It's the name
+of the container, not the hostname inside the container.
+
+If you want to name your container, use the `name` setting. The
 actual name for the created container will have a random hex string
 appended, to avoid name conflicts when you repeatedly deploy an image:
 ```ruby
@@ -163,6 +168,21 @@ appended, to avoid name conflicts when you repeatedly deploy an image:
   end
 ```
 With this, the container will be named something like `backend-4f692997`.
+
+### Container Hostnames
+
+If you don't specify a hostname to use inside your container, the container
+will be given the hostname of the Docker server. This probably is good for
+a lot of situations, but it might not be good for yours. If you need to have
+a specific hostname, you can cause Centurion to do that:
+
+```ruby
+set :container_hostname, 'yourhostname'
+```
+
+This is currently pretty inflexible in that the hostname will now be the same
+on all of your hosts. A possible future addition is the ability to pass
+a block to be evaluated on each host.
 
 ### Interpolation
 
