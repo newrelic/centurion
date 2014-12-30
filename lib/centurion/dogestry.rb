@@ -52,12 +52,7 @@ class Centurion::Dogestry
     "s3://#{s3_bucket}/?region=#{s3_region}"
   end
 
-  def docker_host
-    @options[:docker_host] || 'tcp://localhost:2375'
-  end
-
-  def set_envs(docker_host)
-    ENV['DOCKER_HOST'] = docker_host
+  def set_envs()
     ENV['AWS_ACCESS_KEY'] = aws_access_key_id
     ENV['AWS_SECRET_KEY'] = aws_secret_key
 
@@ -70,22 +65,14 @@ class Centurion::Dogestry
     command
   end
 
-  def download_image_to_temp_dir(repo, local_dir)
+  def pull(repo, pull_hosts)
     validate_before_exec
-    set_envs("")
+    set_envs()
 
-    flags = "-tempdir #{File.expand_path(local_dir)}"
+    hosts = pull_hosts.join(",")
+    flags = "-pullhosts #{hosts}"
 
-    echo(exec_command('download', repo, flags=flags))
+    echo(exec_command('pull', repo, flags))
   end
 
-  def upload_temp_dir_image_to_docker(repo, local_dir, docker_host)
-    validate_before_exec
-    set_envs(docker_host)
-
-    command = "dogestry upload #{local_dir} #{repo}"
-    info "Executing: #{command}"
-
-    echo(command)
-  end
 end
