@@ -44,7 +44,7 @@ describe Centurion::Dogestry do
 
   describe '#exec_command' do
     it 'returns correct value' do
-      expect(registry.exec_command('pull', repo)).to start_with('dogestry') 
+      expect(registry.exec_command('pull', repo)).to start_with('dogestry')
     end
   end
 
