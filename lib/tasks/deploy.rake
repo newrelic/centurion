@@ -49,25 +49,18 @@ namespace :deploy do
         s3_region: fetch(:s3_region) || 'us-east-1',
       )
 
-      # Download image from S3 to local /tmp/directory
-      Dir.mktmpdir("dogestry") do |local_dir|
+      target_servers = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
+      pull_hosts = []
 
-        info "** Downloading image(#{fetch(:image)}:#{fetch(:tag)}) from S3 to local directory"
-        registry.download_image_to_temp_dir("#{fetch(:image)}:#{fetch(:tag)}", local_dir)
-
-        # Upload image from local /tmp/directory to specified Docker hosts
-        target_servers = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
-        target_servers.each_in_parallel do |target_server|
-
-          docker_host = "tcp://#{target_server.hostname}:#{target_server.port}"
-
-          image_and_tag = "#{fetch(:image)}:#{fetch(:tag)}"
-
-          info "** Pushing image(#{image_and_tag}) from #{local_dir} to Docker: #{docker_host}"
-
-          registry.upload_temp_dir_image_to_docker(image_and_tag, local_dir, docker_host)
-        end
+      target_servers.each do |target_server|
+        docker_host = "tcp://#{target_server.hostname}:#{target_server.port}"
+        pull_hosts.push(docker_host)
       end
+
+      image_and_tag = "#{fetch(:image)}:#{fetch(:tag)}"
+      info "** Pulling image(#{image_and_tag}) from S3 to Docker Hosts: #{pull_hosts}"
+
+      registry.pull(image_and_tag, pull_hosts)
     end
   end
 

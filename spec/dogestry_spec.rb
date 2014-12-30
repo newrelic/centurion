@@ -44,9 +44,16 @@ describe Centurion::Dogestry do
 
   describe '#exec_command' do
     it 'returns correct value' do
-      expect(registry.exec_command('pull', repo)).to start_with('dogestry') 
+      expect(registry.exec_command('pull', repo)).to start_with('dogestry')
     end
   end
+
+ describe '#pull' do
+   it 'returns correct value' do
+     expect(registry).to receive(:echo).with("dogestry #{flags} pull #{registry.s3_url} #{repo}")
+     registry.pull(repo, pull_hosts)
+   end
+ end
 
   describe '#which' do
     it 'finds dogestry command line' do
