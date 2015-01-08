@@ -143,13 +143,29 @@ module Centurion::Deploy
     new_container = target_server.create_container(container_config, fetch(:name))
 
     host_config = {}
+
     # Map some host volumes if needed
     host_config['Binds'] = volumes if volumes && !volumes.empty?
+
     # Bind the ports
     host_config['PortBindings'] = port_bindings
+
     # DNS if specified
     dns = fetch(:custom_dns)
     host_config['Dns'] = dns if dns
+
+    # Restart Policy
+    # By default we always auto restart container.
+    host_config['RestartPolicy'] = {}
+
+    restart_policy_name = fetch(:restart_policy_name) || 'always'
+    restart_policy_max_retry_count = fetch(:restart_policy_max_retry_count) || 10
+
+    host_config['RestartPolicy']['Name'] = restart_policy_name
+
+    if restart_policy_name == 'on-failure'
+      host_config['RestartPolicy']['MaximumRetryCount'] = restart_policy_max_retry_count
+    end
 
     info "Starting new container #{new_container['Id'][0..7]}"
     target_server.start_container(new_container['Id'], host_config)
