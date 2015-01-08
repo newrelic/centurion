@@ -237,11 +237,17 @@ describe Centurion::Deploy do
       allow(test_deploy).to receive(:fetch).with(:custom_dns).and_return('8.8.8.8')
       allow(test_deploy).to receive(:fetch).with(:name).and_return(nil)
 
+      allow(test_deploy).to receive(:fetch).with(:restart_policy_name).and_return('on-failure')
+
       expect(server).to receive(:start_container).with(
         'abc123456',
         {
           'PortBindings' => bindings,
-          'Dns' => '8.8.8.8'
+          'Dns' => '8.8.8.8',
+          'RestartPolicy' => {
+            'Name' => 'on-failure',
+            'MaximumRetryCount' => 10
+          }
         }
       ).once
 
