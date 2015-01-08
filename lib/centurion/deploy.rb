@@ -155,10 +155,10 @@ module Centurion::Deploy
     host_config['Dns'] = dns if dns
 
     # Restart Policy
-    # By default we always auto restart container.
+    # By default we always use on-failure policy.
     host_config['RestartPolicy'] = {}
 
-    restart_policy_name = fetch(:restart_policy_name) || 'always'
+    restart_policy_name = fetch(:restart_policy_name) || 'on-failure'
     restart_policy_max_retry_count = fetch(:restart_policy_max_retry_count) || 10
 
     host_config['RestartPolicy']['Name'] = restart_policy_name
