@@ -50,8 +50,10 @@ describe Centurion::Dogestry do
 
  describe '#pull' do
    it 'returns correct value' do
-     expect(registry).to receive(:echo).with("dogestry #{flags} pull #{registry.s3_url} #{repo}")
-     registry.pull(repo, pull_hosts)
+    if registry.which('dogestry')
+      expect(registry).to receive(:echo).with("dogestry pull #{registry.s3_url} #{repo}")
+      registry.pull(repo, {})
+    end
    end
  end
 
