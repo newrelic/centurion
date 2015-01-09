@@ -138,6 +138,21 @@ module Centurion::Deploy
 
   private
 
+  # By default we always use on-failure policy.
+  def build_host_config_restart_policy(host_config={})
+    host_config['RestartPolicy'] = {}
+
+    restart_policy_name = fetch(:restart_policy_name) || 'on-failure'
+    restart_policy_name = 'on-failure' unless ["always", "on-failure", "no"].include?(restart_policy_name)
+
+    restart_policy_max_retry_count = fetch(:restart_policy_max_retry_count) || 10
+
+    host_config['RestartPolicy']['Name'] = restart_policy_name
+    host_config['RestartPolicy']['MaximumRetryCount'] = restart_policy_max_retry_count if restart_policy_name == 'on-failure'
+
+    host_config
+  end
+
   def start_container_with_config(target_server, volumes, port_bindings, container_config)
     info "Creating new container for #{container_config['Image'][0..7]}"
     new_container = target_server.create_container(container_config, fetch(:name))
@@ -155,17 +170,7 @@ module Centurion::Deploy
     host_config['Dns'] = dns if dns
 
     # Restart Policy
-    # By default we always use on-failure policy.
-    host_config['RestartPolicy'] = {}
-
-    restart_policy_name = fetch(:restart_policy_name) || 'on-failure'
-    restart_policy_max_retry_count = fetch(:restart_policy_max_retry_count) || 10
-
-    host_config['RestartPolicy']['Name'] = restart_policy_name
-
-    if restart_policy_name == 'on-failure'
-      host_config['RestartPolicy']['MaximumRetryCount'] = restart_policy_max_retry_count
-    end
+    host_config = build_host_config_restart_policy(host_config)
 
     info "Starting new container #{new_container['Id'][0..7]}"
     target_server.start_container(new_container['Id'], host_config)

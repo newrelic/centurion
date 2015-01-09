@@ -237,13 +237,110 @@ describe Centurion::Deploy do
       allow(test_deploy).to receive(:fetch).with(:custom_dns).and_return('8.8.8.8')
       allow(test_deploy).to receive(:fetch).with(:name).and_return(nil)
 
-      allow(test_deploy).to receive(:fetch).with(:restart_policy_name).and_return('on-failure')
-
       expect(server).to receive(:start_container).with(
         'abc123456',
         {
           'PortBindings' => bindings,
           'Dns' => '8.8.8.8',
+          'RestartPolicy' => {
+            'Name' => 'on-failure',
+            'MaximumRetryCount' => 10
+          }
+        }
+      ).once
+
+      test_deploy.start_new_container(server, 'image_id', bindings, {}, nil, nil)
+    end
+  end
+
+  describe '#start_container_with_restart_policy' do
+    let(:bindings) { {'80/tcp'=>[{'HostIp'=>'0.0.0.0', 'HostPort'=>'80'}]} }
+
+    before do
+      allow(server).to receive(:container_config_for).and_return({
+        'Image'        => 'image_id',
+        'Hostname'     => server.hostname,
+      })
+
+      allow(server).to receive(:create_container).and_return({
+        'Id' => 'abc123456'
+      })
+
+      allow(server).to receive(:inspect_container)
+    end
+
+    it 'pass no restart policy to start_container' do
+      expect(server).to receive(:start_container).with(
+        'abc123456',
+        {
+          'PortBindings' => bindings,
+          'RestartPolicy' => {
+            'Name' => 'on-failure',
+            'MaximumRetryCount' => 10
+          }
+        }
+      ).once
+
+      test_deploy.start_new_container(server, 'image_id', bindings, {}, nil, nil)
+    end
+
+    it 'pass "always" restart policy to start_container' do
+      allow(test_deploy).to receive(:fetch).with(:restart_policy_name).and_return('always')
+
+      expect(server).to receive(:start_container).with(
+        'abc123456',
+        {
+          'PortBindings' => bindings,
+          'RestartPolicy' => {
+            'Name' => 'always'
+          }
+        }
+      ).once
+
+      test_deploy.start_new_container(server, 'image_id', bindings, {}, nil, nil)
+    end
+
+    it 'pass "on-failure with 50 retries" restart policy to start_container' do
+      allow(test_deploy).to receive(:fetch).with(:restart_policy_name).and_return('on-failure')
+      allow(test_deploy).to receive(:fetch).with(:restart_policy_max_retry_count).and_return(50)
+
+      expect(server).to receive(:start_container).with(
+        'abc123456',
+        {
+          'PortBindings' => bindings,
+          'RestartPolicy' => {
+            'Name' => 'on-failure',
+            'MaximumRetryCount' => 50
+          }
+        }
+      ).once
+
+      test_deploy.start_new_container(server, 'image_id', bindings, {}, nil, nil)
+    end
+
+    it 'pass "no" restart policy to start_container' do
+      allow(test_deploy).to receive(:fetch).with(:restart_policy_name).and_return('no')
+
+      expect(server).to receive(:start_container).with(
+        'abc123456',
+        {
+          'PortBindings' => bindings,
+          'RestartPolicy' => {
+            'Name' => 'no'
+          }
+        }
+      ).once
+
+      test_deploy.start_new_container(server, 'image_id', bindings, {}, nil, nil)
+    end
+
+    it 'pass "garbage" restart policy to start_container' do
+      allow(test_deploy).to receive(:fetch).with(:restart_policy_name).and_return('garbage')
+
+      expect(server).to receive(:start_container).with(
+        'abc123456',
+        {
+          'PortBindings' => bindings,
           'RestartPolicy' => {
             'Name' => 'on-failure',
             'MaximumRetryCount' => 10
