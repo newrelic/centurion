@@ -162,7 +162,11 @@ namespace :deploy do
   task :determine_image_id_from_first_server do
     on_each_docker_host do |target_server|
       image_detail = target_server.inspect_image(fetch(:image), fetch(:tag))
-      exact_image = image_detail["id"]
+
+      # Handle CamelCase in response from Docker API
+      # See https://github.com/newrelic/centurion/issues/85
+      exact_image = image_detail["id"] || image_detail["Id"]
+
       set :image_id, exact_image
       info "RESOLVED #{fetch(:image)}:#{fetch(:tag)} => #{exact_image[0..11]}"
       break
@@ -192,7 +196,10 @@ namespace :deploy do
   task :verify_image do
     on_each_docker_host do |target_server|
       image_detail = target_server.inspect_image(fetch(:image), fetch(:tag))
-      found_image_id = image_detail["id"]
+
+      # Handle CamelCase in response from Docker API
+      # See https://github.com/newrelic/centurion/issues/85
+      found_image_id = image_detail["id"] || image_detail["Id"]
 
       if found_image_id == fetch(:image_id)
         info "Image #{found_image_id[0..7]} found on #{target_server.hostname}"
@@ -200,8 +207,11 @@ namespace :deploy do
         raise "Did not find image #{fetch(:image_id)} on host #{target_server.hostname}!"
       end
 
+      # Again, handle CamelCase in response from Docker API
+      container_config = image_detail["container_config"] || image_detail["ContainerConfig"]
+
       # Print the container config
-      image_detail["container_config"].each_pair do |key,value|
+      container_config.each_pair do |key,value|
         info "\t#{key} => #{value.inspect}"
       end
     end
