@@ -11,6 +11,13 @@ describe Centurion::Dogestry do
   }
   let(:registry) { Centurion::Dogestry.new(dogestry_options) }
   let(:repo) { 'google/golang' }
+  let(:pull_hosts) {
+    [
+      'tcp://host-1:2375',
+      'tcp://host-2:2375'
+    ]
+  }
+  let(:flags) { "-pullhosts #{pull_hosts.join(',')}"}
 
   describe '#aws_access_key_id' do
     it 'returns correct value' do
@@ -51,8 +58,8 @@ describe Centurion::Dogestry do
  describe '#pull' do
    it 'returns correct value' do
     if registry.which('dogestry')
-      expect(registry).to receive(:echo).with("dogestry pull #{registry.s3_url} #{repo}")
-      registry.pull(repo, {})
+      expect(registry).to receive(:echo).with("dogestry #{flags} pull #{registry.s3_url} #{repo}")
+      registry.pull(repo, pull_hosts)
     end
    end
  end
