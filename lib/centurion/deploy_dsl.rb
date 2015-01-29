@@ -22,6 +22,14 @@ module Centurion::DeployDSL
     set(:hosts, current)
   end
 
+  def memory(memory)
+    set(:memory, memory)
+  end
+
+  def cpu_shares(cpu_shares)
+    set(:cpu_shares, cpu_shares)
+  end
+
   def command(command)
     set(:command, command)
   end
