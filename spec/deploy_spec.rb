@@ -217,6 +217,20 @@ describe Centurion::Deploy do
         expect(config['Cmd']).to eq(command)
       end
     end
+
+    context 'when cgroup limits are specified' do
+      let(:memory) { "10000000" }
+      let(:cpu_shares) { "1234" }
+
+      it 'sets cgroup limits in the config' do
+        config = test_deploy.container_config_for(server, image_id, port_bindings, env, volumes, command, memory, cpu_shares)
+
+        expect(config).to be_a(Hash)
+        expect(config.keys).to match_array(%w{ Hostname Image Memory CpuShares })
+        expect(config['Memory']).to eq("10000000")
+        expect(config['CpuShares']).to eq("1234")
+      end
+    end
   end
 
   describe '#start_container_with_config' do
@@ -359,7 +373,7 @@ describe Centurion::Deploy do
     let(:command)  { ['/bin/echo', 'hi'] }
 
     it 'configures the container' do
-      expect(test_deploy).to receive(:container_config_for).with(server, 'image_id', bindings, nil, {}, nil).once
+      expect(test_deploy).to receive(:container_config_for).with(server, 'image_id', bindings, nil, {}, nil, nil, nil).once
 
       allow(test_deploy).to receive(:start_container_with_config)
 
@@ -417,16 +431,18 @@ describe Centurion::Deploy do
   end
 
   describe '#launch_console' do
-    let(:bindings) { {'80/tcp'=>[{'HostIp'=>'0.0.0.0', 'HostPort'=>'80'}]} }
-    let(:volumes)  { nil }
-    let(:env)      { nil }
-    let(:command)  { nil }
+    let(:bindings)   { {'80/tcp'=>[{'HostIp'=>'0.0.0.0', 'HostPort'=>'80'}]} }
+    let(:volumes)    { nil }
+    let(:env)        { nil }
+    let(:command)    { nil }
+    let(:memory)     { nil }
+    let(:cpu_shares) { nil }
 
     it 'configures the container' do
-      expect(test_deploy).to receive(:container_config_for).with(server, 'image_id', bindings, env, volumes, command).once
+      expect(test_deploy).to receive(:container_config_for).with(server, 'image_id', bindings, env, volumes, command, memory, cpu_shares).once
       allow(test_deploy).to receive(:start_container_with_config)
 
-      test_deploy.start_new_container(server, 'image_id', bindings, volumes, env, command)
+      test_deploy.start_new_container(server, 'image_id', bindings, volumes, env, command, memory, cpu_shares)
     end
 
     it 'augments the container_config' do
