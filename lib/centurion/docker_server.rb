@@ -34,10 +34,18 @@ class Centurion::DockerServer
 
   def find_containers_by_public_port(public_port, type='tcp')
     ps.select do |container|
-      if container['Ports']
-        container['Ports'].find do |port|
-          port['PublicPort'] == public_port.to_i && port['Type'] == type
-        end
+      next unless container && container['Ports']
+      container['Ports'].find do |port|
+        port['PublicPort'] == public_port.to_i && port['Type'] == type
+      end
+    end
+  end
+
+  def find_containers_by_name(wanted_name)
+    ps.select do |container|
+      next unless container && container['Names']
+      container['Names'].find do |name|
+        name =~ /\A\/#{wanted_name}(-[a-f0-9]{7})?\Z/
       end
     end
   end
