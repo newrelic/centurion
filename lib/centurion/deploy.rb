@@ -4,6 +4,8 @@ module Centurion; end
 
 module Centurion::Deploy
   FAILED_CONTAINER_VALIDATION = 100
+  INVALID_CGROUP_CPUSHARES_VALUE = 101
+  INVALID_CGROUP_MEMORY_VALUE = 102
 
   def stop_containers(target_server, port_bindings, timeout = 30)
     public_port    = public_port_for(port_bindings)
@@ -71,6 +73,17 @@ module Centurion::Deploy
     false
   end
 
+  def is_a_uint64?(value)
+    result = false
+    if !value.is_a? Integer
+      return result
+    end
+    if value < 0 || value > 0xFFFFFFFFFFFFFFFF
+      return result
+    end
+    return true
+  end
+
   def wait_for_load_balancer_check_interval
     sleep(fetch(:rolling_deploy_check_interval, 5))
   end
@@ -88,6 +101,17 @@ module Centurion::Deploy
   end
 
   def container_config_for(target_server, image_id, port_bindings=nil, env_vars=nil, volumes=nil, command=nil, memory=nil, cpu_shares=nil)
+
+    if memory && ! is_a_uint64?(memory) 
+      error "Invalid value for CGroup memory constraint: #{memory}, value must be a between 0 and 18446744073709551615"
+      exit(INVALID_CGROUP_MEMORY_VALUE)
+    end
+
+    if cpu_shares && ! is_a_uint64?(cpu_shares)
+      error "Invalid value for CGroup CPU constraint: #{cpu_shares}, value must be between 0 and 18446744073709551615"
+      exit(INVALID_CGROUP_CPUSHARES_VALUE)
+    end
+
     container_config = {
       'Image'        => image_id,
       'Hostname'     => fetch(:container_hostname, target_server.hostname),

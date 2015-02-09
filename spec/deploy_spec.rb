@@ -219,16 +219,28 @@ describe Centurion::Deploy do
     end
 
     context 'when cgroup limits are specified' do
-      let(:memory) { "10000000" }
-      let(:cpu_shares) { "1234" }
+      let(:memory) { 10000000 }
+      let(:cpu_shares) { 1234 }
 
       it 'sets cgroup limits in the config' do
         config = test_deploy.container_config_for(server, image_id, port_bindings, env, volumes, command, memory, cpu_shares)
 
         expect(config).to be_a(Hash)
         expect(config.keys).to match_array(%w{ Hostname Image Memory CpuShares })
-        expect(config['Memory']).to eq("10000000")
-        expect(config['CpuShares']).to eq("1234")
+        expect(config['Memory']).to eq(10000000)
+        expect(config['CpuShares']).to eq(1234)
+      end
+
+      it 'throws a fatal error value for Cgroup Memory limit is invalid' do
+        expect { config = test_deploy.container_config_for(server, image_id, port_bindings, env, volumes, command, "I like pie", cpu_shares) }.to terminate.with_code(102)
+        expect { test_deploy.container_config_for(server, image_id, port_bindings, env, volumes, command, -100, cpu_shares) }.to terminate.with_code(102)
+        expect { test_deploy.container_config_for(server, image_id, port_bindings, env, volumes, command, 0xFFFFFFFFFFFFFFFFFF, cpu_shares) }.to terminate.with_code(102)
+      end
+
+      it 'throws a fatal error value for Cgroup CPU limit is invalid' do
+        expect { test_deploy.container_config_for(server, image_id, port_bindings, env, volumes, command, memory, "I like pie") }.to terminate.with_code(101)
+        expect { test_deploy.container_config_for(server, image_id, port_bindings, env, volumes, command, memory, -100) }.to terminate.with_code(101)
+        expect { test_deploy.container_config_for(server, image_id, port_bindings, env, volumes, command, memory, 0xFFFFFFFFFFFFFFFFFF) }.to terminate.with_code(101)
       end
     end
   end
