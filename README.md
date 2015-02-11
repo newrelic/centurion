@@ -388,6 +388,7 @@ Pull requests should:
  * Have a description that explains the need for the changes
  * Include tests!
  * Not break the public API
+ * Add yourself to the CONTRIBUTORS file. I might forget.
 
 If you are simply looking to contribute to the project, taking on one of the
 items in the "Future Additions" section above would be a great place to start.
