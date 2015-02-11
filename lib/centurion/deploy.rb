@@ -87,7 +87,7 @@ module Centurion::Deploy
     end
   end
 
-  def container_config_for(target_server, image_id, port_bindings=nil, env_vars=nil, volumes=nil, command=nil, hostname=nil)
+  def container_config_for(target_server, image_id, port_bindings=nil, env_vars=nil, volumes=nil, command=nil)
     container_config = {
       'Image'        => image_id,
       'Hostname'     => fetch(:container_hostname, target_server.hostname),
