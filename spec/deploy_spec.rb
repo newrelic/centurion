@@ -1,3 +1,4 @@
+require 'spec_helper'
 require 'centurion/deploy'
 require 'centurion/deploy_dsl'
 require 'centurion/logging'
@@ -221,6 +222,10 @@ describe Centurion::Deploy do
     context 'when cgroup limits are specified' do
       let(:memory) { 10000000 }
       let(:cpu_shares) { 1234 }
+
+      before do
+        allow(test_deploy).to receive(:error) # Make sure we don't have red output in tests
+      end
 
       it 'sets cgroup limits in the config' do
         config = test_deploy.container_config_for(server, image_id, port_bindings, env, volumes, command, memory, cpu_shares)
