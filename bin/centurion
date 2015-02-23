@@ -32,6 +32,7 @@ opts = Trollop::options do
   opt :no_pull,          'Skip the pull_image step',                    type: :flag, default: false, short: '-n'
   opt :registry_user,    'user for registry auth (default: nil)',       type: String, default: nil, short: :none
   opt :registry_password,'password for registry auth (default: nil)',   type: String, default: nil, short: :none
+  opt :extra_envvars, 'extra env_vars, comma separated (default: nil)', type: String, default: nil, short: :none
 end
 
 set_current_environment(opts[:environment].to_sym)
@@ -54,6 +55,14 @@ invoke("environment:#{opts[:environment]}")
 set :image, opts[:image] if opts[:image]
 set :tag,   opts[:tag] if opts[:tag]
 set :hosts, opts[:hosts].split(",") if opts[:hosts]
+
+# Add extra env_vars
+if opts[:extra_envvars]
+  for extra_envvar in opts[:extra_envvars].split(",")
+    key, value = extra_envvar.split('=')
+    env_vars({key => value})
+  end
+end
 
 # Default tag should be "latest"
 set :tag, 'latest' unless any?(:tag)
