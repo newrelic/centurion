@@ -184,6 +184,23 @@ This is currently pretty inflexible in that the hostname will now be the same
 on all of your hosts. A possible future addition is the ability to pass
 a block to be evaluated on each host.
 
+### CGroup Resource Constraints
+
+Limits on memory and CPU can be specified with the `memory` and `cpu_shares`
+settings. Both of these expect a 64-bit integer describing the number of
+bytes, and the number of CPU shares, respectively.
+
+For example, to limit the memory to 1G, and the cpu time slice to half the
+normal length, include the following:
+
+```ruby
+memory 1024000000
+cpu_shares 512
+```
+
+For more information on Docker's CGroup limits see [the Docker
+Docs](https://docs.docker.com/reference/run/#runtime-constraints-on-cpu-and-memory)
+
 ### Interpolation
 
 Currently there is one special string for interpolation that can be added to
