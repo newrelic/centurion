@@ -199,7 +199,7 @@ cpu_shares 512
 ```
 
 For more information on Docker's CGroup limits see [the Docker
-Docs](https://docs.docker.com/reference/run/#runtime-constraints-on-cpu-and-memory)
+docs](https://docs.docker.com/reference/run/#runtime-constraints-on-cpu-and-memory).
 
 ### Interpolation
 
@@ -381,6 +381,24 @@ namespace :environment do
   end
 end
 ```
+
+Development
+-----------
+
+Sometimes when you're doing development you want to try out some configuration
+settings in environment variables that aren't in the config yet. Or perhaps you
+want to override existing settings to test with. You can provide the
+`--override-env` command line flag with some overrides or new variables to set.
+Here's how to use it:
+
+```bash
+$ centurion -e development -a deploy -p radio-radio --override-env=SERVICE_PORT=8080,NAME=radio
+```
+
+Centurion is aimed at repeatable deployments so we don't recommend that you use
+this functionality for production deployments. It will work, but it means that
+the config is not the whole source of truth for your container configuration.
+Caveat emptor.
 
 Future Additions
 ----------------
