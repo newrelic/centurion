@@ -102,7 +102,7 @@ module Centurion::Deploy
 
   def container_config_for(target_server, image_id, port_bindings=nil, env_vars=nil, volumes=nil, command=nil, memory=nil, cpu_shares=nil)
 
-    if memory && ! is_a_uint64?(memory) 
+    if memory && ! is_a_uint64?(memory)
       error "Invalid value for CGroup memory constraint: #{memory}, value must be a between 0 and 18446744073709551615"
       exit(INVALID_CGROUP_MEMORY_VALUE)
     end
