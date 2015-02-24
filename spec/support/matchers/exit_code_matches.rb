@@ -19,12 +19,12 @@ RSpec::Matchers.define :terminate do |code|
     @status_code = status_code
   end
 
-  failure_message_for_should do |block|
+  failure_message do |block|
     "expected block to call exit(#{status_code}) but exit" +
       (actual.nil? ? " not called" : "(#{actual}) was called")
   end
 
-  failure_message_for_should_not do |block|
+  failure_message_when_negated do |block|
     "expected block not to call exit(#{status_code})"
   end
 
