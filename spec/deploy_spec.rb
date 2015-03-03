@@ -4,11 +4,9 @@ require 'centurion/deploy_dsl'
 require 'centurion/logging'
 
 describe Centurion::Deploy do
-  let(:mock_ok_status)  { double('http_status_ok').tap { |s| allow(s).to receive(:status).and_return(200) } }
-  let(:mock_bad_status) { double('http_status_ok').tap { |s| allow(s).to receive(:status).and_return(500) } }
-  let(:server)          { double('docker_server').tap { |s|
-                            allow(s).to receive(:hostname).and_return(hostname)
-                            allow(s).to receive(:attach) } }
+  let(:mock_ok_status)  { double('http_status_ok', status: 200) }
+  let(:mock_bad_status) { double('http_status_ok', status: 500) }
+  let(:server)          { double('docker_server', attach: true, hostname: hostname) }
   let(:port)            { 8484 }
   let(:container)       { { 'Ports' => [{ 'PublicPort' => port }, 'Created' => Time.now.to_i ], 'Id' => '21adfd2ef2ef2349494a', 'Names' => [ 'name1' ] } }
   let(:endpoint)        { '/status/check' }
