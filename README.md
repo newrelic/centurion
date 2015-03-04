@@ -203,9 +203,11 @@ docs](https://docs.docker.com/reference/run/#runtime-constraints-on-cpu-and-memo
 
 ### Interpolation
 
-Currently there is one special string for interpolation that can be added to
-any `env_var` value in the DSL. `%DOCKER_HOSTNAME%` will be replaced with the
-current server's hostname in the environment variable at deployment time.
+Currently there a couple of special strings for interpolation that can be added
+to any `env_var` value in the DSL. `%DOCKER_HOSTNAME%` will be replaced with
+the current server's hostname in the environment variable at deployment time.
+Also `%DOCKER_HOST_IP%` will be replaced with the *public* IP address of the
+Docker server using a `getaddrinfo` call on the client.
 
 ### Use TLS certificate
 
