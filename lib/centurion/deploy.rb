@@ -1,4 +1,5 @@
 require 'excon'
+require 'socket'
 
 module Centurion; end
 
@@ -130,7 +131,7 @@ module Centurion::Deploy
 
     if env_vars
       container_config['Env'] = env_vars.map do |k,v|
-        "#{k}=#{v.gsub('%DOCKER_HOSTNAME%', target_server.hostname)}"
+        "#{k}=#{interpolate_var(v, target_server)}"
       end
     end
 
@@ -206,4 +207,16 @@ module Centurion::Deploy
 
     new_container
   end
+
+  def interpolate_var(val, target_server)
+    val.gsub('%DOCKER_HOSTNAME%', target_server.hostname)
+      .gsub('%DOCKER_HOST_IP%', host_ip(target_server.hostname))
+  end
+
+  def host_ip(hostname)
+    @host_ip ||= {}
+    return @host_ip[hostname] if @host_ip.has_key?(hostname)
+    @host_ip[hostname] = Socket.getaddrinfo(hostname, nil).first[2]
+  end
+
 end

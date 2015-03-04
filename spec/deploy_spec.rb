@@ -22,6 +22,7 @@ describe Centurion::Deploy do
   before do
     allow(test_deploy).to receive(:fetch).and_return nil
     allow(test_deploy).to receive(:fetch).with(:container_hostname, hostname).and_return(hostname)
+    allow(test_deploy).to receive(:host_ip).and_return('172.16.0.1')
   end
 
   describe '#http_status_ok?' do
@@ -176,7 +177,11 @@ describe Centurion::Deploy do
     end
 
     context 'when env vars are specified' do
-      let(:env) { { 'FOO' => 'BAR', 'BAZ' => '%DOCKER_HOSTNAME%.example.com' } }
+      let(:env) { {
+        'FOO' => 'BAR',
+        'BAZ' => '%DOCKER_HOSTNAME%.example.com',
+        'BAR' => '%DOCKER_HOST_IP%:1234'
+      } }
 
       it 'sets the Env key in the config' do
         config = test_deploy.container_config_for(server, image_id, port_bindings, env)
@@ -190,6 +195,12 @@ describe Centurion::Deploy do
         config = test_deploy.container_config_for(server, image_id, port_bindings, env)
 
         expect(config['Env']).to include('BAZ=host1.example.com')
+      end
+
+      it 'interpolates the host IP into the env_vars' do
+        config = test_deploy.container_config_for(server, image_id, port_bindings, env)
+
+        expect(config['Env']).to include('BAR=172.16.0.1:1234')
       end
     end
 
