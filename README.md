@@ -220,7 +220,7 @@ You just need to enable the tls mode as the following:
 
 ```ruby
   task :production => :common do
-    set :tls, true
+    set :tlsverify, true
     # ...
   end
 ```
