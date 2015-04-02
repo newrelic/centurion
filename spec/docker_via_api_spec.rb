@@ -237,6 +237,21 @@ describe Centurion::DockerViaApi do
     end
   end
 
+   context 'with default TLS certificates' do
+    let(:excon_uri) { "https://#{hostname}:#{port}/" }
+    let(:tls_args)  { { tls: true } }
+    let(:api)       { Centurion::DockerViaApi.new(hostname, port, tls_args) }
+
+    it 'lists processes' do
+      expect(Excon).to receive(:get).
+                       with(excon_uri + 'v1.7/containers/json',
+                            client_cert: File.expand_path('~/.docker/cert.pem'),
+                            client_key: File.expand_path('~/.docker/key.pem')).
+                       and_return(double(body: json_string, status: 200))
+      expect(api.ps).to eq(json_value)
+    end
+  end
+
   def inspected_container_on_port(id, port)
     {
       "Id" => id.to_s,
