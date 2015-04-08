@@ -253,12 +253,44 @@ A rolling deployment will stop and start each container one at a time to make
 sure that the application stays available from the viewpoint of the load
 balancer. As the deploy runs, a health check will hit each container to ensure
 that the application booted correctly. By default, this will be a GET request to
-the root path of the application. This is configurable by adding
+the root path of the application. The healthcheck endpoint is configurable by adding
 `set(:status_endpoint, '/somewhere/else')` in your config. The status endpoint
 must respond with a valid response in the 200 status range.
 
 ````bash
 $ bundle exec centurion -p radio-radio -e staging -a rolling_deploy
+````
+
+**Custom Health Check**:
+You can use a custom health check by specifying a callable object (anything that
+responds to :call), e.g. a Proc, lambda, or method. This method will be invoked with
+the host url, the port that needs to be checked, and the specified endpoint(via
+`set(:status_endpoint, '/somewhere/else')`). If the port is ready, health check
+should return a truthy value, falsey otherwise. Here's an example of a custom
+health check that verifies that an elasticsearch node is up and has joined the
+cluster.
+
+````ruby
+def cluster_green?(target_server, port, endpoint)
+  response = begin
+    Excon.get("http://#{target_server.hostname}:#{port}#{endpoint}")
+  rescue Excon::Errors::SocketError
+    warn "Elasticsearch node not yet up"
+    nil
+  end
+
+  return false unless response
+  !JSON.parse(response)['timed_out']
+end
+
+task :production => :common do
+  set_current_environment(:production)
+  set :status_endpoint, "/_cluster/health?wait_for_status=green&wait_for_nodes=2"
+  health_check method(:cluster_green?)
+  host_port 9200, container_port: 9200
+  host 'es-01.example.com'
+  host 'es-02.example.com'
+end
 ````
 
 **Rolling Deployment Settings**:

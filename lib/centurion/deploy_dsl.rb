@@ -80,6 +80,11 @@ module Centurion::DeployDSL
     set(:registry, type.to_s)
   end
 
+  def health_check(method)
+   abort("Health check expects a callable (lambda, proc, method), but #{method.class} was specified")  unless method.respond_to?(:call)
+   set(:health_check, method)
+  end
+
   private
 
   def build_server_group
