@@ -74,8 +74,8 @@ namespace :deploy do
   # - remote: list
   # - remote: stop
   task :stop do
-    on_each_docker_host do |server|
-      stop_containers(server, fetch(:port_bindings), fetch(:stop_timeout, 30))
+    on_each_docker_host do |server, params|
+      stop_containers(server, params.fetch(:port_bindings), fetch(:stop_timeout, 30))
     end
   end
 
@@ -84,16 +84,16 @@ namespace :deploy do
   # - remote: start
   # - remote: inspect container
   task :start_new do
-    on_each_docker_host do |server|
+    on_each_docker_host do |server, params|
       start_new_container(
         server,
-        fetch(:image_id),
-        fetch(:port_bindings),
-        fetch(:binds),
-        fetch(:env_vars),
-        fetch(:command),
-        fetch(:memory),
-        fetch(:cpu_shares)
+        params.fetch(:image_id),
+        params.fetch(:port_bindings),
+        params.fetch(:binds),
+        params.fetch(:env_vars),
+        params.fetch(:command),
+        params.fetch(:memory),
+        params.fetch(:cpu_shares)
       )
     end
   end
@@ -102,43 +102,43 @@ namespace :deploy do
     on_each_docker_host do |server|
       launch_console(
         server,
-        fetch(:image_id),
-        fetch(:port_bindings),
-        fetch(:binds),
-        fetch(:env_vars)
+        params.fetch(:image_id),
+        params.fetch(:port_bindings),
+        params.fetch(:binds),
+        params.fetch(:env_vars)
       )
     end
   end
 
   task :rolling_deploy do
-    on_each_docker_host do |server|
-      stop_containers(server, fetch(:port_bindings), fetch(:stop_timeout, 30))
+    on_each_docker_host do |server, params|
+      stop_containers(server, params.fetch(:port_bindings), fetch(:stop_timeout, 30))
 
       start_new_container(
         server,
-        fetch(:image_id),
-        fetch(:port_bindings),
-        fetch(:binds),
-        fetch(:env_vars),
-        fetch(:command),
-        fetch(:memory),
-        fetch(:cpu_shares)
+        params[:image_id],
+        params[:port_bindings],
+        params[:binds],
+        params[:env_vars],
+        params[:command],
+        params[:memory],
+        params[:cpu_shares]
       )
 
-      skip_ports = Array(fetch(:rolling_deploy_skip_ports, [])).map(&:to_s)
+      skip_ports = Array(params.fetch(:rolling_deploy_skip_ports, [])).map(&:to_s)
 
-      fetch(:port_bindings).each_pair do |container_port, host_ports|
+      params[:port_bindings].each_pair do |container_port, host_ports|
         port = host_ports.first['HostPort']
         next if skip_ports.include?(port)
 
         wait_for_http_status_ok(
           server,
           port,
-          fetch(:status_endpoint, '/'),
-          fetch(:image),
-          fetch(:tag),
-          fetch(:rolling_deploy_wait_time, 5),
-          fetch(:rolling_deploy_retries, 24)
+          params.fetch(:status_endpoint, '/'),
+          params[:image],
+          params[:tag],
+          params.fetch(:rolling_deploy_wait_time, 5),
+          params.fetch(:rolling_deploy_retries, 24)
         )
       end
 
@@ -147,8 +147,8 @@ namespace :deploy do
   end
 
   task :cleanup do
-    on_each_docker_host do |target_server|
-      cleanup_containers(target_server, fetch(:port_bindings))
+    on_each_docker_host do |target_server, params|
+      cleanup_containers(target_server, params.fetch(:port_bindings))
     end
   end
 
@@ -188,7 +188,7 @@ namespace :deploy do
     if fetch(:registry) == 'dogestry'
       invoke 'deploy:dogestry:pull_image'
     else
-      hosts, docker_path = fetch(:hosts, []), fetch(:docker_path)
+      hosts, docker_path = fetch(:hosts, []) + fetch(:per_host_configs, []).map {|c| c.fetch(:host)}, fetch(:docker_path)
       target_servers = Centurion::DockerServerGroup.new(hosts, docker_path,
                                                         build_tls_params)
       target_servers.each_in_parallel do |target_server|
