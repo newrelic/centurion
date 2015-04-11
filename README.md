@@ -156,11 +156,15 @@ IP address (the equivalent of `docker run --dns 172.17.42.1 ...`) like this:
 ### Container Names
 
 This is the name that shows up in the `docker ps` output. It's the name
-of the container, not the hostname inside the container.
+of the container, not the hostname inside the container. By default
+the container will be named using the name of the project as the base
+of the name.
 
-If you want to name your container, use the `name` setting. The
-actual name for the created container will have a random hex string
-appended, to avoid name conflicts when you repeatedly deploy an image:
+If you want to name your container something other than the project name,
+use the `name` setting. The actual name for the created container will
+have a random hex string appended, to avoid name conflicts when you repeatedly
+deploy a project:
+
 ```ruby
   task :common do
     set :name, 'backend'
@@ -211,10 +215,10 @@ Docker server using a `getaddrinfo` call on the client.
 
 ### Use TLS certificate
 
-Centurion can use your certificate in order to execute the Docker commands.
-In order to do so you have 2 choices.
+Centurion can use your existing Docker TLS certificates when using Docker with
+TLS support. In doing so you have 2 choices.
 
-#### Your certificate files are in ~/.docker/
+#### Your certificate files are in `~/.docker/`
 
 You just need to enable the tls mode as the following:
 
@@ -227,7 +231,7 @@ You just need to enable the tls mode as the following:
 
 Centurion will only set the `--tlsverify` to true and Docker will read your certificate from the `~/.docker/` path.
 
-#### Your certificate files are not in ~/.docker/
+#### Your certificate files are not in `~/.docker/`
 
 Given your files are in `/usr/local/certs/`
 You have to set the following keys:
@@ -311,16 +315,17 @@ are the same everywhere. Settings are per-project.
    an individual container to come up before giving up as a failure. Defaults
    to 24 attempts.
  * `rolling_deploy_skip_ports` => Either a single port, or an array of ports
-   that should be skipped for status checks. Status checking assumes an HTTP 
-   server is on the other end and if you are deploying a container where some 
+   that should be skipped for status checks. By default status checking assumes 
+   an HTTP server is on the other end and if you are deploying a container where some 
    ports are not HTTP services, this allows you to only health check the ports 
-   that are. The default is an empty array.
+   that are. The default is an empty array. If you have non-HTTP services that you
+   want to check, see Custom Health Checks in the previous section.
 
 ###Deploy a project to a fleet of Docker servers
 
 This will hard stop, then start containers on all the specified hosts. This
 is not recommended for apps where one endpoint needs to be available at all
-times.
+times. It is fast.
 
 ````bash
 $ bundle exec centurion -p radio-radio -e staging -a deploy
@@ -374,7 +379,7 @@ private), or [Dogestry](https://github.com/dogestry/dogestry).
 
 If you are not using either Dogestry, or the public registry, you may need to
 provide authentication credentials.  Centurion needs to access the Docker
-registry hosting your images directly to retrive image ids and tags.This is
+registry hosting your images directly to retrive image ids and tags. This is
 supported in both the config file and also as command line arguments.
 
 The command line arguments are: 
@@ -399,6 +404,8 @@ Dogestry uses the Docker daemon's import/export functionality in combination
 with Amazon S3 to provide reliable hosting of images.  Setting Centurion up to
 use Dogestry is pretty trivial:
 
+ 1. Create an S3 bucket and download the credentials to let you access the
+    bucket. Generally these are IAM user keys.
  1. Install Dogestry binaries on the client from which Dogestry is run.
     Binaries are provided in the [GitHub release](https://github.com/dogestry/dogestry).
  1. Add the settings necessary to get Centurion to pull from Dogestry. A config
@@ -441,8 +448,6 @@ We're currently looking at the following feature additions:
 
  * [etcd](https://github.com/coreos/etcd) integration for configs and discovery
  * Add the ability to show all the available tasks on the command line
- * Customized tasks
- * Dynamic host allocation to a pool of servers
 
 Contributions
 -------------
