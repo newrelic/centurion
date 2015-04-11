@@ -1,4 +1,5 @@
 require_relative 'logging'
+require_relative 'shell'
 require 'fileutils'
 
 module Centurion; end
@@ -72,7 +73,6 @@ class Centurion::Dogestry
     hosts = pull_hosts.join(",")
     flags = "-pullhosts #{hosts}"
 
-    echo(exec_command('pull', repo, flags))
+    Centurion::Shell.echo(exec_command('pull', repo, flags))
   end
-
 end

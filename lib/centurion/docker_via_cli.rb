@@ -1,5 +1,6 @@
 require 'pty'
 require_relative 'logging'
+require_relative 'shell'
 
 module Centurion; end
 
@@ -14,16 +15,16 @@ class Centurion::DockerViaCli
 
   def pull(image, tag='latest')
     info 'Using CLI to pull'
-    echo(build_command(:pull, "#{image}:#{tag}"))
+    Centurion::Shell.echo(build_command(:pull, "#{image}:#{tag}"))
   end
 
   def tail(container_id)
     info "Tailing the logs on #{container_id}"
-    echo(build_command(:logs, container_id))
+    Centurion::Shell.echo(build_command(:logs, container_id))
   end
 
   def attach(container_id)
-    echo(build_command(:attach, container_id))
+    Centurion::Shell.echo(build_command(:attach, container_id))
   end
 
   private
@@ -37,7 +38,7 @@ class Centurion::DockerViaCli
   end
 
   def tls_parameters
-    return '' if @tls_args.nil? || @tls_args == {}
+    return '' if @tls_args.nil? || @tls_args.empty?
 
     tls_flags = ''
 
