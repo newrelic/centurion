@@ -19,10 +19,10 @@ module Centurion::Deploy
     end
   end
 
-  def wait_for_http_status_ok(target_server, port, endpoint, image_id, tag, sleep_time=5, retries=12)
+  def wait_for_health_check_ok(health_check_method, target_server, port, endpoint, image_id, tag, sleep_time=5, retries=12)
     info 'Waiting for the port to come up'
     1.upto(retries) do
-      if container_up?(target_server, port) && http_status_ok?(target_server, port, endpoint)
+      if container_up?(target_server, port) && health_check_method.call(target_server, port, endpoint)
         info 'Container is up!'
         break
       end
@@ -31,7 +31,7 @@ module Centurion::Deploy
       sleep(sleep_time)
     end
 
-    unless http_status_ok?(target_server, port, endpoint)
+    unless health_check_method.call(target_server, port, endpoint)
       error "Failed to validate started container on #{target_server}:#{port}"
       exit(FAILED_CONTAINER_VALIDATION)
     end
