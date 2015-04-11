@@ -7,7 +7,7 @@ module Centurion; end
 
 class Centurion::DockerViaApi
   def initialize(hostname, port, tls_args = {})
-    @tls_args = tls_args # Required by tls_enable?
+    @tls_args = default_tls_args(tls_args[:tls]).merge(tls_args.reject { |k, v| v.nil? }) # Required by tls_enable?
     @base_uri = "http#{'s' if tls_enable?}://#{hostname}:#{port}"
 
     configure_excon_globally
@@ -141,5 +141,17 @@ class Centurion::DockerViaApi
     Excon.defaults[:nonblock]        = false
     Excon.defaults[:tcp_nodelay]     = true
     Excon.defaults[:ssl_ca_file]     = @tls_args[:tlscacert]
+  end
+
+  def default_tls_args(tls_enabled)
+    if tls_enabled
+      {
+          tlscacert: File.expand_path('~/.docker/ca.pem'),
+          tlscert: File.expand_path('~/.docker/cert.pem'),
+          tlskey: File.expand_path('~/.docker/key.pem')
+      }
+    else
+      {}
+    end
   end
 end
