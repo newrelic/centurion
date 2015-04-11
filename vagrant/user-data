@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Get latest Docker.io version
+# Docs: https://docs.docker.com/installation/ubuntulinux/#ubuntu-trusty-1404-lts-64-bit
+curl -s https://get.docker.io/ubuntu/ | sudo sh
+
+# Enable docker to respond on socket and tcp
+echo 'DOCKER_OPTS="-H=0.0.0.0:2375 -H unix:///var/run/docker.sock"' >> /etc/default/docker
+service docker restart
