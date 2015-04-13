@@ -76,4 +76,5 @@ set :no_pull, opts[:no_pull_given]
 set :registry_user, opts[:registry_user] if opts[:registry_user]
 set :registry_password, opts[:registry_password] if opts[:registry_password]
 
+invoke('centurion:setup')
 invoke(opts[:action])
