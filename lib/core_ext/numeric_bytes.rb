@@ -1,6 +1,10 @@
 # Copied from ActiveSupport 4.2.1 lib/active_support/core_ext/numeric/bytes.rb
-# Original license follows
-
+#
+# NOTE that THIS LICENSE ONLY APPLIES TO THIS FILE itself, not
+# to the rest of the project.
+#
+# ORIGINAL ACTIVE SUPPORT LICENSE FOLLOWS:
+#
 # Copyright (c) 2005-2015 David Heinemeier Hansson
 #
 # Permission is hereby granted, free of charge, to any person obtaining
