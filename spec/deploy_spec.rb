@@ -1,7 +1,5 @@
 require 'spec_helper'
-require 'centurion/deploy'
-require 'centurion/deploy_dsl'
-require 'centurion/logging'
+require 'centurion'
 
 describe Centurion::Deploy do
   let(:mock_ok_status)  { double('http_status_ok', status: 200) }
@@ -255,6 +253,12 @@ describe Centurion::Deploy do
         expect { test_deploy.container_config_for(server, image_id, port_bindings, env, volumes, command, memory, "I like pie") }.to terminate.with_code(101)
         expect { test_deploy.container_config_for(server, image_id, port_bindings, env, volumes, command, memory, -100) }.to terminate.with_code(101)
         expect { test_deploy.container_config_for(server, image_id, port_bindings, env, volumes, command, memory, 0xFFFFFFFFFFFFFFFFFF) }.to terminate.with_code(101)
+      end
+
+      it 'still works when memory is specified in gigabytes' do
+        memory = 3.gigabytes
+        config = test_deploy.container_config_for(server, image_id, port_bindings, env, volumes, command, memory, cpu_shares)
+        expect(config['Memory']).to eq(3 * 1024 * 1024 * 1024)
       end
     end
   end

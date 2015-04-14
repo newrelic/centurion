@@ -198,7 +198,7 @@ For example, to limit the memory to 1G, and the cpu time slice to half the
 normal length, include the following:
 
 ```ruby
-memory 1024000000
+memory 1.gigabyte
 cpu_shares 512
 ```
 
