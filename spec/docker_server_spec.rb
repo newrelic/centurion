@@ -11,7 +11,7 @@ describe Centurion::DockerServer do
        'Created' => 1414797234,
        'Id'      => '28970c706db0f69716af43527ed926acbd82581e1cef5e4e6ff152fce1b79972',
        'Image'   => 'centurion-test:latest',
-       'Names'   => ['/centurion-783aac4'],
+       'Names'   => ['/centurion-783aac48378283'],
        'Ports'   => [{'PrivatePort'=>80, 'Type'=>'tcp', 'IP'=>'0.0.0.0', 'PublicPort'=>23235}],
        'Status'  => 'Up 3 days'
      }
@@ -72,6 +72,21 @@ describe Centurion::DockerServer do
 
     it 'only returns correct matches by name' do
       expect(server.find_containers_by_name('fbomb')).to be_empty
+    end
+  end
+
+  context 'finding old containers' do
+    it 'finds stopped containers for the given service name' do
+      inspected_containers =
+        [
+            {"Id" => "123", "Names" => ["/centurion-1234567890abcd"], "Status" => "Exit 0"},
+            {"Id" => "456", "Names" => ["/centurion-2234567890abcd"], "Status" => "Running blah blah"},
+            {"Id" => "789", "Names" => ["/centurion-3234567890abcd"], "Status" => "Exited 1 mins ago"},
+            {"Id" => "918", "Names" => ["/fbomb-3234567890abcd"], "Status" => "Exited 1 mins ago"},
+        ]
+      allow(server).to receive(:ps).and_return(inspected_containers)
+
+      expect(server.old_containers_for_name('centurion').map { |c| c['Id'] }).to eq(["123", "789"])
     end
   end
 end

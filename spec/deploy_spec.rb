@@ -6,6 +6,7 @@ describe Centurion::Deploy do
   let(:mock_bad_status) { double('http_status_ok', status: 500) }
   let(:server)          { double('docker_server', attach: true, hostname: hostname) }
   let(:port)            { 8484 }
+  let(:container_id)    { '21adfd2ef2ef2349494a' }
   let(:container)       { { 'Ports' => [{ 'PublicPort' => port }, 'Created' => Time.now.to_i ], 'Id' => container_id, 'Names' => [ 'name1' ] } }
   let(:endpoint)        { '/status/check' }
   let(:container_id)    { '21adfd2ef2ef2349494a' }
@@ -51,23 +52,16 @@ describe Centurion::Deploy do
 
   describe '#container_up?' do
     it 'recognizes when no containers are running' do
-      expect(server).to receive(:find_containers_by_public_port).and_return([])
+      expect(server).to receive(:find_container_by_id).and_return(nil)
 
-      expect(test_deploy.container_up?(server, port)).to be_falsey
-    end
-
-    it 'complains when more than one container is bound to this port' do
-      expect(server).to receive(:find_containers_by_public_port).and_return([1,2])
-      expect(test_deploy).to receive(:error).with /More than one container/
-
-      expect(test_deploy.container_up?(server, port)).to be_falsey
+      expect(test_deploy.container_up?(server, container_id)).to be_falsey
     end
 
     it 'recognizes when the container is actually running' do
-      expect(server).to receive(:find_containers_by_public_port).and_return([container])
+      expect(server).to receive(:find_container_by_id).and_return(container)
       expect(test_deploy).to receive(:info).with /Found container/
 
-      expect(test_deploy.container_up?(server, port)).to be_truthy
+      expect(test_deploy.container_up?(server, container_id)).to be_truthy
     end
   end
 
@@ -80,7 +74,7 @@ describe Centurion::Deploy do
       allow(test_deploy).to receive(:container_up?).and_return(true)
       allow(test_deploy).to receive(:http_status_ok?).and_return(true)
 
-      test_deploy.wait_for_health_check_ok(test_deploy.method(:http_status_ok?), server, port, '/foo', 'image_id', 'chaucer')
+      test_deploy.wait_for_health_check_ok(test_deploy.method(:http_status_ok?), server, container_id, port, '/foo', 'image_id', 'chaucer')
       expect(test_deploy).to have_received(:info).with(/Waiting for the port/)
       expect(test_deploy).to have_received(:info).with('Container is up!')
     end
@@ -92,7 +86,7 @@ describe Centurion::Deploy do
       expect(test_deploy).to receive(:exit)
       expect(test_deploy).to receive(:sleep).with(0)
 
-      test_deploy.wait_for_health_check_ok(test_deploy.method(:http_status_ok?), server, port, '/foo', 'image_id', 'chaucer', 0, 1)
+      test_deploy.wait_for_health_check_ok(test_deploy.method(:http_status_ok?), server, container_id, port, '/foo', 'image_id', 'chaucer', 0, 1)
       expect(test_deploy).to have_received(:info).with(/Waiting for the port/)
     end
 
@@ -103,7 +97,7 @@ describe Centurion::Deploy do
       allow(test_deploy).to receive(:warn)
       expect(test_deploy).to receive(:exit)
 
-      test_deploy.wait_for_health_check_ok(test_deploy.method(:http_status_ok?), server, port, '/foo', 'image_id', 'chaucer', 1, 0)
+      test_deploy.wait_for_health_check_ok(test_deploy.method(:http_status_ok?), server, container_id, port, '/foo', 'image_id', 'chaucer', 1, 0)
       expect(test_deploy).to have_received(:info).with(/Waiting for the port/)
     end
   end
@@ -111,13 +105,12 @@ describe Centurion::Deploy do
   describe '#cleanup_containers' do
     it 'deletes all but two containers' do
       service = Centurion::Service.new('walrus')
-      service.add_port_bindings(80, 8080)
-      expect(server).to receive(:old_containers_for_port).with(80).and_return([
-        {'Id' => '123', 'Names' => ['foo']},
-        {'Id' => '456', 'Names' => ['foo']},
-        {'Id' => '789', 'Names' => ['foo']},
-        {'Id' => '0ab', 'Names' => ['foo']},
-        {'Id' => 'cde', 'Names' => ['foo']},
+      expect(server).to receive(:old_containers_for_name).with('walrus').and_return([
+        {'Id' => '123', 'Names' => ['walrus-3bab311b460bdf']},
+        {'Id' => '456', 'Names' => ['walrus-4bab311b460bdf']},
+        {'Id' => '789', 'Names' => ['walrus-5bab311b460bdf']},
+        {'Id' => '0ab', 'Names' => ['walrus-6bab311b460bdf']},
+        {'Id' => 'cde', 'Names' => ['walrus-7bab311b460bdf']},
       ])
       expect(server).to receive(:remove_container).with('789')
       expect(server).to receive(:remove_container).with('0ab')

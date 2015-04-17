@@ -120,6 +120,7 @@ namespace :deploy do
         wait_for_health_check_ok(
           fetch(:health_check, method(:http_status_ok?)),
           server,
+          container['Id'],
           port,
           fetch(:status_endpoint, '/'),
           fetch(:rolling_deploy_wait_time, 5),
