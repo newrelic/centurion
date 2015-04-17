@@ -426,6 +426,11 @@ end
 Development
 -----------
 
+Centurion supports a few features to make development easier when
+building your deployment tooling or debugging your containers.
+
+#### Overriding Environment Variables
+
 Sometimes when you're doing development you want to try out some configuration
 settings in environment variables that aren't in the config yet. Or perhaps you
 want to override existing settings to test with. You can provide the
@@ -440,6 +445,24 @@ Centurion is aimed at repeatable deployments so we don't recommend that you use
 this functionality for production deployments. It will work, but it means that
 the config is not the whole source of truth for your container configuration.
 Caveat emptor.
+
+#### Exporting Environment Variables Locally
+
+Sometimes you need to test how your code works inside the container and you
+need to have all of your configuration exported. Centurion includes an action
+that will let you do that. It exports all of your environment settings for the
+environment you specify. It then partially sanitizes them to preserve things
+like `rbenv` settings. Then it executes `/bin/bash` locally.
+
+The action is named `dev:export_only` and you call it like this:
+
+```bash
+$ bundle exec centurion -e development -p testing_project -a dev:export_only
+$ bundle exec rake spec
+```
+
+It's important to note that the second line is actually being invoked with new
+environment exported.
 
 Future Additions
 ----------------
