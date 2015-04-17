@@ -25,6 +25,18 @@ end
 
 task :stop => ['deploy:stop']
 
+namespace :dev do
+  task :export_only do
+    # This removes the known-to-be-problematic bundler env
+    # vars but doesn't try to sanitize the whole ENV. Doing
+    # so breaks things like rbenv which we need to use when
+    # testing. A /bin/bash -l will help further clean it up.
+    ENV.reject! { |(var, val)| var =~ /^BUNDLE_/ }
+    fetch(:env_vars).each { |(var, value)| ENV[var] = value }
+    exec fetch(:development_shell, '/bin/bash -l')
+  end
+end
+
 namespace :deploy do
   include Centurion::Deploy
 
@@ -250,4 +262,5 @@ namespace :deploy do
 
     invoke 'deploy'
   end
+
 end
