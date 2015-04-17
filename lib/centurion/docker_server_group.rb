@@ -11,8 +11,8 @@ class Centurion::DockerServerGroup
 
   def initialize(hosts, docker_path, tls_params = {})
     raise ArgumentError.new('Bad Host list!') if hosts.nil? || hosts.empty?
-    @hosts = hosts.map do |hostname|
-      Centurion::DockerServer.new(hostname, docker_path, tls_params)
+    @hosts = hosts.map do |host|
+      Centurion::DockerServer.new(host, docker_path, tls_params)
     end
   end
 

@@ -2,8 +2,40 @@ require_relative 'docker_server_group'
 require 'uri'
 
 module Centurion::DeployDSL
+  class PerHostConfiguration
+    include Centurion::DeployDSL
+
+    attr_reader :params
+
+    def initialize(hostname)
+      @params = {}
+      set(:host, hostname)
+    end
+
+    def set(key, value)
+      @params[key] = value
+    end
+
+    def fetch(key, default)
+      @params[key] || default
+    end
+  end
+
   def on_each_docker_host(&block)
-    build_server_group.tap { |hosts| hosts.each { |host| block.call(host) } }
+    global_config = env[current_environment]
+
+    fetch(:per_host_configs, []).each do |host_config|
+      config = global_config.merge(host_config)
+      host = Centurion::DockerServer.new(config.fetch(:host), fetch(:docker_path), build_tls_params)
+      info "----- Connecting to Docker on #{config.fetch(:host)} -----"
+      block.call(host, config)
+    end
+
+    fetch(:hosts, []).each do |host|
+      host = Centurion::DockerServer.new(host, fetch(:docker_path), build_tls_params)
+      info "----- Connecting to Docker on #{host} -----"
+      block.call(host, global_config)
+    end
   end
 
   def env_vars(new_vars)
@@ -14,10 +46,18 @@ module Centurion::DeployDSL
     set(:env_vars, current)
   end
 
-  def host(hostname)
-    current = fetch(:hosts, [])
-    current << hostname
-    set(:hosts, current)
+  def host(hostname, &block)
+    if block
+      per_host = PerHostConfiguration.new(hostname)
+      per_host.instance_exec(&block)
+      configurations = fetch(:per_host_configs, [])
+      configurations << per_host.params
+      set(:per_host_configs, configurations)
+    else
+      current = fetch(:hosts, [])
+      current << hostname
+      set(:hosts, current)
+    end
   end
 
   def memory(memory)
@@ -88,8 +128,8 @@ module Centurion::DeployDSL
   private
 
   def build_server_group
-    hosts, docker_path = fetch(:hosts, []), fetch(:docker_path)
-    Centurion::DockerServerGroup.new(hosts, docker_path, build_tls_params)
+    hosts = fetch(:hosts, []) + fetch(:per_host_configs, []).map(&:host)
+    Centurion::DockerServerGroup.new(hosts, fetch(:docker_path), build_tls_params)
   end
 
   def add_to_bindings(host_ip, container_port, port, type='tcp')
