@@ -25,18 +25,18 @@ describe Centurion::DeployDSL do
   it 'has a DSL method for specifying the start command' do
     command = ['/bin/echo', 'hi']
     DeployDSLTest.command command
-    expect(DeployDSLTest.fetch(:command)).to equal(command)
+    expect(DeployDSLTest.defined_service.command).to equal(command)
   end
 
   it 'adds new env_vars to the existing ones, as strings' do
-    DeployDSLTest.set(:env_vars, { 'SHAKESPEARE' => 'Hamlet' })
+    DeployDSLTest.env_vars('SHAKESPEARE' => 'Hamlet')
     DeployDSLTest.env_vars('DICKENS' => 'David Copperfield',
                            :DICKENS_BIRTH_YEAR => 1812)
 
-    expect(DeployDSLTest.fetch(:env_vars)).to include(
+    expect(DeployDSLTest.defined_service.env_vars).to include(
       'SHAKESPEARE'        => 'Hamlet',
       'DICKENS'            => 'David Copperfield',
-      'DICKENS_BIRTH_YEAR' => '1812'
+      :DICKENS_BIRTH_YEAR  => 1812
     )
   end
 
@@ -67,25 +67,16 @@ describe Centurion::DeployDSL do
     end
 
     it 'adds new bind ports to the list' do
-      dummy_value = { '666/tcp' => ['value'] }
-      DeployDSLTest.set(:port_bindings, dummy_value)
+      DeployDSLTest.host_port(666, container_port: 666)
       DeployDSLTest.host_port(999, container_port: 80)
 
-      expect(DeployDSLTest).to have_key_and_value(
-        :port_bindings,
-        dummy_value.merge('80/tcp' => [{ 'HostPort' => '999' }])
-      )
+      expect(DeployDSLTest.defined_service.port_bindings).to eq([Centurion::Service::PortBinding.new(666, 666, 'tcp'), Centurion::Service::PortBinding.new(999, 80, 'tcp')])
     end
 
     it 'adds new bind ports to the list with an IP binding when supplied' do
-      dummy_value = { '666/tcp' => ['value'] }
-      DeployDSLTest.set(:port_bindings, dummy_value)
       DeployDSLTest.host_port(999, container_port: 80, host_ip: '0.0.0.0')
 
-      expect(DeployDSLTest).to have_key_and_value(
-        :port_bindings,
-        dummy_value.merge('80/tcp' => [{ 'HostIp' => '0.0.0.0', 'HostPort' => '999' }])
-      )
+      expect(DeployDSLTest.defined_service.port_bindings).to eq([Centurion::Service::PortBinding.new(999, 80, 'tcp', '0.0.0.0')])
     end
 
     it 'does not explode if port_bindings is empty' do
@@ -110,7 +101,7 @@ describe Centurion::DeployDSL do
      expect(DeployDSLTest.fetch(:binds)).to be_nil
      DeployDSLTest.host_volume('volume1', container_volume: '/dev/sdd')
      DeployDSLTest.host_volume('volume2', container_volume: '/dev/sde')
-     expect(DeployDSLTest.fetch(:binds)).to eq %w{ volume1:/dev/sdd volume2:/dev/sde }
+     expect(DeployDSLTest.defined_service.volumes).to eq [Centurion::Service::Volume.new('volume1', '/dev/sdd'), Centurion::Service::Volume.new('volume2', '/dev/sde')]
     end
   end
 
