@@ -1,5 +1,11 @@
+require 'socket'
+
 module Centurion
   class Service
+
+    attr_accessor :command, :dns, :image, :hostname, :name
+    attr_reader :memory, :cpu_shares, :env_vars, :volumes, :port_bindings
+
     def initialize(name)
       @name = name
       @env_vars = {}
@@ -7,8 +13,26 @@ module Centurion
       @port_bindings = []
     end
 
-    attr_accessor :command, :dns, :image, :hostname, :name
-    attr_reader :memory, :cpu_shares, :env_vars, :volumes, :port_bindings
+    def self.from_hash(name, definition)
+      Service.new(name).tap do |s|
+        s.image    = definition[:image]
+        s.hostname = definition[:hostname]
+        s.dns      = definition[:dns]
+
+        (definition[:volumes] || []).each do |port|
+          s.add_volume(port[:host_volume], port[:container_volume])
+        end
+
+        (definition[:port_bindings] || []).each do |binding|
+          s.add_port_bindings(
+            binding[:host_port],
+            binding[:container_port],
+            binding[:type],
+            binding[:host_ip]
+          )
+        end
+      end
+    end
 
     def add_env_vars(new_vars)
       @env_vars.merge!(new_vars)

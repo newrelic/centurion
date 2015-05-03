@@ -1,5 +1,6 @@
 require_relative 'docker_server_group'
 require_relative 'docker_server'
+require_relative 'service'
 require 'uri'
 
 module Centurion::DeployDSL
@@ -70,11 +71,14 @@ module Centurion::DeployDSL
   end
 
   def defined_service
-    service = fetch(:service, {})
-    service.image = fetch(:image)
-    service.hostname = fetch(:container_hostname)
-    service.dns = fetch(:custom_dns)
-    service
+    fetch(:service,
+      Centurion::Service.from_hash(
+        fetch(:project),
+        image:    fetch(:image),
+        hostname: fetch(:container_hostname),
+        dns:      fetch(:custom_dns)
+      )
+    )
   end
 
   def defined_health_check
