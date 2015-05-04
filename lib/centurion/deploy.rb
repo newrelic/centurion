@@ -5,12 +5,9 @@ module Centurion; end
 
 module Centurion::Deploy
   FAILED_CONTAINER_VALIDATION = 100
-  INVALID_CGROUP_CPUSHARES_VALUE = 101
-  INVALID_CGROUP_MEMORY_VALUE = 102
 
-  def stop_containers(target_server, port_bindings, timeout = 30)
-    public_port    = public_port_for(port_bindings)
-    old_containers = target_server.find_containers_by_public_port(public_port)
+  def stop_containers(target_server, service, timeout = 30)
+    old_containers = target_server.find_containers_by_public_port(service.public_ports.first)
     info "Stopping container(s): #{old_containers.inspect}"
 
     old_containers.each do |old_container|
@@ -74,23 +71,12 @@ module Centurion::Deploy
     false
   end
 
-  def is_a_uint64?(value)
-    result = false
-    if !value.is_a? Integer
-      return result
-    end
-    if value < 0 || value > 0xFFFFFFFFFFFFFFFF
-      return result
-    end
-    return true
-  end
-
   def wait_for_load_balancer_check_interval
     sleep(fetch(:rolling_deploy_check_interval, 5))
   end
 
-  def cleanup_containers(target_server, port_bindings)
-    public_port    = public_port_for(port_bindings)
+  def cleanup_containers(target_server, service)
+    public_port = service.public_ports.first
     old_containers = target_server.old_containers_for_port(public_port)
     old_containers.shift(2)
 
@@ -101,122 +87,33 @@ module Centurion::Deploy
     end
   end
 
-  def container_config_for(target_server, image_id, port_bindings=nil, env_vars=nil, volumes=nil, command=nil, memory=nil, cpu_shares=nil)
-
-    if memory && ! is_a_uint64?(memory)
-      error "Invalid value for CGroup memory constraint: #{memory}, value must be a between 0 and 18446744073709551615"
-      exit(INVALID_CGROUP_MEMORY_VALUE)
-    end
-
-    if cpu_shares && ! is_a_uint64?(cpu_shares)
-      error "Invalid value for CGroup CPU constraint: #{cpu_shares}, value must be between 0 and 18446744073709551615"
-      exit(INVALID_CGROUP_CPUSHARES_VALUE)
-    end
-
-    container_config = {
-      'Image'        => image_id,
-      'Hostname'     => fetch(:container_hostname, target_server.hostname),
-    }
-
-    container_config.merge!('Cmd' => command) if command
-    container_config.merge!('Memory' => memory) if memory
-    container_config.merge!('CpuShares' => cpu_shares) if cpu_shares
-
-    if port_bindings
-      container_config['ExposedPorts'] ||= {}
-      port_bindings.keys.each do |port|
-        container_config['ExposedPorts'][port] = {}
-      end
-    end
-
-    if env_vars
-      container_config['Env'] = env_vars.map do |k,v|
-        "#{k}=#{interpolate_var(v, target_server)}"
-      end
-    end
-
-    if volumes
-      container_config['Volumes'] = volumes.inject({}) do |memo, v|
-        memo[v.split(/:/).last] = {}
-        memo
-      end
-      container_config['VolumesFrom'] = 'parent'
-    end
-
-    container_config
-  end
-
-  def start_new_container(target_server, image_id, port_bindings, volumes, env_vars=nil, command=nil, memory=nil, cpu_shares=nil)
-    container_config = container_config_for(target_server, image_id, port_bindings, env_vars, volumes, command, memory, cpu_shares)
-    start_container_with_config(target_server, volumes, port_bindings, container_config)
-  end
-
-  def launch_console(target_server, image_id, port_bindings, volumes, env_vars=nil)
-    container_config = container_config_for(target_server, image_id, port_bindings, env_vars, volumes, ['/bin/bash']).merge(
-      'AttachStdin' => true,
-      'Tty'         => true,
-      'OpenStdin'   => true,
-    )
-
-    container = start_container_with_config(target_server, volumes, port_bindings, container_config)
-
-    target_server.attach(container['Id'])
-  end
-
-  private
-
-  # By default we always use on-failure policy.
-  def build_host_config_restart_policy(host_config={})
-    host_config['RestartPolicy'] = {}
-
-    restart_policy_name = fetch(:restart_policy_name) || 'on-failure'
-    restart_policy_name = 'on-failure' unless ["always", "on-failure", "no"].include?(restart_policy_name)
-
-    restart_policy_max_retry_count = fetch(:restart_policy_max_retry_count) || 10
-
-    host_config['RestartPolicy']['Name'] = restart_policy_name
-    host_config['RestartPolicy']['MaximumRetryCount'] = restart_policy_max_retry_count if restart_policy_name == 'on-failure'
-
-    host_config
-  end
-
-  def start_container_with_config(target_server, volumes, port_bindings, container_config)
+  def start_new_container(server, service, restart_policy)
+    container_config = service.build_config(server.hostname)
     info "Creating new container for #{container_config['Image'][0..7]}"
-    new_container = target_server.create_container(container_config, fetch(:name))
+    container = server.create_container(container_config, service.name)
 
-    host_config = {}
+    host_config = service.build_host_config(restart_policy)
 
-    # Map some host volumes if needed
-    host_config['Binds'] = volumes if volumes && !volumes.empty?
+    info "Starting new container #{container['Id'][0..7]}"
+    server.start_container(container['Id'], host_config)
 
-    # Bind the ports
-    host_config['PortBindings'] = port_bindings
+    info "Inspecting new container #{container['Id'][0..7]}:"
+    info server.inspect_container(container['Id'])
 
-    # DNS if specified
-    dns = fetch(:custom_dns)
-    host_config['Dns'] = dns if dns
-
-    # Restart Policy
-    host_config = build_host_config_restart_policy(host_config)
-
-    info "Starting new container #{new_container['Id'][0..7]}"
-    target_server.start_container(new_container['Id'], host_config)
-
-    info "Inspecting new container #{new_container['Id'][0..7]}:"
-    info target_server.inspect_container(new_container['Id'])
-
-    new_container
+    container
   end
 
-  def interpolate_var(val, target_server)
-    val.gsub('%DOCKER_HOSTNAME%', target_server.hostname)
-      .gsub('%DOCKER_HOST_IP%', host_ip(target_server.hostname))
-  end
+  def launch_console(server, service)
+    container_config = service.build_console_config(server.hostname)
+    info "Creating new container for #{container_config['Image'][0..7]}"
 
-  def host_ip(hostname)
-    @host_ip ||= {}
-    return @host_ip[hostname] if @host_ip.has_key?(hostname)
-    @host_ip[hostname] = Socket.getaddrinfo(hostname, nil).first[2]
-  end
+    container = server.create_container(container_config, service.name)
 
+    host_config = service.build_host_config
+
+    info "Starting new container #{container['Id'][0..7]}"
+    server.start_container(container['Id'], host_config)
+
+    server.attach(container['Id'])
+  end
 end
