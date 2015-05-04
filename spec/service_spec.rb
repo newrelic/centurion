@@ -2,7 +2,28 @@ require 'spec_helper'
 require 'centurion/service'
 
 describe Centurion::Service do
-  let(:service) { Centurion::Service.new(:redis) }
+  let(:service)  { Centurion::Service.new(:redis) }
+  let(:hostname) { 'shakespeare' }
+  let(:image)    { 'redis' }
+
+  it 'creates a service from a hash' do
+    svc = Centurion::Service.from_hash(
+      'mycontainer',
+      image: image,
+      hostname: hostname,
+      dns: nil,
+      volumes: [ { host_volume: '/foo', container_volume: '/foo/bar' } ],
+      port_bindings: [ { host_port: 12340, container_port: 80, type: 'tcp' } ]
+    )
+
+    expect(svc.name). to eq('mycontainer')
+    expect(svc.hostname).to eq(hostname)
+    expect(svc.dns).to be_nil
+    expect(svc.volumes.size).to eq(1)
+    expect(svc.volumes.first.host_volume).to eq('/foo')
+    expect(svc.port_bindings.size).to eq(1)
+    expect(svc.port_bindings.first.container_port).to eq(80)
+  end
 
   it 'has an associated hostname' do
     service.hostname = 'example.com'
