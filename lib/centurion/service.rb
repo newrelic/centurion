@@ -19,11 +19,11 @@ module Centurion
         s.hostname = definition[:hostname]
         s.dns      = definition[:dns]
 
-        (definition[:volumes] || []).each do |port|
+        definition.fetch(:volumes, []).each do |port|
           s.add_volume(port[:host_volume], port[:container_volume])
         end
 
-        (definition[:port_bindings] || []).each do |binding|
+        definition.fetch(:port_bindings, []).each do |binding|
           s.add_port_bindings(
             binding[:host_port],
             binding[:container_port],
