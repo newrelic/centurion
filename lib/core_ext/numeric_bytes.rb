@@ -25,68 +25,72 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+begin
+  require 'active_support/core_ext/numeric/bytes'
+rescue LoadError
+  class Numeric
+    KILOBYTE = 1024 unless defined? KILOBYTE
+    MEGABYTE = KILOBYTE * 1024 unless defined? MEGABYTE
+    GIGABYTE = MEGABYTE * 1024 unless defined? GIGABYTE
+    TERABYTE = GIGABYTE * 1024 unless defined? TERABYTE
+    PETABYTE = TERABYTE * 1024 unless defined? PETABYTE
+    EXABYTE  = PETABYTE * 1024 unless defined? EXABYTE
 
-class Numeric
-  KILOBYTE = 1024
-  MEGABYTE = KILOBYTE * 1024
-  GIGABYTE = MEGABYTE * 1024
-  TERABYTE = GIGABYTE * 1024
-  PETABYTE = TERABYTE * 1024
-  EXABYTE  = PETABYTE * 1024
+    # Enables the use of byte calculations and declarations, like 45.bytes + 2.6.megabytes
+    #
+    #   2.bytes # => 2
+    def bytes
+      self
+    end unless method_defined? :bytes
+    alias :byte :bytes unless method_defined? :byte
 
-  # Enables the use of byte calculations and declarations, like 45.bytes + 2.6.megabytes
-  #
-  #   2.bytes # => 2
-  def bytes
-    self
+    # Returns the number of bytes equivalent to the kilobytes provided.
+    #
+    #   2.kilobytes # => 2048
+    def kilobytes
+      self * KILOBYTE
+    end unless method_defined? :kilobytes
+    alias :kilobyte :kilobytes unless method_defined? :kilobyte
+
+    # Returns the number of bytes equivalent to the megabytes provided.
+    #
+    #   2.megabytes # => 2_097_152
+    def megabytes
+      self * MEGABYTE
+    end unless method_defined? :megabytes?
+    alias :megabyte :megabytes unless method_defined? :megabyte
+
+    # Returns the number of bytes equivalent to the gigabytes provided.
+    #
+    #   2.gigabytes # => 2_147_483_648
+    def gigabytes
+      self * GIGABYTE
+    end unless method_defined? :gigabytes
+    alias :gigabyte :gigabytes unless method_defined? :gigabyte
+
+    # Returns the number of bytes equivalent to the terabytes provided.
+    #
+    #   2.terabytes # => 2_199_023_255_552
+    def terabytes
+      self * TERABYTE
+    end unless method_defined? :terabytes
+    alias :terabyte :terabytes unless method_defined? :terabyte
+
+    # Returns the number of bytes equivalent to the petabytes provided.
+    #
+    #   2.petabytes # => 2_251_799_813_685_248
+    def petabytes
+      self * PETABYTE
+    end unless method_defined? :petabytes
+    alias :petabyte :petabytes unless method_defined? :petabyte
+
+    # Returns the number of bytes equivalent to the exabytes provided.
+    #
+    #   2.exabytes # => 2_305_843_009_213_693_952
+    def exabytes
+      self * EXABYTE
+    end unless method_defined? :exabytes
+    alias :exabyte :exabytes unless method_defined? :exabyte
   end
-  alias :byte :bytes
-
-  # Returns the number of bytes equivalent to the kilobytes provided.
-  #
-  #   2.kilobytes # => 2048
-  def kilobytes
-    self * KILOBYTE
-  end
-  alias :kilobyte :kilobytes
-
-  # Returns the number of bytes equivalent to the megabytes provided.
-  #
-  #   2.megabytes # => 2_097_152
-  def megabytes
-    self * MEGABYTE
-  end
-  alias :megabyte :megabytes
-
-  # Returns the number of bytes equivalent to the gigabytes provided.
-  #
-  #   2.gigabytes # => 2_147_483_648
-  def gigabytes
-    self * GIGABYTE
-  end
-  alias :gigabyte :gigabytes
-
-  # Returns the number of bytes equivalent to the terabytes provided.
-  #
-  #   2.terabytes # => 2_199_023_255_552
-  def terabytes
-    self * TERABYTE
-  end
-  alias :terabyte :terabytes
-
-  # Returns the number of bytes equivalent to the petabytes provided.
-  #
-  #   2.petabytes # => 2_251_799_813_685_248
-  def petabytes
-    self * PETABYTE
-  end
-  alias :petabyte :petabytes
-
-  # Returns the number of bytes equivalent to the exabytes provided.
-  #
-  #   2.exabytes # => 2_305_843_009_213_693_952
-  def exabytes
-    self * EXABYTE
-  end
-  alias :exabyte :exabytes
 end
+
