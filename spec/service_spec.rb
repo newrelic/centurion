@@ -16,7 +16,8 @@ describe Centurion::Service do
       port_bindings: [ { host_port: 12340, container_port: 80, type: 'tcp' } ]
     )
 
-    expect(svc.name). to eq('mycontainer')
+    expect(svc.name).to eq('mycontainer')
+    expect(svc.image).to eq(image)
     expect(svc.hostname).to eq(hostname)
     expect(svc.dns).to be_nil
     expect(svc.volumes.size).to eq(1)

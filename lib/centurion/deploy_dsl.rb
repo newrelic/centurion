@@ -95,7 +95,14 @@ module Centurion::DeployDSL
   private
 
   def service_under_construction
-    service = fetch(:service, Centurion::Service.new(fetch(:project)))
+    service = fetch(:service,
+      Centurion::Service.from_hash(
+        fetch(:project),
+        image:    fetch(:image),
+        hostname: fetch(:container_hostname),
+        dns:      fetch(:custom_dns)
+      )
+    )
     set(:service, service)
   end
 
