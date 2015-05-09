@@ -1,4 +1,4 @@
-# Copied from ActiveSupport 4.2.1 lib/active_support/core_ext/numeric/bytes.rb
+# Modified from ActiveSupport 4.2.1 lib/active_support/core_ext/numeric/bytes.rb
 #
 # NOTE that THIS LICENSE ONLY APPLIES TO THIS FILE itself, not
 # to the rest of the project.
@@ -25,9 +25,7 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-begin
-  require 'active_support/core_ext/numeric/bytes'
-rescue LoadError
+unless Numeric.constants.include?(:KILOBYTE)
   class Numeric
     KILOBYTE = 1024 unless defined? KILOBYTE
     MEGABYTE = KILOBYTE * 1024 unless defined? MEGABYTE
