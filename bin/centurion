@@ -33,7 +33,6 @@ opts = Trollop::options do
   opt :registry_user,    'user for registry auth',               type: String, short: :none
   opt :registry_password,'password for registry auth',           type: String, short: :none
   opt :override_env,     'override environment variables, comma separated', type: String
-  opt :dry_run,          'print out docker command do run',      type: :flag, default: false, short: :none
 end
 
 set_current_environment(opts[:environment].to_sym)
@@ -78,9 +77,4 @@ set :registry_user, opts[:registry_user] if opts[:registry_user]
 set :registry_password, opts[:registry_password] if opts[:registry_password]
 
 invoke('centurion:setup')
-if opts[:dry_run] 
-  Centurion::Mock.new(env).run
-  exit
-end
-
 invoke(opts[:action])
