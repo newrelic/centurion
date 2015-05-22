@@ -176,17 +176,33 @@ With this, the container will be named something like `backend-4f692997`.
 ### Container Hostnames
 
 If you don't specify a hostname to use inside your container, the container
-will be given the hostname of the Docker server. This probably is good for
+will be given a hostname matching the container ID. This probably is good for
 a lot of situations, but it might not be good for yours. If you need to have
-a specific hostname, you can cause Centurion to do that:
+a specific hostname, you can ask Centurion to do that:
 
 ```ruby
 set :container_hostname, 'yourhostname'
 ```
 
-This is currently pretty inflexible in that the hostname will now be the same
-on all of your hosts. A possible future addition is the ability to pass
-a block to be evaluated on each host.
+That will make *all* of your containers named 'yourhostname'. If you want to do
+something more dynamic, you can pass a `Proc` or a lambda like this:
+
+```ruby
+set :container_hostname, ->(hostname) { "#{hostname}.example.com" }
+```
+
+The lambda will be passed the current server's hostname. So, this example will
+cause ".example.com" to be appended to the hostname of each Docker host during
+deployment.
+
+*If you want to restore the old behavior from Centurion 1.6.0* and earlier, you
+can do the following:
+
+```ruby
+set :container_hostname, ->(hostname) { hostname }
+```
+
+That will cause the container hostname to match the server's hostname.
 
 ### CGroup Resource Constraints
 
