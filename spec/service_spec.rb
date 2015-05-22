@@ -18,17 +18,11 @@ describe Centurion::Service do
 
     expect(svc.name).to eq('mycontainer')
     expect(svc.image).to eq(image)
-    expect(svc.hostname).to eq(hostname)
     expect(svc.dns).to be_nil
     expect(svc.volumes.size).to eq(1)
     expect(svc.volumes.first.host_volume).to eq('/foo')
     expect(svc.port_bindings.size).to eq(1)
     expect(svc.port_bindings.first.container_port).to eq(80)
-  end
-
-  it 'has an associated hostname' do
-    service.hostname = 'example.com'
-    expect(service.hostname).to eq('example.com')
   end
 
   it 'starts with a command' do
@@ -90,27 +84,42 @@ describe Centurion::Service do
     expect(service.public_ports).to eq([8000, 18000])
   end
 
-  it 'builds a valid docker container configuration' do
-    service = Centurion::Service.new(:redis)
-    service.image = 'http://registry.hub.docker.com/library/redis'
-    service.command = ['redis-server', '--appendonly', 'yes']
-    service.memory = 1024
-    service.cpu_shares = 512
-    service.add_env_vars(SLAVE_OF: '127.0.0.2')
-    service.add_port_bindings(8000, 6379, 'tcp', '10.0.0.1')
-    service.add_volume('/volumes/redis.8000', '/data')
+  context 'building a container configuration' do
+      service = Centurion::Service.new(:redis)
+      service.image = 'http://registry.hub.docker.com/library/redis'
+      service.command = ['redis-server', '--appendonly', 'yes']
+      service.memory = 1024
+      service.cpu_shares = 512
+      service.add_env_vars(SLAVE_OF: '127.0.0.2')
+      service.add_port_bindings(8000, 6379, 'tcp', '10.0.0.1')
+      service.add_volume('/volumes/redis.8000', '/data')
 
-    expect(service.build_config('example.com')).to eq({
-      'Image' => 'http://registry.hub.docker.com/library/redis',
-      'Hostname' => 'example.com',
-      'Cmd' => ['redis-server', '--appendonly', 'yes'],
-      'Memory' => 1024,
-      'CpuShares' => 512,
-      'ExposedPorts' => {'6379/tcp' => {}},
-      'Env' => ['SLAVE_OF=127.0.0.2'],
-      'Volumes' => {'/data' => {}},
-      'VolumesFrom' => 'parent'
-    })
+    it 'builds a valid docker container configuration' do
+      expect(service.build_config('example.com')).to eq({
+        'Image' => 'http://registry.hub.docker.com/library/redis',
+        'Cmd' => ['redis-server', '--appendonly', 'yes'],
+        'Memory' => 1024,
+        'CpuShares' => 512,
+        'ExposedPorts' => {'6379/tcp' => {}},
+        'Env' => ['SLAVE_OF=127.0.0.2'],
+        'Volumes' => {'/data' => {}},
+        'VolumesFrom' => 'parent'
+      })
+    end
+
+    it 'overrides the default hostname when passed a block' do
+      expect(service.build_config('example.com') { |s| "host.#{s}" }).to eq({
+        'Image' => 'http://registry.hub.docker.com/library/redis',
+        'Hostname' => 'host.example.com',
+        'Cmd' => ['redis-server', '--appendonly', 'yes'],
+        'Memory' => 1024,
+        'CpuShares' => 512,
+        'ExposedPorts' => {'6379/tcp' => {}},
+        'Env' => ['SLAVE_OF=127.0.0.2'],
+        'Volumes' => {'/data' => {}},
+        'VolumesFrom' => 'parent'
+      })
+    end
   end
 
   it 'interpolates hostname into env variables' do

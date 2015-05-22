@@ -87,8 +87,17 @@ module Centurion::Deploy
     end
   end
 
+  def hostname_proc
+    hostname = fetch(:container_hostname)
+    if hostname.respond_to?(:call)
+      hostname
+    else
+      ->{ hostname }
+    end
+  end
+
   def start_new_container(server, service, restart_policy)
-    container_config = service.build_config(server.hostname)
+    container_config = service.build_config(server.hostname, &hostname_proc)
     info "Creating new container for #{container_config['Image'][0..7]}"
     container = server.create_container(container_config, service.name)
 

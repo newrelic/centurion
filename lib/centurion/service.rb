@@ -3,7 +3,7 @@ require 'socket'
 module Centurion
   class Service
 
-    attr_accessor :command, :dns, :image, :hostname, :name
+    attr_accessor :command, :dns, :image, :name
     attr_reader :memory, :cpu_shares, :env_vars, :volumes, :port_bindings
 
     def initialize(name)
@@ -16,7 +16,6 @@ module Centurion
     def self.from_hash(name, definition)
       Service.new(name).tap do |s|
         s.image    = definition[:image]
-        s.hostname = definition[:hostname]
         s.dns      = definition[:dns]
 
         definition.fetch(:volumes, []).each do |port|
@@ -64,15 +63,14 @@ module Centurion
       @image = image
     end
 
-    def build_config(server_hostname)
-      container_config = {
-          'Image'        => image,
-          'Hostname'     => hostname || server_hostname,
-      }
-
-      container_config['Cmd'] = command if command
-      container_config['Memory'] = memory if memory
-      container_config['CpuShares'] = cpu_shares if cpu_shares
+    def build_config(server_hostname, &block)
+      container_config = {}.tap do |c|
+        c['Image'] = image
+        c['Hostname'] = yield server_hostname if block_given?
+        c['Cmd'] = command if command
+        c['Memory'] = memory if memory
+        c['CpuShares'] = cpu_shares if cpu_shares
+      end
 
       unless port_bindings.empty?
         container_config['ExposedPorts'] = port_bindings.reduce({}) do |config, binding|
@@ -124,9 +122,8 @@ module Centurion
       host_config
     end
 
-    def build_console_config(hostname)
-      config = build_config(hostname)
-      config.merge({
+    def build_console_config(server_name, &block)
+      build_config(server_name, &block).merge({
         'Cmd' => ['/bin/bash'],
         'AttachStdin' => true,
         'Tty'         => true,
