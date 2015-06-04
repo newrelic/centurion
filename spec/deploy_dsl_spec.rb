@@ -210,4 +210,36 @@ describe Centurion::DeployDSL do
     DeployDSLTest.set(:image, 'charlemagne')
     expect(DeployDSLTest.defined_service.image).to eq('charlemagne:roland')
   end
+
+  describe '#before_stopping_image' do
+    it 'collects before_stopping_image callbacks as procs' do
+      callback = ->(server) { }
+      DeployDSLTest.before_stopping_image callback
+      expect(DeployDSLTest.fetch(:before_stopping_image_callbacks)).to eq([callback])
+    end
+
+    it 'collects before_stopping_image callbacks as blocks' do
+      DeployDSLTest.before_stopping_image do |_|
+        'from the block'
+      end
+      callback = DeployDSLTest.fetch(:before_stopping_image_callbacks)[0]
+      expect(callback.call).to eq('from the block')
+    end
+  end
+
+  describe '#after_image_started' do
+    it 'collects after_image_started callbacks as procs' do
+      callback = ->(server) { }
+      DeployDSLTest.after_image_started callback
+      expect(DeployDSLTest.fetch(:after_image_started_callbacks)).to eq([callback])
+    end
+
+    it 'collects after_image_started callbacks as blocks' do
+      DeployDSLTest.after_image_started do |_|
+        'from the block'
+      end
+      callback = DeployDSLTest.fetch(:after_image_started_callbacks)[0]
+      expect(callback.call).to eq('from the block')
+    end
+  end
 end
