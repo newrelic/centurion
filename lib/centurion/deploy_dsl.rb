@@ -97,6 +97,18 @@ module Centurion::DeployDSL
     Centurion::Service::RestartPolicy.new(fetch(:restart_policy_name, 'on-failure'), fetch(:restart_policy_max_retry_count, 10))
   end
 
+  def before_stopping_image(callback = nil, &block)
+    callbacks = fetch(:before_stopping_image_callbacks, [])
+    callbacks << (callback || block)
+    set(:before_stopping_image_callbacks, callbacks)
+  end
+
+  def after_image_started(callback = nil, &block)
+    callbacks = fetch(:after_image_started_callbacks, [])
+    callbacks << (callback || block)
+    set(:after_image_started_callbacks, callbacks)
+  end
+
   private
 
   def build_server_group
