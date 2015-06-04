@@ -92,7 +92,7 @@ module Centurion::Deploy
     if hostname.respond_to?(:call)
       hostname
     else
-      ->{ hostname }
+      ->(hostname) { hostname }
     end
   end
 
