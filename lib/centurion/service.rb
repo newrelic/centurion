@@ -163,7 +163,7 @@ module Centurion
     end
 
     def interpolate_var(val, hostname)
-      val.gsub('%DOCKER_HOSTNAME%', hostname)
+      val.to_s.gsub('%DOCKER_HOSTNAME%', hostname)
         .gsub('%DOCKER_HOST_IP%', host_ip(hostname))
     end
 

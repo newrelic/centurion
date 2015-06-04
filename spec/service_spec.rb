@@ -138,6 +138,10 @@ describe Centurion::Service do
     expect(service.build_config('example.com')['Env']).to eq(['HOST=93.184.216.34'])
   end
 
+  it 'does not blow up on non-string values' do
+    expect { service.add_env_vars(SOMETHING: true) }.not_to raise_error
+  end
+
   it 'builds a valid docker host configuration' do
     service = Centurion::Service.new(:redis)
     service.dns = 'example.com'
