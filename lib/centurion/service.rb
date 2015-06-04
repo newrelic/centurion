@@ -63,10 +63,11 @@ module Centurion
       @image = image
     end
 
-    def build_config(server_hostname, &block)
+    def build_config(server_hostname, hostname = nil)
+
       container_config = {}.tap do |c|
         c['Image'] = image
-        c['Hostname'] = yield server_hostname if block_given?
+        c['Hostname'] = hostname if hostname
         c['Cmd'] = command if command
         c['Memory'] = memory if memory
         c['CpuShares'] = cpu_shares if cpu_shares

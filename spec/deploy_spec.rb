@@ -153,6 +153,26 @@ describe Centurion::Deploy do
     end
   end
 
+  describe '#container_hostname' do
+    it 'does not provide a container hostname if no override is given' do
+      expect(test_deploy.container_hostname('foo')).to be_nil
+    end
+
+    context 'container_hostname is overridden with a string' do
+      it 'does not provide a container hostname if no override is given' do
+        expect(test_deploy).to receive(:fetch).with(:container_hostname).and_return 'hiya'
+        expect(test_deploy.container_hostname('foo')).to eq('hiya')
+      end
+    end
+
+    context 'container_hostname is overridden with a proc' do
+      it 'does not provide a container hostname if no override is given' do
+        expect(test_deploy).to receive(:fetch).with(:container_hostname).and_return ->(s) { "#{s}bar" }
+        expect(test_deploy.container_hostname('foo')).to eq('foobar')
+      end
+    end
+  end
+
   describe '#start_new_container' do
     let(:bindings) { {'80/tcp'=>[{'HostIp'=>'0.0.0.0', 'HostPort'=>'80'}]} }
     let(:env)      { { 'FOO' => 'BAR' } }
