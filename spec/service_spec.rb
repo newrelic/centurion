@@ -107,7 +107,7 @@ describe Centurion::Service do
       })
     end
 
-    it 'overrides the default hostname when passed a block' do
+    it 'overrides the default hostname when passed a container hostname' do
       expect(service.build_config('example.com', 'host.example.com')).to eq({
         'Image' => 'http://registry.hub.docker.com/library/redis',
         'Hostname' => 'host.example.com',
