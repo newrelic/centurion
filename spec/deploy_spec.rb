@@ -20,7 +20,6 @@ describe Centurion::Deploy do
 
   before do
     allow(test_deploy).to receive(:fetch).and_return nil
-    allow(test_deploy).to receive(:fetch).with(:container_hostname, hostname).and_return(hostname)
     allow(test_deploy).to receive(:host_ip).and_return('172.16.0.1')
   end
 
@@ -150,6 +149,28 @@ describe Centurion::Deploy do
       expect(test_deploy).to receive(:sleep).with(timing)
 
       test_deploy.wait_for_load_balancer_check_interval
+    end
+  end
+
+  describe '#container_hostname' do
+    let(:server_name) { 'server.com' }
+
+    it 'does not provide a container hostname if no override is given' do
+      expect(test_deploy.container_hostname(server_name)).to be_nil
+    end
+
+    context 'container_hostname is overridden with a string' do
+      it 'provides container hostname if an overrided is given' do
+        expect(test_deploy).to receive(:fetch).with(:container_hostname).and_return 'container.com'
+        expect(test_deploy.container_hostname(server_name)).to eq('container.com')
+      end
+    end
+
+    context 'container_hostname is overridden with a proc' do
+      it 'provides a container hostname by executing the proc given' do
+        expect(test_deploy).to receive(:fetch).with(:container_hostname).and_return ->(s) { "container.#{s}" }
+        expect(test_deploy.container_hostname(server_name)).to eq('container.server.com')
+      end
     end
   end
 
