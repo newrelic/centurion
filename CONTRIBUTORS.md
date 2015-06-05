@@ -11,6 +11,7 @@ Your name could be here!
  * [Matt Sanford][mzsanford]
  * [Suren Karapetyan][skarap]
  * [Jon Wood][jellybob]
+ * [Mark Borcherding][markborcherding]
 
 Pre-release
 -----------
@@ -71,3 +72,4 @@ Contributor                                   | Commits    | Additions | Deletio
 [mzsanford]: https://github.com/mzsanford
 [skarap]: https://github.com/skarap
 [jellybob]: https://github.com/jellybob
+[markborcherding]: https://github.com/markborcherding
