@@ -119,8 +119,13 @@ describe Centurion::DeployDSL do
   end
 
   describe '#before_stopping_image' do
+    it 'does not add nil callbacks' do
+      DeployDSLTest.before_stopping_image
+      expect(DeployDSLTest.fetch(:before_stopping_image_callbacks, [])).to eq([])
+    end
+
     it 'collects before_stopping_image callbacks as procs' do
-      callback = ->(server) { }
+      callback = ->(_) {}
       DeployDSLTest.before_stopping_image callback
       expect(DeployDSLTest.fetch(:before_stopping_image_callbacks)).to eq([callback])
     end
@@ -135,6 +140,11 @@ describe Centurion::DeployDSL do
   end
 
   describe '#after_image_started' do
+    it 'does not add nil callbacks' do
+      DeployDSLTest.after_image_started
+      expect(DeployDSLTest.fetch(:after_image_started_callbacks, [])).to eq([])
+    end
+
     it 'collects after_image_started callbacks as procs' do
       callback = ->(server) { }
       DeployDSLTest.after_image_started callback
