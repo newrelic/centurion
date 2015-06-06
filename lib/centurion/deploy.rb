@@ -109,7 +109,7 @@ module Centurion::Deploy
     server.start_container(container['Id'], host_config)
 
     info "Inspecting new container #{container['Id'][0..7]}:"
-    server.inspect_container(container['Id']).each_pair do |key,value|
+    (server.inspect_container(container['Id']) || {}).each_pair do |key,value|
       info "\t#{key} => #{value.inspect}"
     end
 
