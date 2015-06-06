@@ -22,7 +22,8 @@ describe Centurion::Deploy do
   before do
     allow(test_deploy).to receive(:fetch).and_return nil
     allow(test_deploy).to receive(:host_ip).and_return('172.16.0.1')
-    allow(test_deploy).to receive(:fetch).with(:before_stopping_container_callbacks, []).and_return([])
+    allow(test_deploy).to receive(:fetch).with(:before_stopping_image_callbacks, []).and_return([])
+    allow(test_deploy).to receive(:fetch).with(:after_image_started_callbacks, []).and_return([])
   end
 
   describe '#http_status_ok?' do
