@@ -59,8 +59,8 @@ the commands should just work now.
 Configuration
 -------------
 
-Centurion expects to find configuration tasks in the current working directory.
-Soon it will also support reading configuration from etcd.
+Centurion expects to find configuration tasks in the current working directory
+tree.
 
 We recommend putting all your configuration for multiple applications into a
 single repo rather than spreading it around by project. This allows a central
