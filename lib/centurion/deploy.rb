@@ -89,10 +89,12 @@ module Centurion::Deploy
 
   def hostname_proc
     hostname = fetch(:container_hostname)
+    return nil if hostname.nil?
+
     if hostname.respond_to?(:call)
       hostname
     else
-      ->(hostname) { hostname }
+      ->(h) { hostname }
     end
   end
 
