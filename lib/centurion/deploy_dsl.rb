@@ -147,20 +147,35 @@ module Centurion::DeployDSL
   end
 
   def before_stopping_image(callback = nil, &block)
-    return unless callback || block
-    callbacks = fetch(:before_stopping_image_callbacks, [])
-    callbacks << (callback || block)
-    set(:before_stopping_image_callbacks, callbacks)
+    collect_callback :before_stopping_image_callbacks, callback, &block
   end
 
   def after_image_started(callback = nil, &block)
-    return unless callback || block
-    callbacks = fetch(:after_image_started_callbacks, [])
-    callbacks << (callback || block)
-    set(:after_image_started_callbacks, callbacks)
+    collect_callback :after_image_started_callbacks, callback, &block
   end
 
   private
+
+  def collect_callback(name, callback = nil, &block)
+    return unless callback || block
+    abort('Callback expects a lambda, proc, or block') if callback && !callback.respond_to?(:call)
+    callbacks = fetch(name, [])
+    callbacks << (callback || block)
+    set(name, callbacks)
+  end
+
+  def service_under_construction
+    service = fetch(:service,
+      Centurion::Service.from_hash(
+        fetch(:project),
+        image:    fetch(:image),
+        hostname: fetch(:container_hostname),
+        dns:      fetch(:custom_dns)
+      )
+    )
+    set(:service, service)
+  end
+
 
   def build_server_group
     hosts, docker_path = fetch(:hosts, []), fetch(:docker_path)
