@@ -15,7 +15,7 @@ class Centurion::DockerServer
 
   def_delegators :docker_via_api, :create_container, :inspect_container,
                  :inspect_image, :ps, :start_container, :stop_container,
-                 :old_containers_for_port, :remove_container
+                 :remove_container
   def_delegators :docker_via_cli, :pull, :tail, :attach
 
   def initialize(host, docker_path, tls_params = {})
@@ -45,8 +45,18 @@ class Centurion::DockerServer
     ps.select do |container|
       next unless container && container['Names']
       container['Names'].find do |name|
-        name =~ /\A\/#{wanted_name}(-[a-f0-9]{7})?\Z/
+        name =~ /\A\/#{wanted_name}(-[a-f0-9]{14})?\Z/
       end
+    end
+  end
+
+  def find_container_by_id(container_id)
+    ps.find { |container| container && container['Id'] == container_id }
+  end
+
+  def old_containers_for_name(wanted_name)
+    find_containers_by_name(wanted_name).select do |container|
+      container["Status"] =~ /^(Exit |Exited)/
     end
   end
 
