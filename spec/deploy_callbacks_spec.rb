@@ -23,7 +23,7 @@ RSpec.describe Centurion::DeployCallbacks do
     let(:object) do
       klass.new.tap do |o|
         allow(o).to receive(:fetch)
-          .with(:before_stopping_container_callbacks, [])
+          .with(:before_stopping_image_callbacks, [])
           .and_return callbacks
       end
     end
@@ -46,7 +46,7 @@ RSpec.describe Centurion::DeployCallbacks do
     let(:object) do
       klass.new.tap do |o|
         allow(o).to receive(:fetch)
-          .with(:after_new_container_started_callbacks, [])
+          .with(:after_image_started_callbacks, [])
           .and_return callbacks
       end
     end
