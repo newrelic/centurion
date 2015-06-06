@@ -336,6 +336,22 @@ You have to set the following keys:
 
 Modify the paths as appropriate for your cert, ca, and key files.
 
+### Callbacks
+
+You can create callbacks to perform custom actions during a deploy.
+
+```ruby
+  task :production => :common do
+    before_stopping_image do |server|
+      my_loadbalancer.disable server.hostname
+    end
+
+    after_image_started  do |server|
+      my_loadbalancer.enable server.hostname
+    end
+  end
+```
+
 Deploying
 ---------
 
