@@ -15,7 +15,7 @@ tools directly so you can use anything they currently support via the normal
 registry mechanism.
 
 If you haven't been using a registry, you should read up on how to do that
-before trying to deploy anything with Centurion.  
+before trying to deploy anything with Centurion.
 
 Commercial Docker Registry Providers:
 - Docker, Inc. [provides repositories](https://index.docker.io/), and hosts the
@@ -263,6 +263,22 @@ You have to set the following keys:
   end
 ```
 
+### Callbacks
+
+You can create callbacks to perform custom actions during a deploy.
+
+```ruby
+  task :production => :common do
+    before_stopping_image do |server|
+      my_loadbalancer.disable server.hostname
+    end
+
+    after_image_started  do |server|
+      my_loadbalancer.enable server.hostname
+    end
+  end
+```
+
 Deploying
 ---------
 
@@ -333,9 +349,9 @@ are the same everywhere. Settings are per-project.
    an individual container to come up before giving up as a failure. Defaults
    to 24 attempts.
  * `rolling_deploy_skip_ports` => Either a single port, or an array of ports
-   that should be skipped for status checks. By default status checking assumes 
-   an HTTP server is on the other end and if you are deploying a container where some 
-   ports are not HTTP services, this allows you to only health check the ports 
+   that should be skipped for status checks. By default status checking assumes
+   an HTTP server is on the other end and if you are deploying a container where some
+   ports are not HTTP services, this allows you to only health check the ports
    that are. The default is an empty array. If you have non-HTTP services that you
    want to check, see Custom Health Checks in the previous section.
 
@@ -393,14 +409,14 @@ Centurion needs to have access to some registry in order to pull images to
 remote Docker servers. This needs to be either a hosted registry (public or
 private), or [Dogestry](https://github.com/dogestry/dogestry).
 
-#### Access to the registry 
+#### Access to the registry
 
 If you are not using either Dogestry, or the public registry, you may need to
 provide authentication credentials.  Centurion needs to access the Docker
 registry hosting your images directly to retrive image ids and tags. This is
 supported in both the config file and also as command line arguments.
 
-The command line arguments are: 
+The command line arguments are:
  * `--registry-user` => The username to pass to the registry
  * `--registry-password` => The password
 
