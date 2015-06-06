@@ -66,7 +66,7 @@ module Centurion
     def build_config(server_hostname, &block)
       container_config = {}.tap do |c|
         c['Image'] = image
-        c['Hostname'] = yield server_hostname if block_given?
+        c['Hostname'] = block.call(server_hostname) if block_given?
         c['Cmd'] = command if command
         c['Memory'] = memory if memory
         c['CpuShares'] = cpu_shares if cpu_shares
@@ -90,7 +90,9 @@ module Centurion
           memo[v.container_volume] = {}
           memo
         end
-        container_config['VolumesFrom'] = 'parent'
+        # TODO: Ignoring this for now because Docker 1.6
+        # https://github.com/newrelic/centurion/issues/117
+        # container_config['VolumesFrom'] = 'parent'
       end
 
       container_config

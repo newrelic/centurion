@@ -103,7 +103,10 @@ describe Centurion::Service do
         'ExposedPorts' => {'6379/tcp' => {}},
         'Env' => ['SLAVE_OF=127.0.0.2'],
         'Volumes' => {'/data' => {}},
-        'VolumesFrom' => 'parent'
+
+        # TODO: Ignoring this for now because Docker 1.6
+        # https://github.com/newrelic/centurion/issues/117
+        # 'VolumesFrom' => 'parent'
       })
     end
 
@@ -117,7 +120,10 @@ describe Centurion::Service do
         'ExposedPorts' => {'6379/tcp' => {}},
         'Env' => ['SLAVE_OF=127.0.0.2'],
         'Volumes' => {'/data' => {}},
-        'VolumesFrom' => 'parent'
+
+        # TODO: Ignoring this for now because Docker 1.6
+        # https://github.com/newrelic/centurion/issues/117
+        # 'VolumesFrom' => 'parent'
       })
     end
   end
