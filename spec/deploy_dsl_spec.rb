@@ -252,4 +252,25 @@ describe Centurion::DeployDSL do
       expect(callback.call).to eq('from the block')
     end
   end
+
+  describe '#after_health_check_ok' do
+    it 'does not add nil callbacks' do
+      DeployDSLTest.after_health_check_ok
+      expect(DeployDSLTest.fetch(:after_health_check_ok_callbacks, [])).to eq([])
+    end
+
+    it 'collects after_health_check_ok callbacks as procs' do
+      callback = ->(server) { }
+      DeployDSLTest.after_health_check_ok callback
+      expect(DeployDSLTest.fetch(:after_health_check_ok_callbacks)).to eq([callback])
+    end
+
+    it 'collects after_health_check_ok callbacks as blocks' do
+      DeployDSLTest.after_health_check_ok do |_|
+        'from the block'
+      end
+      callback = DeployDSLTest.fetch(:after_health_check_ok_callbacks)[0]
+      expect(callback.call).to eq('from the block')
+    end
+  end
 end

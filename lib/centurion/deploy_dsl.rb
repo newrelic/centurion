@@ -154,6 +154,10 @@ module Centurion::DeployDSL
     collect_callback :after_image_started_callbacks, callback, &block
   end
 
+  def after_health_check_ok(callback = nil, &block)
+    collect_callback :after_health_check_ok_callbacks, callback, &block
+  end
+
   private
 
   def collect_callback(name, callback = nil, &block)
