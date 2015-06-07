@@ -161,11 +161,13 @@ module Centurion::DeployDSL
   private
 
   def collect_callback(name, callback = nil, &block)
-    return unless callback || block
-    abort('Callback expects a lambda, proc, or block') if callback && !callback.respond_to?(:call)
     callbacks = fetch(name, [])
-    callbacks << (callback || block)
-    set(name, callbacks)
+    if  callback || block
+      abort('Callback expects a lambda, proc, or block') if callback && !callback.respond_to?(:call)
+      callbacks << (callback || block)
+      set(name, callbacks)
+    end
+    callbacks
   end
 
   def service_under_construction
