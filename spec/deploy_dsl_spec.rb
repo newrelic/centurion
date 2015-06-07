@@ -123,61 +123,57 @@ describe Centurion::DeployDSL do
       DeployDSLTest.before_stopping_image
       expect(DeployDSLTest.fetch(:before_stopping_image_callbacks, [])).to eq([])
     end
-
-    it 'collects before_stopping_image callbacks as procs' do
-      callback = ->(_) {}
-      DeployDSLTest.before_stopping_image callback
-      expect(DeployDSLTest.fetch(:before_stopping_image_callbacks)).to eq([callback])
-    end
-
-    it 'collects before_stopping_image callbacks as blocks' do
-      DeployDSLTest.before_stopping_image do |_|
-        'from the block'
-      end
-      callback = DeployDSLTest.fetch(:before_stopping_image_callbacks)[0]
-      expect(callback.call).to eq('from the block')
-    end
   end
 
-  describe '#after_image_started' do
-    it 'does not add nil callbacks' do
-      DeployDSLTest.after_image_started
-      expect(DeployDSLTest.fetch(:after_image_started_callbacks, [])).to eq([])
-    end
+  describe 'callbacks' do
+    shared_examples_for 'a callback for' do |callback_name|
+      let(:callbacks) { DeployDSLTest.fetch("#{callback_name}_callbacks".to_sym, []) }
 
-    it 'collects after_image_started callbacks as procs' do
-      callback = ->(server) { }
-      DeployDSLTest.after_image_started callback
-      expect(DeployDSLTest.fetch(:after_image_started_callbacks)).to eq([callback])
-    end
-
-    it 'collects after_image_started callbacks as blocks' do
-      DeployDSLTest.after_image_started do |_|
-        'from the block'
+      it 'does not add nil callbacks' do
+        DeployDSLTest.send callback_name
+        expect(callbacks).to eq([])
       end
-      callback = DeployDSLTest.fetch(:after_image_started_callbacks)[0]
-      expect(callback.call).to eq('from the block')
-    end
-  end
 
-  describe '#after_health_check_ok' do
-    it 'does not add nil callbacks' do
-      DeployDSLTest.after_health_check_ok
-      expect(DeployDSLTest.fetch(:after_health_check_ok_callbacks, [])).to eq([])
-    end
-
-    it 'collects after_health_check_ok callbacks as procs' do
-      callback = ->(server) { }
-      DeployDSLTest.after_health_check_ok callback
-      expect(DeployDSLTest.fetch(:after_health_check_ok_callbacks)).to eq([callback])
-    end
-
-    it 'collects after_health_check_ok callbacks as blocks' do
-      DeployDSLTest.after_health_check_ok do |_|
-        'from the block'
+      it 'collects callbacks as procs' do
+        callback = ->(_) {}
+        DeployDSLTest.send callback_name, callback
+        expect(callbacks).to eq([callback])
       end
-      callback = DeployDSLTest.fetch(:after_health_check_ok_callbacks)[0]
-      expect(callback.call).to eq('from the block')
+
+      it 'collects callbacks as blocks' do
+        DeployDSLTest.send callback_name do |_|
+          'from the block'
+        end
+        callback = callbacks[0]
+        expect(callback.call).to eq('from the block')
+      end
+
+      it 'returns a list of all callbacks when adding one' do
+        callback1 = ->(_) {}
+        callback2 = ->(_) {}
+        DeployDSLTest.send callback_name, callback1
+        returned_callbacks = DeployDSLTest.send callback_name, callback2
+        expect(returned_callbacks).to eq([callback1, callback2])
+      end
+
+      it 'returns a list of all callbacks when adding none' do
+        callback1 = ->(_) {}
+        DeployDSLTest.send callback_name, callback1
+        returned_callbacks = DeployDSLTest.send callback_name
+        expect(returned_callbacks).to eq([callback1])
+      end
+    end
+
+    describe '#before_stopping_image' do
+      it_behaves_like 'a callback for', :before_stopping_image
+    end
+
+    describe '#after_image_started' do
+      it_behaves_like 'a callback for', :after_image_started
+    end
+
+    describe '#after_health_check_ok' do
+      it_behaves_like 'a callback for', :after_health_check_ok
     end
   end
 end
