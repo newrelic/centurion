@@ -47,6 +47,7 @@ end
 
 namespace :deploy do
   include Centurion::Deploy
+  include Centurion::DeployCallbacks
 
   namespace :dogestry do
     task :validate_pull_image do
