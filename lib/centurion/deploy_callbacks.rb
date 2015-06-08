@@ -3,7 +3,7 @@ module Centurion
   # be useful to communicate with a loadbalancer, chat room, etc.
   module DeployCallbacks
     def stop_containers(server, service, timeout = 30)
-      before_stopping_container_callbacks.each do |callback|
+      callbacks(:before_stopping_image).each do |callback|
         callback.call server
       end
       super server, service, timeout
@@ -11,7 +11,7 @@ module Centurion
 
     def start_new_container(server, service, restart_policy)
       result = super server, service, restart_policy
-      after_new_container_started_callbacks.each do |callback|
+      callbacks(:after_image_started).each do |callback|
         callback.call server
       end
       result
@@ -27,7 +27,7 @@ module Centurion
                      sleep_time,
                      retries
 
-      after_health_check_ok_callbacks.each do |callback|
+      callbacks(:after_health_check_ok).each do |callback|
         callback.call server
       end
       result
@@ -35,16 +35,8 @@ module Centurion
 
     private
 
-    def before_stopping_container_callbacks
-      fetch :before_stopping_image_callbacks, []
-    end
-
-    def after_new_container_started_callbacks
-      fetch :after_image_started_callbacks, []
-    end
-
-    def after_health_check_ok_callbacks
-      fetch :after_health_check_ok_callbacks, []
+    def callbacks(name)
+      fetch "#{name}_callbacks".to_sym, []
     end
   end
 end
