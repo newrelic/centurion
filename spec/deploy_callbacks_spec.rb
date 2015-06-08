@@ -57,4 +57,23 @@ RSpec.describe Centurion::DeployCallbacks do
                     :after_image_started,
                     :start_new_container
   end
+
+  describe 'after health check ok callback' do
+    let(:args) do
+      [
+        double(:health_check_method),
+        server,
+        double(:port),
+        double(:endpoint),
+        double(:image_id),
+        double(:tag),
+        double(:sleep),
+        double(:retries)
+      ]
+    end
+    subject { object.wait_for_health_check_ok(*args) }
+    it_behaves_like 'an after callback',
+                    :after_health_check_ok,
+                    :wait_for_health_check_ok
+  end
 end
