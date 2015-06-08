@@ -6,7 +6,6 @@ require_relative 'deploy_callbacks'
 module Centurion; end
 
 module Centurion::Deploy
-  prepend Centurion::DeployCallbacks
 
   FAILED_CONTAINER_VALIDATION = 100
 
