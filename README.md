@@ -347,6 +347,10 @@ You can create callbacks to perform custom actions during a deploy.
     end
 
     after_image_started  do |server|
+      my_chat_server.post "#{server.hostname} started my image....waiting for health check"
+    end
+
+    after_health_check_ok do |server|
       my_loadbalancer.enable server.hostname
     end
   end
