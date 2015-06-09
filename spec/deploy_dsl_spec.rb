@@ -111,4 +111,10 @@ describe Centurion::DeployDSL do
 
     expect(DeployDSLTest.get_current_tags_for('asdf')).to eq [ { server: 'host1', tags: [ 'foo'] } ]
   end
+
+  it 'appends tags to the image name when returning a service' do
+    DeployDSLTest.set(:tag, 'roland')
+    DeployDSLTest.set(:image, 'charlemagne')
+    expect(DeployDSLTest.defined_service.image).to eq('charlemagne:roland')
+  end
 end

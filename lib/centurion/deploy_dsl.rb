@@ -71,14 +71,7 @@ module Centurion::DeployDSL
   end
 
   def defined_service
-    fetch(:service,
-      Centurion::Service.from_hash(
-        fetch(:project),
-        image:    fetch(:image),
-        hostname: fetch(:container_hostname),
-        dns:      fetch(:custom_dns)
-      )
-    )
+    fetch(:service, create_service)
   end
 
   def defined_health_check
@@ -94,18 +87,26 @@ module Centurion::DeployDSL
 
   private
 
-  def service_under_construction
-    service = fetch(:service,
-      Centurion::Service.from_hash(
-        fetch(:project),
-        image:    fetch(:image),
-        hostname: fetch(:container_hostname),
-        dns:      fetch(:custom_dns)
-      )
+  def create_service
+    image = if (tag = fetch(:tag))
+      "#{fetch(:image)}:#{tag}"
+    else
+      fetch(:image)
+    end
+
+    Centurion::Service.from_hash(
+      fetch(:project),
+      image:    image,
+      hostname: fetch(:container_hostname),
+      dns:      fetch(:custom_dns)
     )
-    set(:service, service)
+
   end
 
+  def service_under_construction
+    service = fetch(:service, create_service)
+    set(:service, service)
+  end
 
   def build_server_group
     hosts, docker_path = fetch(:hosts, []), fetch(:docker_path)
