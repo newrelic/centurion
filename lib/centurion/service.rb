@@ -17,7 +17,11 @@ module Centurion
 
     def self.from_env
       Service.new(fetch(:project, 'default')).tap do |s|
-        s.image    = fetch(:image, nil)
+        s.image    = if fetch(:tag, nil)
+          "#{fetch(:image, nil)}:#{fetch(:tag)}"
+        else
+          fetch(:image, nil)
+        end
         s.dns      = fetch(:dns, nil)
 
         s.volumes = fetch(:binds, [])
