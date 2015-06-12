@@ -9,7 +9,11 @@ module Centurion::DeployDSL
   end
 
   def env_vars(new_vars)
-    service_under_construction.add_env_vars(new_vars)
+    current = fetch(:env_vars, {})
+    new_vars.each_pair do |new_key, new_value|
+      current[new_key.to_s] = new_value.to_s
+    end
+    set(:env_vars, current)
   end
 
   def host(hostname)
@@ -19,15 +23,15 @@ module Centurion::DeployDSL
   end
 
   def memory(memory)
-    service_under_construction.memory = memory
+    set(:memory, memory)
   end
 
   def cpu_shares(cpu_shares)
-    service_under_construction.cpu_shares = cpu_shares
+    set(:cpu_shares, cpu_shares)
   end
 
   def command(command)
-    service_under_construction.command = command
+    set(:command, command)
   end
 
   def localhost
@@ -41,16 +45,24 @@ module Centurion::DeployDSL
     validate_options_keys(options, [ :host_ip, :container_port, :type ])
     require_options_keys(options,  [ :container_port ])
 
-    service_under_construction.add_port_bindings(port, options[:container_port], options[:type] || 'tcp', options[:host_ip])
+    set(:port_bindings, fetch(:port_bindings, []).tap do |bindings|
+      bindings << Centurion::Service::PortBinding.new(port, options[:container_port], options[:type] || 'tcp', options[:host_ip])
+    end)
+  end
+
+  def public_port_for(port_bindings)
+    # {'80/tcp'=>[{'HostIp'=>'0.0.0.0', 'HostPort'=>'80'}]}
+    first_port_binding = port_bindings.values.first
+    first_port_binding.first['HostPort']
   end
 
   def host_volume(volume, options)
     validate_options_keys(options, [ :container_volume ])
     require_options_keys(options,  [ :container_volume ])
 
-    container_volume = options[:container_volume]
-
-    service_under_construction.add_volume(volume, container_volume)
+    set(:binds, fetch(:binds, []).tap do |volumes|
+      volumes << Centurion::Service::Volume.new(volume, options[:container_volume])
+    end)
   end
 
   def get_current_tags_for(image)
@@ -71,14 +83,7 @@ module Centurion::DeployDSL
   end
 
   def defined_service
-    fetch(:service,
-      Centurion::Service.from_hash(
-        fetch(:project),
-        image:    fetch(:image),
-        hostname: fetch(:container_hostname),
-        dns:      fetch(:custom_dns)
-      )
-    )
+    Centurion::Service.from_env
   end
 
   def defined_health_check
@@ -94,18 +99,17 @@ module Centurion::DeployDSL
 
   private
 
-  def service_under_construction
-    service = fetch(:service,
-      Centurion::Service.from_hash(
-        fetch(:project),
-        image:    fetch(:image),
-        hostname: fetch(:container_hostname),
-        dns:      fetch(:custom_dns)
-      )
-    )
-    set(:service, service)
+  def add_to_bindings(host_ip, container_port, port, type='tcp')
+    set(:port_bindings, fetch(:port_bindings, {}).tap do |bindings|
+      bindings["#{container_port.to_s}/#{type}"] = {
+        host_port: port,
+        container_port: container_port,
+        type: type
+      }.tap do |b|
+        b[:host_ip] = host_ip if host_ip
+      end
+    end)
   end
-
 
   def build_server_group
     hosts, docker_path = fetch(:hosts, []), fetch(:docker_path)

@@ -2,20 +2,21 @@ require 'spec_helper'
 require 'centurion/service'
 
 describe Centurion::Service do
+
   let(:service)  { Centurion::Service.new(:redis) }
   let(:hostname) { 'shakespeare' }
   let(:image)    { 'redis' }
 
-  it 'creates a service from a hash' do
-    svc = Centurion::Service.from_hash(
-      'mycontainer',
-      image: image,
-      hostname: hostname,
-      dns: nil,
-      volumes: [ { host_volume: '/foo', container_volume: '/foo/bar' } ],
-      port_bindings: [ { host_port: 12340, container_port: 80, type: 'tcp' } ]
-    )
+  it 'creates a service from the environment' do
+    extend Capistrano::DSL
+    set_current_environment(:test)
+    set(:project, 'mycontainer')
+    set(:image, image)
+    set(:hostname, hostname)
+    set(:binds, [ Centurion::Service::Volume.new('/foo', '/foo/bar') ])
+    set(:port_bindings, [ Centurion::Service::PortBinding.new(12340, 80, 'tcp') ])
 
+    svc = Centurion::Service.from_env
     expect(svc.name).to eq('mycontainer')
     expect(svc.image).to eq(image)
     expect(svc.dns).to be_nil

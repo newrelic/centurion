@@ -23,9 +23,9 @@ describe Centurion::DeployDSL do
   end
 
   it 'has a DSL method for specifying the start command' do
-    command = ['/bin/echo', 'hi']
+    command = %w{ /bin/echo hi }
     DeployDSLTest.command command
-    expect(DeployDSLTest.defined_service.command).to equal(command)
+    expect(DeployDSLTest.defined_service.command).to eq(command)
   end
 
   it 'adds new env_vars to the existing ones, as strings' do
@@ -33,10 +33,10 @@ describe Centurion::DeployDSL do
     DeployDSLTest.env_vars('DICKENS' => 'David Copperfield',
                            :DICKENS_BIRTH_YEAR => 1812)
 
-    expect(DeployDSLTest.defined_service.env_vars).to include(
+    expect(DeployDSLTest.defined_service.env_vars).to eq(
       'SHAKESPEARE'        => 'Hamlet',
       'DICKENS'            => 'David Copperfield',
-      :DICKENS_BIRTH_YEAR  => 1812
+      'DICKENS_BIRTH_YEAR' => '1812'
     )
   end
 

@@ -1,10 +1,12 @@
 require 'socket'
+require 'capistrano_dsl'
 
 module Centurion
   class Service
+    extend ::Capistrano::DSL
 
-    attr_accessor :command, :dns, :image, :name
-    attr_reader :memory, :cpu_shares, :env_vars, :volumes, :port_bindings
+    attr_accessor :command, :dns, :image, :name, :volumes, :port_bindings
+    attr_reader :memory, :cpu_shares, :env_vars
 
     def initialize(name)
       @name = name
@@ -13,23 +15,16 @@ module Centurion
       @port_bindings = []
     end
 
-    def self.from_hash(name, definition)
-      Service.new(name).tap do |s|
-        s.image    = definition[:image]
-        s.dns      = definition[:dns]
+    def self.from_env
+      Service.new(fetch(:project, 'default')).tap do |s|
+        s.image    = fetch(:image, nil)
+        s.dns      = fetch(:dns, nil)
 
-        definition.fetch(:volumes, []).each do |port|
-          s.add_volume(port[:host_volume], port[:container_volume])
-        end
+        s.volumes = fetch(:binds, [])
+        s.port_bindings = fetch(:port_bindings, [])
 
-        definition.fetch(:port_bindings, []).each do |binding|
-          s.add_port_bindings(
-            binding[:host_port],
-            binding[:container_port],
-            binding[:type],
-            binding[:host_ip]
-          )
-        end
+        s.command = fetch(:command, nil)
+        s.add_env_vars(fetch(:env_vars, {}))
       end
     end
 
@@ -90,9 +85,6 @@ module Centurion
           memo[v.container_volume] = {}
           memo
         end
-        # TODO: Ignoring this for now because Docker 1.6
-        # https://github.com/newrelic/centurion/issues/117
-        # container_config['VolumesFrom'] = 'parent'
       end
 
       container_config
