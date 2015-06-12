@@ -99,18 +99,6 @@ module Centurion::DeployDSL
 
   private
 
-  def add_to_bindings(host_ip, container_port, port, type='tcp')
-    set(:port_bindings, fetch(:port_bindings, {}).tap do |bindings|
-      bindings["#{container_port.to_s}/#{type}"] = {
-        host_port: port,
-        container_port: container_port,
-        type: type
-      }.tap do |b|
-        b[:host_ip] = host_ip if host_ip
-      end
-    end)
-  end
-
   def build_server_group
     hosts, docker_path = fetch(:hosts, []), fetch(:docker_path)
     Centurion::DockerServerGroup.new(hosts, docker_path, build_tls_params)
