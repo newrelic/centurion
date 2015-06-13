@@ -16,7 +16,7 @@ module Centurion
     end
 
     def self.from_env
-      Service.new(fetch(:project, 'default')).tap do |s|
+      Service.new(fetch(:name)).tap do |s|
         s.image    = if fetch(:tag, nil)
           "#{fetch(:image, nil)}:#{fetch(:tag)}"
         else

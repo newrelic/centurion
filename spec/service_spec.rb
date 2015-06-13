@@ -10,7 +10,7 @@ describe Centurion::Service do
   it 'creates a service from the environment' do
     extend Capistrano::DSL
     set_current_environment(:test)
-    set(:project, 'mycontainer')
+    set(:name, 'mycontainer')
     set(:image, image)
     set(:hostname, hostname)
     set(:binds, [ Centurion::Service::Volume.new('/foo', '/foo/bar') ])
