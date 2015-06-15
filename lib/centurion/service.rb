@@ -5,7 +5,7 @@ module Centurion
   class Service
     extend ::Capistrano::DSL
 
-    attr_accessor :command, :dns, :image, :name, :volumes, :port_bindings
+    attr_accessor :command, :dns, :extra_hosts, :image, :name, :volumes, :port_bindings
     attr_reader :memory, :cpu_shares, :env_vars
 
     def initialize(name)
@@ -23,6 +23,7 @@ module Centurion
           fetch(:image, nil)
         end
         s.dns      = fetch(:dns, nil)
+        s.extra_hosts = fetch(:extra_hosts, nil)
 
         s.volumes = fetch(:binds, [])
         s.port_bindings = fetch(:port_bindings, [])
@@ -105,6 +106,9 @@ module Centurion
 
       # DNS if specified
       host_config['Dns'] = dns if dns
+
+      # Add ExtraHosts if needed
+      host_config['ExtraHosts'] = extra_hosts if extra_hosts
 
       # Restart Policy
       if restart_policy
