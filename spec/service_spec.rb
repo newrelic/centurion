@@ -36,6 +36,11 @@ describe Centurion::Service do
     expect(service.memory).to eq(1024)
   end
 
+  it 'memory takes floats too' do
+    memory = 1.5 * 10**9 # Simulating 1.5.gigabytes
+    expect { service.memory = memory }.not_to raise_error
+  end
+
   it 'rejects non-numeric memory bounds' do
     expect(-> { service.memory = 'all' }).to raise_error
   end

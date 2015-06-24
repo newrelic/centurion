@@ -45,10 +45,10 @@ module Centurion
     end
 
     def memory=(bytes)
-      if !bytes || !is_a_uint64?(bytes)
+      if !bytes || (!is_a_uint64?(bytes) && !(bytes.is_a? Numeric))
     raise ArgumentError, "invalid value for cgroup memory constraint: #{bytes}, value must be a between 0 and 18446744073709551615"
       end
-      @memory = bytes
+      @memory = bytes.to_i
     end
 
     def cpu_shares=(shares)
