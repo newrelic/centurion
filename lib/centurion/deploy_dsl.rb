@@ -98,27 +98,27 @@ module Centurion::DeployDSL
   end
 
   def before_stopping_image(callback = nil, &block)
-    collect_callback :before_stopping_image_callbacks, callback, &block
+    on :before_stopping_image, callback, &block
   end
 
   def after_image_started(callback = nil, &block)
-    collect_callback :after_image_started_callbacks, callback, &block
+    on :after_image_started, callback, &block
   end
 
   def after_health_check_ok(callback = nil, &block)
-    collect_callback :after_health_check_ok_callbacks, callback, &block
+    on :after_health_check_ok, callback, &block
+  end
+
+  def on(name, callback = nil, &block)
+    abort('A callback or block is require') unless callback || block
+    abort('Callback expects a lambda, proc, or block') if callback && !callback.respond_to?(:call)
+    callbacks[name] <<= (callback || block)
   end
 
   private
 
-  def collect_callback(name, callback = nil, &block)
-    callbacks = fetch(name, [])
-    if  callback || block
-      abort('Callback expects a lambda, proc, or block') if callback && !callback.respond_to?(:call)
-      callbacks << (callback || block)
-      set(name, callbacks)
-    end
-    callbacks
+  def callbacks
+    fetch('callbacks') || set('callbacks', Hash.new { [] })
   end
 
   def service_under_construction

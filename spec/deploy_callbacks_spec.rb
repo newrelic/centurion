@@ -2,11 +2,9 @@ require 'spec_helper'
 require 'centurion'
 
 RSpec.describe Centurion::DeployCallbacks do
-  shared_examples_for 'a callback' do |callback|
+  shared_examples_for 'a callback' do
     let(:server) { double :server }
     let(:service) { double :service }
-    let(:callbacks) { [double, double] }
-    let(:callback_name) { "#{callback}_callbacks".to_sym }
 
     let(:klass) do
       Class.new do
@@ -18,28 +16,30 @@ RSpec.describe Centurion::DeployCallbacks do
     end
 
     let(:object) do
-      klass.new.tap do |o|
-        allow(o).to receive(:fetch).with(callback_name, []).and_return callbacks
-      end
+      klass.new
+    end
+
+    before do
+      allow(object).to receive(:emit)
     end
   end
 
   shared_examples_for 'a before callback' do |callback, method_name|
-    include_examples 'a callback', callback
+    include_examples 'a callback'
 
     it 'invokes all the callback before the method' do
-      callbacks.each { |cb| expect(cb).to receive(:call).with(server).ordered }
+      expect(object).to receive(:emit).with(callback, server).ordered
       expect(object).to receive(:doing).with(method_name).ordered
       subject
     end
   end
 
   shared_examples_for 'an after callback' do |callback, method_name|
-    include_examples 'a callback', callback
+    include_examples 'a callback'
 
     it 'invokes all the callback before the method' do
       expect(object).to receive(:doing).with(method_name).ordered
-      callbacks.each { |cb| expect(cb).to receive(:call).with(server).ordered }
+      expect(object).to receive(:emit).with(callback, server).ordered
       subject
     end
   end

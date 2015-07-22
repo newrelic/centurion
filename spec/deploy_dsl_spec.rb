@@ -118,49 +118,13 @@ describe Centurion::DeployDSL do
     expect(DeployDSLTest.defined_service.image).to eq('charlemagne:roland')
   end
 
-  describe '#before_stopping_image' do
-    it 'does not add nil callbacks' do
-      DeployDSLTest.before_stopping_image
-      expect(DeployDSLTest.fetch(:before_stopping_image_callbacks, [])).to eq([])
-    end
-  end
-
   describe 'callbacks' do
     shared_examples_for 'a callback for' do |callback_name|
-      let(:callbacks) { DeployDSLTest.fetch("#{callback_name}_callbacks".to_sym, []) }
-
-      it 'does not add nil callbacks' do
-        DeployDSLTest.send callback_name
-        expect(callbacks).to eq([])
-      end
-
-      it 'collects callbacks as procs' do
+      it 'accepts procs' do
         callback = ->(_) {}
+        allow(DeployDSLTest).to receive(:on)
+        expect(DeployDSLTest).to receive(:on).with(callback_name, callback)
         DeployDSLTest.send callback_name, callback
-        expect(callbacks).to eq([callback])
-      end
-
-      it 'collects callbacks as blocks' do
-        DeployDSLTest.send callback_name do |_|
-          'from the block'
-        end
-        callback = callbacks[0]
-        expect(callback.call).to eq('from the block')
-      end
-
-      it 'returns a list of all callbacks when adding one' do
-        callback1 = ->(_) {}
-        callback2 = ->(_) {}
-        DeployDSLTest.send callback_name, callback1
-        returned_callbacks = DeployDSLTest.send callback_name, callback2
-        expect(returned_callbacks).to eq([callback1, callback2])
-      end
-
-      it 'returns a list of all callbacks when adding none' do
-        callback1 = ->(_) {}
-        DeployDSLTest.send callback_name, callback1
-        returned_callbacks = DeployDSLTest.send callback_name
-        expect(returned_callbacks).to eq([callback1])
       end
     end
 
