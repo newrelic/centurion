@@ -82,6 +82,12 @@ module Centurion::DeployDSL
    set(:health_check, method)
   end
 
+  def extra_host(ip, name)
+    current = fetch(:extra_hosts, [])
+    current.push("#{name}:#{ip}")
+    set(:extra_hosts, current)
+  end
+
   def defined_service
     Centurion::Service.from_env
   end

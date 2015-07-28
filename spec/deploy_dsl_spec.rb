@@ -105,6 +105,19 @@ describe Centurion::DeployDSL do
     end
   end
 
+  describe '#extra_host' do
+    it 'adds new hosts to the list' do
+      DeployDSLTest.extra_host('192.168.33.10', 'newrelic.dev')
+      DeployDSLTest.extra_host('192.168.33.93', 'd.newrelic.dev')
+
+      expect(DeployDSLTest.defined_service.extra_hosts).to eq(['newrelic.dev:192.168.33.10', 'd.newrelic.dev:192.168.33.93'])
+    end
+
+    it 'extra_hosts list is nil by default' do
+      expect(DeployDSLTest.defined_service.extra_hosts).to eq(nil)
+    end
+  end
+
   it 'gets current tags for an image' do
     allow_any_instance_of(Centurion::DockerServer).to receive(:current_tags_for).and_return([ 'foo' ])
     DeployDSLTest.set(:hosts, [ 'host1' ])
