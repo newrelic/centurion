@@ -74,6 +74,20 @@ describe Centurion::DockerViaApi do
       api.stop_container('12345')
     end
 
+    it 'restarts a container' do
+      expect(Excon).to receive(:post).
+                          with(excon_uri + "v1.10" + "/containers/12345/restart?t=30", {}).
+                          and_return(double(body: json_string, status: 204))
+      api.restart_container('12345')
+    end
+
+    it 'restarts a container with a custom timeout' do
+      expect(Excon).to receive(:post).
+                          with(excon_uri + "v1.10" + "/containers/12345/restart?t=300", {}).
+                          and_return(double(body: json_string, status: 204))
+      api.restart_container('12345', 300)
+    end
+
     it 'inspects a container' do
       expect(Excon).to receive(:get).
                            with(excon_uri + 'v1.7/containers/12345/json', {}).
@@ -175,6 +189,24 @@ describe Centurion::DockerViaApi do
                             client_key: '/certs/key.pem').
                        and_return(double(status: 204))
       api.stop_container('12345')
+    end
+
+    it 'restarts a container' do
+      expect(Excon).to receive(:post).
+                        with(excon_uri + "v1.10" + "/containers/12345/restart?t=30",
+                            client_cert: '/certs/cert.pem',
+                            client_key: '/certs/key.pem').
+                        and_return(double(body: json_string, status: 204))
+      api.restart_container('12345')
+    end
+
+    it 'restarts a container with a custom timeout' do
+      expect(Excon).to receive(:post).
+                        with(excon_uri + "v1.10" + "/containers/12345/restart?t=300",
+                            client_cert: '/certs/cert.pem',
+                            client_key: '/certs/key.pem').
+                        and_return(double(body: json_string, status: 204))
+      api.restart_container('12345', 300)
     end
 
     it 'inspects a container' do
