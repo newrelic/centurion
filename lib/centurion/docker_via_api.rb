@@ -87,6 +87,24 @@ class Centurion::DockerViaApi
     end
   end
 
+  def restart_container(container_id, timeout = 30)
+    path = "/v1.10/containers/#{container_id}/restart?t=#{timeout}"
+    response = Excon.post(
+      @base_uri + path,
+      tls_excon_arguments
+    )
+    case response.status
+    when 204
+      true
+    when 404
+      fail "Failed to start missing container! \"#{response.body}\""
+    when 500
+      fail "Failed to start existing container! \"#{response.body}\""
+    else
+      raise response.inspect
+    end
+  end
+
   def inspect_container(container_id)
     path = "/v1.7/containers/#{container_id}/json"
     response = Excon.get(
