@@ -16,6 +16,16 @@ module Centurion::DeployDSL
     set(:env_vars, current)
   end
 
+  def add_capability(new_cap_adds)
+    current = fetch(:cap_adds, [])
+    set(:cap_adds, current << new_cap_adds)
+  end
+
+  def drop_capability(new_cap_drops)
+    current = fetch(:cap_drops, [])
+    set(:cap_drops, current << new_cap_drops)
+  end
+
   def host(hostname)
     current = fetch(:hosts, [])
     current << hostname

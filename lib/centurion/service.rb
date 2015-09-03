@@ -5,14 +5,16 @@ module Centurion
   class Service
     extend ::Capistrano::DSL
 
-    attr_accessor :command, :dns, :extra_hosts, :image, :name, :volumes, :port_bindings
+    attr_accessor :command, :dns, :extra_hosts, :image, :name, :volumes, :port_bindings, :cap_adds, :cap_drops
     attr_reader :memory, :cpu_shares, :env_vars
 
     def initialize(name)
-      @name = name
-      @env_vars = {}
-      @volumes = []
+      @name          = name
+      @env_vars      = {}
+      @volumes       = []
       @port_bindings = []
+      @cap_adds      = []
+      @cap_drops     = []
     end
 
     def self.from_env
@@ -22,13 +24,13 @@ module Centurion
         else
           fetch(:image, nil)
         end
-        s.dns      = fetch(:dns, nil)
-        s.extra_hosts = fetch(:extra_hosts, nil)
-
-        s.volumes = fetch(:binds, [])
+        s.cap_adds      = fetch(:cap_adds, [])
+        s.cap_drops     = fetch(:cap_drops, [])
+        s.dns           = fetch(:dns, nil)
+        s.extra_hosts   = fetch(:extra_hosts, nil)
+        s.volumes       = fetch(:binds, [])
         s.port_bindings = fetch(:port_bindings, [])
-
-        s.command = fetch(:command, nil)
+        s.command       = fetch(:command, nil)
         s.add_env_vars(fetch(:env_vars, {}))
       end
     end
@@ -43,6 +45,20 @@ module Centurion
 
     def add_volume(host_volume, container_volume)
       @volumes << Volume.new(host_volume, container_volume)
+    end
+
+    def cap_adds=(capabilites)
+      unless capabilites.is_a? Array
+        raise ArgumentError, "invalid value for capability additions: #{capabilites}, value must be an array"
+      end
+      @cap_adds = capabilites
+    end
+
+    def cap_drops=(capabilites)
+      unless capabilites.is_a? Array
+        raise ArgumentError, "invalid value for capability drops: #{capabilites}, value must be an array"
+      end
+      @cap_drops = capabilites
     end
 
     def memory=(bytes)
@@ -97,6 +113,10 @@ module Centurion
 
     def build_host_config(restart_policy = nil)
       host_config = {}
+
+      # Set capability additions and drops
+      host_config['CapAdd'] = cap_adds if cap_adds
+      host_config['CapDrop'] = cap_drops if cap_drops
 
       # Map some host volumes if needed
       host_config['Binds'] = volume_binds_config if volume_binds_config
