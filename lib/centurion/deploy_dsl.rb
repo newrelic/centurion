@@ -66,6 +66,10 @@ module Centurion::DeployDSL
     end)
   end
 
+  def network_mode(mode)
+    set(:network_mode, fetch(:network_mode, 'bridge'))
+  end
+
   def public_port_for(port_bindings)
     # {'80/tcp'=>[{'HostIp'=>'0.0.0.0', 'HostPort'=>'80'}]}
     first_port_binding = port_bindings.values.first

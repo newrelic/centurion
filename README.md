@@ -206,6 +206,20 @@ set :container_hostname, ->(hostname) { hostname }
 
 That will cause the container hostname to match the server's hostname.
 
+### Network modes
+
+You may specify the network mode you would like a container to use via:
+
+```ruby
+set :network_mode, 'networkmode'
+```
+
+Docker (and therefore Centurion) supports one of `bridge` (the default), `host`,
+and `container:<container-id>` for this argument.
+
+*Note:* While host_port remains required, the mappings specified in it are
+*ignored* when using `host` and `container...` network modes.
+
 ### CGroup Resource Constraints
 
 Limits on memory and CPU can be specified with the `memory` and `cpu_shares`
