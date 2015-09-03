@@ -153,10 +153,14 @@ describe Centurion::Service do
     service = Centurion::Service.new(:redis)
     service.dns = 'example.com'
     service.add_port_bindings(8000, 6379)
+    service.cap_adds = ['IPC_BIND', 'NET_RAW']
+    service.cap_drops = ['DAC_OVERRIDE']
     service.add_volume('/volumes/redis.8000', '/data')
 
     expect(service.build_host_config(Centurion::Service::RestartPolicy.new('on-failure', 10))).to eq({
       'Binds' => ['/volumes/redis.8000:/data'],
+      'CapAdd' => ['IPC_BIND', 'NET_RAW'],
+      'CapDrop' => ['DAC_OVERRIDE'],
       'PortBindings' => {
         '6379/tcp' => [{'HostPort' => '8000'}]
       },
@@ -173,6 +177,8 @@ describe Centurion::Service do
 
     expect(service.build_host_config(Centurion::Service::RestartPolicy.new('garbage'))).to eq({
        'Binds' => [],
+       'CapAdd' => [],
+       'CapDrop' => [],
        'PortBindings' => {},
        'RestartPolicy' => {
          'Name' => 'on-failure',
@@ -186,6 +192,8 @@ describe Centurion::Service do
 
     expect(service.build_host_config(Centurion::Service::RestartPolicy.new('no'))).to eq({
       'Binds' => [],
+      'CapAdd' => [],
+      'CapDrop' => [],
       'PortBindings' => {},
        'RestartPolicy' => {
          'Name' => 'no',
@@ -198,6 +206,8 @@ describe Centurion::Service do
 
     expect(service.build_host_config(Centurion::Service::RestartPolicy.new('always'))).to eq({
       'Binds' => [],
+      'CapAdd' => [],
+      'CapDrop' => [],
       'PortBindings' => {},
        'RestartPolicy' => {
          'Name' => 'always',
@@ -210,6 +220,8 @@ describe Centurion::Service do
 
     expect(service.build_host_config(Centurion::Service::RestartPolicy.new('on-failure', 50))).to eq({
       'Binds' => [],
+      'CapAdd' => [],
+      'CapDrop' => [],
       'PortBindings' => {},
        'RestartPolicy' => {
          'Name' => 'on-failure',
