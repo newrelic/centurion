@@ -17,11 +17,17 @@ module Centurion::DeployDSL
   end
 
   def add_capability(new_cap_adds)
+    if !valid_capability?(new_cap_adds)
+      abort("Invalid capability addition #{new_cap_adds} specified.")
+    end
     current = fetch(:cap_adds, [])
     set(:cap_adds, current << new_cap_adds)
   end
 
   def drop_capability(new_cap_drops)
+    if !valid_capability?(new_cap_drops)
+      abort("Invalid capability drop #{new_cap_drops} specified.")
+    end
     current = fetch(:cap_drops, [])
     set(:cap_drops, current << new_cap_drops)
   end
@@ -132,6 +138,15 @@ module Centurion::DeployDSL
     unless missing.empty?
       raise ArgumentError.new("Options must contain #{missing.inspect}")
     end
+  end
+
+  def valid_capability?(capability)
+    %w(ALL SETPCAP SYS_MODULE SYS_RAWIO SYS_PACCT SYS_ADMIN SYS_NICE
+       SYS_RESOURCE SYS_TIME SYS_TTY_CONFIG MKNOD AUDIT_WRITE AUDIT_CONTROL
+       MAC_OVERRIDE MAC_ADMIN NET_ADMIN SYSLOG CHOWN NET_RAW DAC_OVERRIDE FOWNER
+       DAC_READ_SEARCH FSETID KILL SETGID SETUID LINUX_IMMUTABLE
+       NET_BIND_SERVICE NET_BROADCAST IPC_LOCK IPC_OWNER SYS_CHROOT SYS_PTRACE
+       SYS_BOOT LEASE SETFCAP WAKE_ALARM BLOCK_SUSPEND).include?(capability)
   end
 
   def tls_paths_available?

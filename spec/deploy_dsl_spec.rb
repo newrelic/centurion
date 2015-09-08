@@ -51,6 +51,10 @@ describe Centurion::DeployDSL do
       DeployDSLTest.add_capability 'SYS_RESOURCE'
       expect(DeployDSLTest.defined_service.cap_adds).to eq(['IPC_LOCK', 'SYS_RESOURCE'])
     end
+
+    it 'fails when an invalid capability is added' do
+      lambda{ DeployDSLTest.add_capability 'FOO_BAR' }.should raise_error SystemExit
+    end
   end
 
   describe '#drop_capability' do
