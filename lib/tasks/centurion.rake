@@ -7,6 +7,7 @@ namespace :centurion do
   task :clean_environment do
     ENV.delete('DOCKER_HOST')
     ENV.delete('DOCKER_TLS_VERIFY')
+    set(:original_docker_cert_path, ENV['DOCKER_CERT_PATH'])
     ENV.delete('DOCKER_CERT_PATH')
   end
 end

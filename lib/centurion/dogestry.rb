@@ -57,6 +57,20 @@ class Centurion::Dogestry
     ENV['AWS_ACCESS_KEY'] = aws_access_key_id
     ENV['AWS_SECRET_KEY'] = aws_secret_key
 
+    # If we want TLS, then try to pass a sane directory to Dogestry, which doesn't
+    # speak individual filenames.
+    if @options[:tlsverify]
+      ENV['DOCKER_CERT_PATH'] =
+        if @options[:tlscacert] || @options[:tlscert]
+          File.dirname(
+            @options[:tlscacert] ||
+            @options[:tlscert]
+          )
+        else
+          @options[:original_docker_cert_path]
+        end
+    end
+
     info "Dogestry ENV: #{ENV.inspect}"
   end
 
