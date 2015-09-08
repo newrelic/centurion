@@ -40,6 +40,36 @@ describe Centurion::DeployDSL do
     )
   end
 
+  describe '#add_capability' do
+    it 'adds one capability' do
+      DeployDSLTest.add_capability 'IPC_LOCK'
+      expect(DeployDSLTest.defined_service.cap_adds).to eq(['IPC_LOCK'])
+    end
+
+    it 'adds multiple capabilites' do 
+      DeployDSLTest.add_capability 'IPC_LOCK'
+      DeployDSLTest.add_capability 'SYS_RESOURCE'
+      expect(DeployDSLTest.defined_service.cap_adds).to eq(['IPC_LOCK', 'SYS_RESOURCE'])
+    end
+
+    it 'fails when an invalid capability is added' do
+      lambda{ DeployDSLTest.add_capability 'FOO_BAR' }.should raise_error SystemExit
+    end
+  end
+
+  describe '#drop_capability' do
+    it 'drops one capability' do
+      DeployDSLTest.drop_capability 'IPC_LOCK'
+      expect(DeployDSLTest.defined_service.cap_drops).to eq(['IPC_LOCK'])
+    end
+
+    it 'drops multiple capabilites' do 
+      DeployDSLTest.drop_capability 'IPC_LOCK'
+      DeployDSLTest.drop_capability 'SYS_RESOURCE'
+      expect(DeployDSLTest.defined_service.cap_drops).to eq(['IPC_LOCK', 'SYS_RESOURCE'])
+    end
+  end      
+
   it 'adds hosts to the host list' do
     DeployDSLTest.set(:hosts, [ 'host1' ])
     DeployDSLTest.host('host2')

@@ -223,6 +223,27 @@ cpu_shares 512
 For more information on Docker's CGroup limits see [the Docker
 docs](https://docs.docker.com/reference/run/#runtime-constraints-on-cpu-and-memory).
 
+### Adding Extended Capabilities
+
+Additional kernel capabilities may be granted to containers, permitting them
+device access they do not normally have. You may specify these as follows:
+
+```ruby
+add_capability 'SOME_CAPABILITY'
+add_capability 'ANOTHER_CAPABILITY'
+drop_capability 'SOMEOTHER_CAPABILITY'
+```
+
+You may also ask for all but a few capabilities as follows:
+
+```ruby
+add_capability 'ALL'
+drop_capability 'SOME_CAPABILITY'
+```
+
+For more information on which kernel capabilities may be specified, see the
+[Docker docs](https://docs.docker.com/reference/run/#runtime-privilege-linux-capabilities-and-lxc-configuration).
+
 ### Interpolation
 
 Currently there a couple of special strings for interpolation that can be added
@@ -247,7 +268,8 @@ You just need to enable the tls mode as the following:
   end
 ```
 
-Centurion will only set the `--tlsverify` to true and Docker will read your certificate from the `~/.docker/` path.
+Centurion will only set the `--tlsverify` to true and Docker will read your
+certificate from the `~/.docker/` path.
 
 #### Your certificate files are not in `~/.docker/`
 
