@@ -118,6 +118,27 @@ describe Centurion::DeployDSL do
     end
   end
 
+  describe '#network_mode' do
+    it 'accepts host mode' do
+      DeployDSLTest.network_mode('host')
+      expect(DeployDSLTest.defined_service.network_mode).to eq('host')
+    end
+
+    it 'accepts bridge mode' do
+      DeployDSLTest.network_mode('bridge')
+      expect(DeployDSLTest.defined_service.network_mode).to eq('bridge')
+    end
+
+    it 'accepts container link mode' do
+      DeployDSLTest.network_mode('container:a2e8937b')
+      expect(DeployDSLTest.defined_service.network_mode).to eq('container:a2e8937b')
+    end
+
+    it 'fails when invalid mode is passed' do
+      expect { DeployDSLTest.network_mode('foo') }.to raise_error(SystemExit)
+    end
+  end
+
   describe '#host_volume' do
     it 'raises unless passed the container_volume option' do
       expect { DeployDSLTest.host_volume('foo', {}) }.to raise_error(ArgumentError, /:container_volume/)

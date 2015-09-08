@@ -66,6 +66,14 @@ module Centurion::DeployDSL
     end)
   end
 
+  def network_mode(mode)
+    if %w(bridge host).include?(mode) or mode =~ /container.*/
+      set(:network_mode, mode)
+    else
+      abort("invalid value for network_mode: #{mode}, value must be one of 'bridge', 'host', or 'container:<name|id>'")
+    end
+  end
+
   def public_port_for(port_bindings)
     # {'80/tcp'=>[{'HostIp'=>'0.0.0.0', 'HostPort'=>'80'}]}
     first_port_binding = port_bindings.values.first

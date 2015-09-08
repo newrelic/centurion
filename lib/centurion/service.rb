@@ -5,7 +5,7 @@ module Centurion
   class Service
     extend ::Capistrano::DSL
 
-    attr_accessor :command, :dns, :extra_hosts, :image, :name, :volumes, :port_bindings, :cap_adds, :cap_drops
+    attr_accessor :command, :dns, :extra_hosts, :image, :name, :volumes, :port_bindings, :network_mode, :cap_adds, :cap_drops 
     attr_reader :memory, :cpu_shares, :env_vars
 
     def initialize(name)
@@ -15,22 +15,26 @@ module Centurion
       @port_bindings = []
       @cap_adds      = []
       @cap_drops     = []
+      @network_mode  = 'bridge'
     end
 
     def self.from_env
       Service.new(fetch(:name)).tap do |s|
-        s.image    = if fetch(:tag, nil)
+        s.image = if fetch(:tag, nil)
           "#{fetch(:image, nil)}:#{fetch(:tag)}"
         else
           fetch(:image, nil)
         end
+
         s.cap_adds      = fetch(:cap_adds, [])
         s.cap_drops     = fetch(:cap_drops, [])
         s.dns           = fetch(:dns, nil)
         s.extra_hosts   = fetch(:extra_hosts, nil)
         s.volumes       = fetch(:binds, [])
         s.port_bindings = fetch(:port_bindings, [])
+        s.network_mode  = fetch(:network_mode, 'bridge')
         s.command       = fetch(:command, nil)
+
         s.add_env_vars(fetch(:env_vars, {}))
       end
     end
@@ -61,9 +65,13 @@ module Centurion
       @cap_drops = capabilites
     end
 
+    def network_mode=(mode)
+      @network_mode = mode
+    end
+
     def memory=(bytes)
       if !bytes || !is_a_uint64?(bytes)
-    raise ArgumentError, "invalid value for cgroup memory constraint: #{bytes}, value must be a between 0 and 18446744073709551615"
+        raise ArgumentError, "invalid value for cgroup memory constraint: #{bytes}, value must be a between 0 and 18446744073709551615"
       end
       @memory = bytes
     end
@@ -123,6 +131,9 @@ module Centurion
 
       # Bind the ports
       host_config['PortBindings'] = port_bindings_config
+
+      # Set the network mode
+      host_config['NetworkMode'] = network_mode
 
       # DNS if specified
       host_config['Dns'] = dns if dns
