@@ -442,12 +442,12 @@ end
 ```
 
 **TLS with Dogestry**: Because this involves a little passing around of both
-settings and environment variables there are a couple of things to verity to
+settings and environment variables, there are a couple of things to verify to
 make sure everything is passed properly between Centurion and Dogestry. If your
-keys are named the default names and are in located in the path represented by
-`DOCKER_CERT_PATH` in your environment, this will just work. Otherwise you'll
+keys have the default names and are in located in the path represented by
+`DOCKER_CERT_PATH` in your environment, this should just work. Otherwise you'll
 need to be sure to `set :tlsverify, true` and *also* set the TLS cert names as
-decribed above.
+decribed above. 
 
 Development
 -----------
