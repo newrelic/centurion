@@ -59,6 +59,10 @@ namespace :deploy do
         aws_secret_key: fetch(:aws_secret_key),
         s3_bucket: fetch(:s3_bucket),
         s3_region: fetch(:s3_region) || 'us-east-1',
+        tlsverify: fetch(:tlsverify),
+        tlscacert: fetch(:tlscacert),
+        tlscert: fetch(:tlscert),
+        original_docker_cert_path: fetch(:original_docker_cert_path)
       )
 
       target_servers = Centurion::DockerServerGroup.new(fetch(:hosts), fetch(:docker_path))
