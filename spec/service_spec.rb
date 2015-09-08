@@ -255,10 +255,12 @@ describe Centurion::Service do
     })
   end
 
-  it 'builds docker configuration for container-linked networking' do 
+  it 'builds docker configuration for container-linked networking' do
     service.network_mode = 'container:a2e8937b'
     expect(service.build_host_config(Centurion::Service::RestartPolicy.new('on-failure', 50))).to eq({
       'Binds' => [],
+      'CapAdd' => [],
+      'CapDrop' => [],
       'NetworkMode' => 'container:a2e8937b',
       'PortBindings' => {},
        'RestartPolicy' => {
@@ -267,5 +269,20 @@ describe Centurion::Service do
       }
    })
   end
-end
 
+  it 'builds docker configuration for host networking' do
+    service.network_mode = 'host'
+    expect(service.build_host_config(Centurion::Service::RestartPolicy.new('on-failure', 50))).to eq({
+      'Binds' => [],
+      'CapAdd' => [],
+      'CapDrop' => [],
+      'NetworkMode' => 'host',
+      'PortBindings' => {},
+       'RestartPolicy' => {
+         'Name' => 'on-failure',
+         'MaximumRetryCount' => 50
+      }
+   })
+  end
+
+end

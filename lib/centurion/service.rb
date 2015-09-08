@@ -20,11 +20,12 @@ module Centurion
 
     def self.from_env
       Service.new(fetch(:name)).tap do |s|
-        s.image    = if fetch(:tag, nil)
+        s.image = if fetch(:tag, nil)
           "#{fetch(:image, nil)}:#{fetch(:tag)}"
         else
           fetch(:image, nil)
         end
+
         s.cap_adds      = fetch(:cap_adds, [])
         s.cap_drops     = fetch(:cap_drops, [])
         s.dns           = fetch(:dns, nil)
@@ -62,13 +63,10 @@ module Centurion
         raise ArgumentError, "invalid value for capability drops: #{capabilites}, value must be an array"
       end
       @cap_drops = capabilites
+    end
 
     def network_mode=(mode)
-      if ['bridge', 'host'].include?(mode) or mode =~ /container.*/
-        @network_mode = mode
-      else
-        raise ArgumentError, "invalid value for network_mode: #{mode}, value must be one of 'bridge', 'host', or 'container:<name|id>"
-      end
+      @network_mode = mode
     end
 
     def memory=(bytes)
