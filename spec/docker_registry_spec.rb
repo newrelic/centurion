@@ -93,7 +93,7 @@ describe Centurion::DockerRegistry do
       JSON
 
       before do
-        expect(Excon).to receive(:get).with(kind_of(String), hash_including(:user => user, :password => password)).and_return(
+        expect(Excon).to receive(:get).with(kind_of(String), hash_including(user: user, password: password)).and_return(
           double(status: 200, body: response)
         )
       end

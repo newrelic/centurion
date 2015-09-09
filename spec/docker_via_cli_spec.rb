@@ -28,7 +28,7 @@ describe Centurion::DockerViaCli do
     it 'should print all chars when one thread is running' do
       expect(Centurion::Shell).to receive(:run_with_echo)
 
-      allow(Thread).to receive(:list) {[double(:status => 'run')]}
+      allow(Thread).to receive(:list) {[double(status: 'run')]}
 
       docker_via_cli.pull('foo')
     end
@@ -36,7 +36,7 @@ describe Centurion::DockerViaCli do
     it 'should only print lines when multiple threads are running' do
       expect(Centurion::Shell).to receive(:run_without_echo)
 
-      allow(Thread).to receive(:list) {[double(:status => 'run'), double(:status => 'run')]}
+      allow(Thread).to receive(:list) {[double(status: 'run'), double(status: 'run')]}
 
       docker_via_cli.pull('foo')
     end

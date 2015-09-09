@@ -17,7 +17,7 @@ class Centurion::DockerRegistry
     path = "/v1/repositories/#{repository}/tags/#{tag}"
     uri = uri_for_repository_path(repository, path)
     $stderr.puts "GET: #{uri}"
-    options = { :headers => { "Content-Type" => "application/json" } }
+    options = { headers: { "Content-Type" => "application/json" } }
     if @user
       options[:user] = @user
       options[:password] = @password
