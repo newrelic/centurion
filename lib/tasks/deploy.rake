@@ -127,6 +127,8 @@ namespace :deploy do
           container['Id'],
           port,
           fetch(:status_endpoint, '/'),
+          fetch(:image),
+          fetch(:tag),
           fetch(:rolling_deploy_wait_time, 5),
           fetch(:rolling_deploy_retries, 24)
         )
