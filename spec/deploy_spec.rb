@@ -127,7 +127,7 @@ describe Centurion::Deploy do
       second_container = container.dup
       containers = [ container, second_container ]
 
-      expect(server).to receive(:find_containers_by_public_port).with(80).and_return(containers)
+      expect(server).to receive(:find_containers_by_name).with(:centurion).and_return(containers)
       expect(server).to receive(:stop_container).with(container['Id'], 30).once
       expect(server).to receive(:stop_container).with(second_container['Id'], 30).once
 
