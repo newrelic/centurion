@@ -31,7 +31,7 @@ module Centurion::Deploy
     end
 
     unless health_check_method.call(target_server, port, endpoint)
-      error "Failed to validate started container on #{target_server}:#{port}"
+      error "Failed to validate started container on #{target_server.hostname}:#{port}"
       exit(FAILED_CONTAINER_VALIDATION)
     end
   end
