@@ -27,7 +27,7 @@ describe Centurion::DockerViaApi do
 
     it 'creates a container' do
       configuration_as_json = double
-      configuration = double(:to_json => configuration_as_json)
+      configuration = double(to_json: configuration_as_json)
       expect(Excon).to receive(:post).
                            with(excon_uri + "v1.10" + "/containers/create",
                                 query: nil,
@@ -39,10 +39,10 @@ describe Centurion::DockerViaApi do
 
     it 'creates a container with a name' do
       configuration_as_json = double
-      configuration = double(:to_json => configuration_as_json)
+      configuration = double(to_json: configuration_as_json)
       expect(Excon).to receive(:post).
                            with(excon_uri + "v1.10" + "/containers/create",
-                                query: { :name => match(/^app1-[a-f0-9]+$/) },
+                                query: { name: match(/^app1-[a-f0-9]+$/) },
                                 body: configuration_as_json,
                                 headers: {'Content-Type' => 'application/json'}).
                            and_return(double(body: json_string, status: 201))
@@ -51,7 +51,7 @@ describe Centurion::DockerViaApi do
 
     it 'starts a container' do
       configuration_as_json = double
-      configuration = double(:to_json => configuration_as_json)
+      configuration = double(to_json: configuration_as_json)
       expect(Excon).to receive(:post).
                            with(excon_uri + "v1.10" + "/containers/12345/start",
                                 body: configuration_as_json,
@@ -148,7 +148,7 @@ describe Centurion::DockerViaApi do
 
     it 'creates a container' do
       configuration_as_json = double
-      configuration = double(:to_json => configuration_as_json)
+      configuration = double(to_json: configuration_as_json)
       expect(Excon).to receive(:post).
                            with(excon_uri + 'v1.10/containers/create',
                                 client_cert: '/certs/cert.pem',
@@ -162,7 +162,7 @@ describe Centurion::DockerViaApi do
 
     it 'starts a container' do
       configuration_as_json = double
-      configuration = double(:to_json => configuration_as_json)
+      configuration = double(to_json: configuration_as_json)
       expect(Excon).to receive(:post).
                            with(excon_uri + 'v1.10/containers/12345/start',
                                 client_cert: '/certs/cert.pem',

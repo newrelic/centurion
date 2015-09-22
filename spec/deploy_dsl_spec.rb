@@ -31,7 +31,7 @@ describe Centurion::DeployDSL do
   it 'adds new env_vars to the existing ones, as strings' do
     DeployDSLTest.env_vars('SHAKESPEARE' => 'Hamlet')
     DeployDSLTest.env_vars('DICKENS' => 'David Copperfield',
-                           :DICKENS_BIRTH_YEAR => 1812)
+                           DICKENS_BIRTH_YEAR: 1812)
 
     expect(DeployDSLTest.defined_service.env_vars).to eq(
       'SHAKESPEARE'        => 'Hamlet',

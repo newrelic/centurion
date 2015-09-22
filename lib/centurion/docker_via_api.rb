@@ -28,7 +28,7 @@ class Centurion::DockerViaApi
 
     response = Excon.get(
       @base_uri + path,
-      tls_excon_arguments.merge(:headers => {'Accept' => 'application/json'})
+      tls_excon_arguments.merge(headers: {'Accept' => 'application/json'})
     )
     raise response.inspect unless response.status == 200
     JSON.load(response.body)
@@ -59,9 +59,9 @@ class Centurion::DockerViaApi
     response = Excon.post(
       @base_uri + path,
       tls_excon_arguments.merge(
-        :query   => name ? {:name => "#{name}-#{SecureRandom.hex(7)}"} : nil,
-        :body    => configuration.to_json,
-        :headers => { "Content-Type" => "application/json" }
+        query: name ? {name: "#{name}-#{SecureRandom.hex(7)}"} : nil,
+        body: configuration.to_json,
+        headers: { "Content-Type" => "application/json" }
       )
     )
     raise response.inspect unless response.status == 201
@@ -73,8 +73,8 @@ class Centurion::DockerViaApi
     response = Excon.post(
       @base_uri + path,
       tls_excon_arguments.merge(
-        :body => configuration.to_json,
-        :headers => { "Content-Type" => "application/json" }
+        body: configuration.to_json,
+        headers: { "Content-Type" => "application/json" }
       )
     )
     case response.status
