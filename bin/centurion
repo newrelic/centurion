@@ -40,15 +40,7 @@ set :project, opts[:project]
 set :environment, opts[:environment]
 
 # Load the per-project config and execute the task for the current environment
-projects_dir = File.join(Dir.getwd(), 'config', 'centurion')
-config_file  = "#{opts[:project]}.rake"
-if File.exists?(File.join(projects_dir, config_file))
-  load File.join(File.join(projects_dir, config_file))
-elsif File.exists?(config_file)
-  load config_file
-else
-  raise "Can't find '#{config_file}'!"
-end
+Centurion::ProjectLoader.load_project(Dir.getwd(), opts[:project])
 invoke("environment:#{opts[:environment]}")
 
 # Override the config with command line values if given
