@@ -64,7 +64,7 @@ class Centurion::DockerServer
 
   def docker_via_api
     @docker_via_api ||= Centurion::DockerViaApi.new(@hostname, @port,
-                                                    @tls_params)
+                                                    @tls_params, nil)
   end
 
   def docker_via_cli

@@ -4,6 +4,7 @@ require 'centurion/docker_via_api'
 describe Centurion::DockerViaApi do
   let(:hostname) { 'example.com' }
   let(:port) { '2375' }
+  let(:api_version) { '1.12' }
   let(:json_string) { '[{ "Hello": "World" }]' }
   let(:json_value) { JSON.load(json_string) }
 

@@ -12,6 +12,7 @@ Your name could be here!
  * [Suren Karapetyan][skarap]
  * [Jon Wood][jellybob]
  * [Mark Borcherding][markborcherding]
+ * [Nick Laferriere][laferrieren]
 
 Pre-release
 -----------
