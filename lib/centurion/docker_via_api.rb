@@ -14,7 +14,7 @@ class Centurion::DockerViaApi
   end
 
   def ps(options={})
-    path = "/v1.7" + "/containers/json"
+    path = "/v1.12" + "/containers/json"
     path += "?all=1" if options[:all]
     response = Excon.get(@base_uri + path, tls_excon_arguments)
 
@@ -24,7 +24,7 @@ class Centurion::DockerViaApi
 
   def inspect_image(image, tag = "latest")
     repository = "#{image}:#{tag}"
-    path       = "/v1.7" + "/images/#{repository}/json"
+    path       = "/v1.12" + "/images/#{repository}/json"
 
     response = Excon.get(
       @base_uri + path,
@@ -35,7 +35,7 @@ class Centurion::DockerViaApi
   end
 
   def remove_container(container_id)
-    path = "/v1.7" + "/containers/#{container_id}"
+    path = "/v1.12" + "/containers/#{container_id}"
     response = Excon.delete(
       @base_uri + path,
       tls_excon_arguments
@@ -45,7 +45,7 @@ class Centurion::DockerViaApi
   end
 
   def stop_container(container_id, timeout = 30)
-    path = "/v1.7" + "/containers/#{container_id}/stop?t=#{timeout}"
+    path = "/v1.12" + "/containers/#{container_id}/stop?t=#{timeout}"
     response = Excon.post(
       @base_uri + path,
       tls_excon_arguments
@@ -55,7 +55,7 @@ class Centurion::DockerViaApi
   end
 
   def create_container(configuration, name = nil)
-    path = "/v1.10" + "/containers/create"
+    path = "/v1.12" + "/containers/create"
     response = Excon.post(
       @base_uri + path,
       tls_excon_arguments.merge(
@@ -69,7 +69,7 @@ class Centurion::DockerViaApi
   end
 
   def start_container(container_id, configuration)
-    path = "/v1.10" + "/containers/#{container_id}/start"
+    path = "/v1.12" + "/containers/#{container_id}/start"
     response = Excon.post(
       @base_uri + path,
       tls_excon_arguments.merge(
@@ -88,7 +88,7 @@ class Centurion::DockerViaApi
   end
 
   def restart_container(container_id, timeout = 30)
-    path = "/v1.10" + "/containers/#{container_id}/restart?t=#{timeout}"
+    path = "/v1.12" + "/containers/#{container_id}/restart?t=#{timeout}"
     response = Excon.post(
       @base_uri + path,
       tls_excon_arguments
@@ -106,7 +106,7 @@ class Centurion::DockerViaApi
   end
 
   def inspect_container(container_id)
-    path = "/v1.7" + "/containers/#{container_id}/json"
+    path = "/v1.12" + "/containers/#{container_id}/json"
     response = Excon.get(
       @base_uri + path,
       tls_excon_arguments
