@@ -27,6 +27,10 @@ class Centurion::DockerViaCli
     Centurion::Shell.echo(build_command(:attach, container_id))
   end
 
+  def exec(container_id, commandline)
+    Centurion::Shell.echo(build_command(:exec, "#{container_id} #{commandline}"))
+  end
+
   private
 
   def self.tls_keys
@@ -61,6 +65,7 @@ class Centurion::DockerViaCli
                when :pull then ' pull '
                when :logs then ' logs -f '
                when :attach then ' attach '
+               when :exec then ' exec '
                end
     command << destination
     command
