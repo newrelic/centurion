@@ -67,7 +67,6 @@ describe Centurion::DockerServer do
     end
 
     it 'finds containers by name' do
-      expect(server).to receive(:ps).with(all: true).and_return(ps)
       expect(server.find_containers_by_name('centurion')).to eq([container])
     end
 

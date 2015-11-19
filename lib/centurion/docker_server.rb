@@ -42,7 +42,7 @@ class Centurion::DockerServer
   end
 
   def find_containers_by_name(wanted_name)
-    ps(all: true).select do |container|
+    ps.select do |container|
       next unless container && container['Names']
       container['Names'].find do |name|
         name =~ /\A\/#{wanted_name}(-[a-f0-9]{14})?\Z/
