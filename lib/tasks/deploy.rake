@@ -23,6 +23,12 @@ task :rolling_deploy do
   invoke 'deploy:cleanup'
 end
 
+task :repair do
+  invoke 'deploy:get_image'
+  invoke 'deploy:repair'
+  invoke 'deploy:cleanup'
+end
+
 task :stop => ['deploy:stop']
 
 namespace :dev do
@@ -135,6 +141,27 @@ namespace :deploy do
       end
 
       wait_for_load_balancer_check_interval
+    end
+  end
+
+  task :repair do
+    service = defined_service
+
+    # find nodes that are down
+    on_each_docker_host do |server|
+      failed_healthcheck = false
+      public_ports = service.public_ports - fetch(:rolling_deploy_skip_ports, [])
+      public_ports.each do |port|
+        unless method(:http_status_ok?).call(server, port, fetch(:status_endpoint, '/'))
+          failed_healthcheck = true 
+          break
+        end
+      end
+      next unless failed_healthcheck
+      # issue stop to clean host
+      stop_containers(server, service, fetch(:stop_timeout, 30))
+      # start new container services is already down, so no need to role gracefully
+      start_new_container(server, defined_service, defined_restart_policy)
     end
   end
 

@@ -394,6 +394,14 @@ with `/bin/bash`. It will use the first host from the host list.
 ````bash
 $ bundle exec centurion -p radio-radio -e staging -a deploy_console
 ````
+### Repair unhealthy docker containers
+
+This will preform a health check on each host using rolling deployment
+health check settings and redeploy to the host if a health check fails.
+
+````bash
+$ bundle exec centurion -p radio-radio -e staging -a repair
+````
 
 ###List all the tags running on your servers for a particular project
 
