@@ -75,9 +75,12 @@ module Centurion::DeployDSL
   end
 
   def public_port_for(port_bindings)
-    # {'80/tcp'=>[{'HostIp'=>'0.0.0.0', 'HostPort'=>'80'}]}
-    first_port_binding = port_bindings.values.first
-    first_port_binding.first['HostPort']
+    # port_bindings = [#<struct Centurion::Service::PortBinding
+    #   host_port=17090,
+    #   container_port=80,
+    #   type="tcp",
+    #   host_ip=nil>]
+    port_bindings.first.host_port
   end
 
   def host_volume(volume, options)
