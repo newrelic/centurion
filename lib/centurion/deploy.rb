@@ -7,8 +7,11 @@ module Centurion::Deploy
   FAILED_CONTAINER_VALIDATION = 100
 
   def stop_containers(target_server, service, timeout = 30)
-    old_containers = target_server.find_containers_by_name(service.name) || 
-                     target_server.find_containers_by_public_port(service.public_ports.first)
+    old_containers = if service.public_ports.nil? || service.public_ports.empty?
+      target_server.find_containers_by_name(service.name)
+    else
+      target_server.find_containers_by_public_port(service.public_ports.first)
+    end
 
     info "Stopping container(s): #{old_containers.inspect}"
 

@@ -120,11 +120,25 @@ describe Centurion::Deploy do
   end
 
   describe '#stop_containers' do
-    it 'calls stop_container on the right containers' do
+    it 'calls stop_container on the right containers when ports are mapped' do
       service = Centurion::Service.new(:centurion)
       service.add_port_bindings(80, 80)
 
+      second_container = container.dup.tap { |c| c['Id'] = c['Id'].sub(/49494/, '55555') }
+      containers = [ container, second_container ]
+
+      expect(server).to receive(:find_containers_by_public_port).with(80).and_return(containers)
+      expect(server).to receive(:stop_container).with(container['Id'], 30).once
+      expect(server).to receive(:stop_container).with(second_container['Id'], 30).once
+
+      test_deploy.stop_containers(server, service)
+    end
+
+    it 'calls stop_container on the right containers when ports are not mapped' do
+      service = Centurion::Service.new(:centurion)
+
       second_container = container.dup
+      second_container = container.dup.tap { |c| c['Id'] = c['Id'].sub(/49494/, '55555') }
       containers = [ container, second_container ]
 
       expect(server).to receive(:find_containers_by_name).with(:centurion).and_return(containers)
