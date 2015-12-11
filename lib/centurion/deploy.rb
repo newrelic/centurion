@@ -97,7 +97,7 @@ module Centurion::Deploy
 
   def start_new_container(server, service, restart_policy)
     container_config = service.build_config(server.hostname, &hostname_proc)
-    info "Creating new container for #{container_config['Image'][0..7]}"
+    info "Creating new container for #{container_config['Image']}"
     container = server.create_container(container_config, service.name)
 
     host_config = service.build_host_config(restart_policy)
