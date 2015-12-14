@@ -5,7 +5,7 @@ module Centurion
   class Service
     extend ::Capistrano::DSL
 
-    attr_accessor :command, :dns, :extra_hosts, :image, :name, :volumes, :port_bindings, :network_mode, :cap_adds, :cap_drops 
+    attr_accessor :command, :dns, :extra_hosts, :image, :name, :use_decorated_name, :volumes, :port_bindings, :network_mode, :cap_adds, :cap_drops 
     attr_reader :memory, :cpu_shares, :env_vars
 
     def initialize(name)
@@ -18,24 +18,25 @@ module Centurion
       @network_mode  = 'bridge'
     end
 
-    def self.from_env
-      Service.new(fetch(:name)).tap do |s|
-        s.image = if fetch(:tag, nil)
-          "#{fetch(:image, nil)}:#{fetch(:tag)}"
+    def self.from_env(environment = ::Capistrano::DSL::Env::Store.instance)
+      Service.new(environment.fetch(:name)).tap do |s|
+        s.image = if environment.fetch(:tag, nil)
+          "#{environment.fetch(:image, nil)}:#{environment.fetch(:tag)}"
         else
-          fetch(:image, nil)
+          environment.fetch(:image, nil)
         end
 
-        s.cap_adds      = fetch(:cap_adds, [])
-        s.cap_drops     = fetch(:cap_drops, [])
-        s.dns           = fetch(:dns, nil)
-        s.extra_hosts   = fetch(:extra_hosts, nil)
-        s.volumes       = fetch(:binds, [])
-        s.port_bindings = fetch(:port_bindings, [])
-        s.network_mode  = fetch(:network_mode, 'bridge')
-        s.command       = fetch(:command, nil)
+        s.cap_adds           = environment.fetch(:cap_adds, [])
+        s.cap_drops          = environment.fetch(:cap_drops, [])
+        s.dns                = environment.fetch(:dns, nil)
+        s.extra_hosts        = environment.fetch(:extra_hosts, nil)
+        s.volumes            = environment.fetch(:binds, [])
+        s.port_bindings      = environment.fetch(:port_bindings, [])
+        s.network_mode       = environment.fetch(:network_mode, 'bridge')
+        s.command            = environment.fetch(:command, nil)
+        s.use_decorated_name = environment.fetch(:use_decorated_name, true)
 
-        s.add_env_vars(fetch(:env_vars, {}))
+        s.add_env_vars(environment.fetch(:env_vars, {}))
       end
     end
 

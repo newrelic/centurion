@@ -13,7 +13,11 @@ module Centurion::Deploy
       target_server.find_containers_by_public_port(service.public_ports.first)
     end
 
-    info "Stopping container(s): #{old_containers.inspect}"
+    if old_containers.empty?
+      info "No containers to stop"
+    else 
+      info "Stopping container(s): #{old_containers.inspect}" 
+    end
 
     old_containers.each do |old_container|
       info "Stopping old container #{old_container['Id'][0..7]} (#{old_container['Names'].join(',')})"
@@ -97,8 +101,13 @@ module Centurion::Deploy
 
   def start_new_container(server, service, restart_policy)
     container_config = service.build_config(server.hostname, &hostname_proc)
+<<<<<<< Updated upstream
     info "Creating new container for #{container_config['Image'][0..7]}"
     container = server.create_container(container_config, service.name)
+=======
+    info "Creating new container for #{container_config['Image']}"
+    container = server.create_container(container_config, service.name, service.use_decorated_name)
+>>>>>>> Stashed changes
 
     host_config = service.build_host_config(restart_policy)
 

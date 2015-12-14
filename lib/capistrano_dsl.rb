@@ -42,8 +42,11 @@ module Capistrano
         Store.instance
       end
 
-      def fetch(key, default=nil, &block)
-        env[current_environment][key] || default
+      def fetch(key, default=nil)
+        if env[current_environment].has_key?(key)
+          return env[current_environment][key]
+        end
+        default
       end
 
       def any?(key)

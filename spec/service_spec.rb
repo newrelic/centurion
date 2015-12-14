@@ -1,22 +1,29 @@
 require 'spec_helper'
+require 'capistrano_dsl'
 require 'centurion/service'
+require 'centurion/deploy_dsl'
 
 describe Centurion::Service do
 
   let(:service)  { Centurion::Service.new(:redis) }
   let(:hostname) { 'shakespeare' }
   let(:image)    { 'redis' }
+  let(:test_deploy) do
+    Object.new.tap do |o|
+      o.send(:extend, Capistrano::DSL)
+      o.send(:extend, Centurion::DeployDSL)
+    end
+  end
 
   it 'creates a service from the environment' do
-    extend Capistrano::DSL
-    set_current_environment(:test)
-    set(:name, 'mycontainer')
-    set(:image, image)
-    set(:hostname, hostname)
-    set(:binds, [ Centurion::Service::Volume.new('/foo', '/foo/bar') ])
-    set(:port_bindings, [ Centurion::Service::PortBinding.new(12340, 80, 'tcp') ])
+    test_deploy.set_current_environment(:test)
+    test_deploy.set(:name, 'mycontainer')
+    test_deploy.set(:image, image)
+    test_deploy.set(:hostname, hostname)
+    test_deploy.set(:binds, [ Centurion::Service::Volume.new('/foo', '/foo/bar') ])
+    test_deploy.set(:port_bindings, [ Centurion::Service::PortBinding.new(12340, 80, 'tcp') ])
 
-    svc = Centurion::Service.from_env
+    svc = Centurion::Service.from_env(test_deploy)
     expect(svc.name).to eq('mycontainer')
     expect(svc.image).to eq(image)
     expect(svc.dns).to be_nil
@@ -24,6 +31,16 @@ describe Centurion::Service do
     expect(svc.volumes.first.host_volume).to eq('/foo')
     expect(svc.port_bindings.size).to eq(1)
     expect(svc.port_bindings.first.container_port).to eq(80)
+  end
+
+  it 'creates a service from the environment with an undecorated name' do
+    test_deploy.set_current_environment(:test)
+    test_deploy.set(:name, 'mycontainer')
+    test_deploy.set(:use_decorated_name, false)
+
+    svc = Centurion::Service.from_env(test_deploy)
+    expect(svc.name).to eq('mycontainer')
+    expect(svc.use_decorated_name).to eq(false)
   end
 
   it 'starts with a command' do

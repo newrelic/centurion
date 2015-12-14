@@ -41,6 +41,7 @@ class Centurion::DockerServer
     end
   end
 
+  # Find containers by name, optionally containing hex deduplication suffix
   def find_containers_by_name(wanted_name)
     ps.select do |container|
       next unless container && container['Names']

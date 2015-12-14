@@ -185,7 +185,7 @@ describe Centurion::Deploy do
     let(:command)  { ['/bin/echo', 'hi'] }
 
     it 'ultimately asks the server object to do the work' do
-      service = double(:Service, name: :centurion, build_config: {"Image" => "abcdef"}, build_host_config: {})
+      service = double(:Service, name: :centurion, use_decorated_name: true, build_config: {"Image" => "abcdef"}, build_host_config: {})
       restart_policy = double(:RestartPolicy)
 
       expect(server).to receive(:create_container).with({"Image" => "abcdef"}, :centurion).and_return(container)
@@ -195,6 +195,12 @@ describe Centurion::Deploy do
 
       new_container = test_deploy.start_new_container(server, service, restart_policy)
       expect(new_container).to eq(container)
+    end
+
+    it 'starts a container with an undecorated name when asked' do
+      service = double(:Service, name: :centurion, use_decorated_name: false, build_config: {"Image" => "abcdef"}, build_host_config: {}).as_null_object
+      expect(server).to receive(:create_container).with({"Image" => "abcdef"}, :centurion, false)
+      test_deploy.start_new_container(server, service, double(:RestartPolicy))
     end
   end
 

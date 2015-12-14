@@ -51,16 +51,18 @@ class Centurion::DockerViaApi
       @base_uri + path,
       tls_excon_arguments
     )
-    raise response.inspect unless response.status == 204
+    raise response.inspect unless response.status == 204 or response.status == 404
     true
   end
 
-  def create_container(configuration, name = nil)
+  def create_container(configuration, name = nil, append_name_hex = true)
+    container_name = container_name_builder(name, append_name_hex)
+
     path = @docker_api_version + "/containers/create"
     response = Excon.post(
       @base_uri + path,
       tls_excon_arguments.merge(
-        query: name ? {name: "#{name}-#{SecureRandom.hex(7)}"} : nil,
+        query: container_name ,
         body: configuration.to_json,
         headers: { "Content-Type" => "application/json" }
       )
@@ -117,6 +119,16 @@ class Centurion::DockerViaApi
   end
 
   private
+
+  def container_name_builder(name, append_name_hex)
+    if append_name_hex && name
+      { name: "#{name}-#{SecureRandom.hex(7)}" }
+    elsif name
+      { name: name }
+    else
+      nil
+    end
+  end
 
   # use on result of inspect container, not on an item in a list
   def container_listening_on_port?(container, port)
