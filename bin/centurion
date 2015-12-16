@@ -33,6 +33,8 @@ opts = Trollop::options do
   opt :registry_user,    'user for registry auth',               type: String, short: :none
   opt :registry_password,'password for registry auth',           type: String, short: :none
   opt :override_env,     'override environment variables, comma separated', type: String
+  opt :api_version,      'docker API version',                   type: String, short: :none
+  opt :registry_version, 'docker registry version',              type: String, short: '-r'
 end
 
 set_current_environment(opts[:environment].to_sym)
@@ -75,6 +77,8 @@ set :docker_path, opts[:docker_path]
 set :no_pull, opts[:no_pull_given]
 set :registry_user, opts[:registry_user] if opts[:registry_user]
 set :registry_password, opts[:registry_password] if opts[:registry_password]
+set :registry_version, opts[:registry_version] if opts[:registry_version]
+set :api_version, opts[:api_version] if opts[:api_version]
 
 invoke('centurion:setup')
 invoke(opts[:action])

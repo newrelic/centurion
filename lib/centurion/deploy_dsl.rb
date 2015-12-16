@@ -133,8 +133,8 @@ module Centurion::DeployDSL
   private
 
   def build_server_group
-    hosts, docker_path = fetch(:hosts, []), fetch(:docker_path)
-    Centurion::DockerServerGroup.new(hosts, docker_path, build_tls_params)
+    hosts, docker_path, api_version = fetch(:hosts, []), fetch(:docker_path), fetch(:api_version)
+    Centurion::DockerServerGroup.new(hosts, docker_path, build_tls_params, api_version)
   end
 
   def validate_options_keys(options, valid_keys)

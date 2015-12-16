@@ -27,11 +27,16 @@ namespace :list do
       registry = Centurion::DockerRegistry.new(
         fetch(:docker_registry),
         fetch(:registry_user),
-        fetch(:registry_password)
+        fetch(:registry_password),
+        fetch(:registry_version)
       )
       tags = registry.repository_tags(fetch(:image))
       tags.each do |tag|
-        puts "\t#{tag[0]}\t-> #{tag[1][0..11]}"
+        if tag.length > 1
+          puts "\t#{tag[0]}\t-> #{tag[1][0..11]}"
+        else
+          puts "\t#{tag[0]}"
+        end
       end
     rescue StandardError => e
       error "Couldn't communicate with Registry: #{e.message}"

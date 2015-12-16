@@ -10,18 +10,18 @@ describe Centurion::DockerViaApi do
 
   context 'without TLS certificates' do
     let(:excon_uri) { "http://#{hostname}:#{port}/" }
-    let(:api) { Centurion::DockerViaApi.new(hostname, port) }
+    let(:api) { Centurion::DockerViaApi.new(hostname, port, {}, api_version) }
 
     it 'lists processes' do
       expect(Excon).to receive(:get).
-                       with(excon_uri + "v1.12" + "/containers/json", {}).
+                       with(excon_uri + "v#{api_version}/containers/json", {}).
                        and_return(double(body: json_string, status: 200))
       expect(api.ps).to eq(json_value)
     end
 
     it 'lists all processes' do
       expect(Excon).to receive(:get).
-                       with(excon_uri + "v1.12" + "/containers/json?all=1", {}).
+                       with(excon_uri + "v#{api_version}/containers/json?all=1", {}).
                        and_return(double(body: json_string, status: 200))
       expect(api.ps(all: true)).to eq(json_value)
     end
@@ -30,7 +30,7 @@ describe Centurion::DockerViaApi do
       configuration_as_json = double
       configuration = double(to_json: configuration_as_json)
       expect(Excon).to receive(:post).
-                           with(excon_uri + "v1.12" + "/containers/create",
+                           with(excon_uri + "v#{api_version}/containers/create",
                                 query: nil,
                                 body: configuration_as_json,
                                 headers: {'Content-Type' => 'application/json'}).
@@ -42,7 +42,7 @@ describe Centurion::DockerViaApi do
       configuration_as_json = double
       configuration = double(to_json: configuration_as_json)
       expect(Excon).to receive(:post).
-                           with(excon_uri + "v1.12" + "/containers/create",
+                           with(excon_uri + "v#{api_version}/containers/create",
                                 query: { name: match(/^app1-[a-f0-9]+$/) },
                                 body: configuration_as_json,
                                 headers: {'Content-Type' => 'application/json'}).
@@ -54,7 +54,7 @@ describe Centurion::DockerViaApi do
       configuration_as_json = double
       configuration = double(to_json: configuration_as_json)
       expect(Excon).to receive(:post).
-                           with(excon_uri + "v1.12" + "/containers/12345/start",
+                           with(excon_uri + "v#{api_version}/containers/12345/start",
                                 body: configuration_as_json,
                                 headers: {'Content-Type' => 'application/json'}).
                            and_return(double(body: json_string, status: 204))
@@ -63,49 +63,49 @@ describe Centurion::DockerViaApi do
 
     it 'stops a container' do
       expect(Excon).to receive(:post).
-                       with(excon_uri + "v1.12" + "/containers/12345/stop?t=300", {}).
+                       with(excon_uri + "v#{api_version}/containers/12345/stop?t=300", {}).
                        and_return(double(status: 204))
       api.stop_container('12345', 300)
     end
 
     it 'stops a container with a custom timeout' do
       expect(Excon).to receive(:post).
-                       with(excon_uri + "v1.12" + "/containers/12345/stop?t=30", {}).
+                       with(excon_uri + "v#{api_version}/containers/12345/stop?t=30", {}).
                        and_return(double(status: 204))
       api.stop_container('12345')
     end
 
     it 'restarts a container' do
       expect(Excon).to receive(:post).
-                          with(excon_uri + "v1.12" + "/containers/12345/restart?t=30", {}).
+                          with(excon_uri + "v#{api_version}/containers/12345/restart?t=30", {}).
                           and_return(double(body: json_string, status: 204))
       api.restart_container('12345')
     end
 
     it 'restarts a container with a custom timeout' do
       expect(Excon).to receive(:post).
-                          with(excon_uri + "v1.12" + "/containers/12345/restart?t=300", {}).
+                          with(excon_uri + "v#{api_version}/containers/12345/restart?t=300", {}).
                           and_return(double(body: json_string, status: 204))
       api.restart_container('12345', 300)
     end
 
     it 'inspects a container' do
       expect(Excon).to receive(:get).
-                           with(excon_uri + "v1.12" + "/containers/12345/json", {}).
+                           with(excon_uri + "v#{api_version}/containers/12345/json", {}).
                            and_return(double(body: json_string, status: 200))
       expect(api.inspect_container('12345')).to eq(json_value)
     end
 
     it 'removes a container' do
       expect(Excon).to receive(:delete).
-                           with(excon_uri + "v1.12" + "/containers/12345", {}).
+                           with(excon_uri + "v#{api_version}/containers/12345", {}).
                            and_return(double(status: 204))
       expect(api.remove_container('12345')).to eq(true)
     end
 
     it 'inspects an image' do
       expect(Excon).to receive(:get).
-                       with(excon_uri + "v1.12" + "/images/foo:bar/json",
+                       with(excon_uri + "v#{api_version}/images/foo:bar/json",
                             headers: {'Accept' => 'application/json'}).
                        and_return(double(body: json_string, status: 200))
       expect(api.inspect_image('foo', 'bar')).to eq(json_value)
@@ -121,7 +121,7 @@ describe Centurion::DockerViaApi do
 
     it 'lists processes' do
       expect(Excon).to receive(:get).
-                       with(excon_uri + "v1.12" + "/containers/json",
+                       with(excon_uri + "v#{api_version}/containers/json",
                             client_cert: '/certs/cert.pem',
                             client_key: '/certs/key.pem').
                        and_return(double(body: json_string, status: 200))
@@ -130,7 +130,7 @@ describe Centurion::DockerViaApi do
 
     it 'lists all processes' do
       expect(Excon).to receive(:get).
-                       with(excon_uri + "v1.12" + "/containers/json?all=1",
+                       with(excon_uri + "v#{api_version}/containers/json?all=1",
                             client_cert: '/certs/cert.pem',
                             client_key: '/certs/key.pem').
                        and_return(double(body: json_string, status: 200))
@@ -139,7 +139,7 @@ describe Centurion::DockerViaApi do
 
     it 'inspects an image' do
       expect(Excon).to receive(:get).
-                       with(excon_uri + "v1.12" + "/images/foo:bar/json",
+                       with(excon_uri + "v#{api_version}/images/foo:bar/json",
                             client_cert: '/certs/cert.pem',
                             client_key: '/certs/key.pem',
                             headers: {'Accept' => 'application/json'}).
@@ -151,7 +151,7 @@ describe Centurion::DockerViaApi do
       configuration_as_json = double
       configuration = double(to_json: configuration_as_json)
       expect(Excon).to receive(:post).
-                           with(excon_uri + "v1.12" + "/containers/create",
+                           with(excon_uri + "v#{api_version}/containers/create",
                                 client_cert: '/certs/cert.pem',
                                 client_key: '/certs/key.pem',
                                 query: nil,
@@ -165,7 +165,7 @@ describe Centurion::DockerViaApi do
       configuration_as_json = double
       configuration = double(to_json: configuration_as_json)
       expect(Excon).to receive(:post).
-                           with(excon_uri + "v1.12" + "/containers/12345/start",
+                           with(excon_uri + "v#{api_version}/containers/12345/start",
                                 client_cert: '/certs/cert.pem',
                                 client_key: '/certs/key.pem',
                                 body: configuration_as_json,
@@ -176,7 +176,7 @@ describe Centurion::DockerViaApi do
 
     it 'stops a container' do
       expect(Excon).to receive(:post).
-                       with(excon_uri + "v1.12" + "/containers/12345/stop?t=300",
+                       with(excon_uri + "v#{api_version}/containers/12345/stop?t=300",
                             client_cert: '/certs/cert.pem',
                             client_key: '/certs/key.pem').
                        and_return(double(status: 204))
@@ -185,7 +185,7 @@ describe Centurion::DockerViaApi do
 
     it 'stops a container with a custom timeout' do
       expect(Excon).to receive(:post).
-                       with(excon_uri + "v1.12" + "/containers/12345/stop?t=30",
+                       with(excon_uri + "v#{api_version}/containers/12345/stop?t=30",
                             client_cert: '/certs/cert.pem',
                             client_key: '/certs/key.pem').
                        and_return(double(status: 204))
@@ -194,7 +194,7 @@ describe Centurion::DockerViaApi do
 
     it 'restarts a container' do
       expect(Excon).to receive(:post).
-                        with(excon_uri + "v1.12" + "/containers/12345/restart?t=30",
+                        with(excon_uri + "v#{api_version}/containers/12345/restart?t=30",
                             client_cert: '/certs/cert.pem',
                             client_key: '/certs/key.pem').
                         and_return(double(body: json_string, status: 204))
@@ -203,7 +203,7 @@ describe Centurion::DockerViaApi do
 
     it 'restarts a container with a custom timeout' do
       expect(Excon).to receive(:post).
-                        with(excon_uri + "v1.12" + "/containers/12345/restart?t=300",
+                        with(excon_uri + "v#{api_version}/containers/12345/restart?t=300",
                             client_cert: '/certs/cert.pem',
                             client_key: '/certs/key.pem').
                         and_return(double(body: json_string, status: 204))
@@ -212,7 +212,7 @@ describe Centurion::DockerViaApi do
 
     it 'inspects a container' do
       expect(Excon).to receive(:get).
-                           with(excon_uri + "v1.12" + "/containers/12345/json",
+                           with(excon_uri + "v#{api_version}/containers/12345/json",
                                 client_cert: '/certs/cert.pem',
                                 client_key: '/certs/key.pem').
                            and_return(double(body: json_string, status: 200))
@@ -221,7 +221,7 @@ describe Centurion::DockerViaApi do
 
     it 'removes a container' do
       expect(Excon).to receive(:delete).
-                           with(excon_uri + "v1.12" + "/containers/12345",
+                           with(excon_uri + "v#{api_version}/containers/12345",
                                 client_cert: '/certs/cert.pem',
                                 client_key: '/certs/key.pem').
                            and_return(double(status: 204))
@@ -236,7 +236,7 @@ describe Centurion::DockerViaApi do
 
     it 'lists processes' do
       expect(Excon).to receive(:get).
-                       with(excon_uri + "v1.12" + "/containers/json",
+                       with(excon_uri + "v#{api_version}/containers/json",
                             client_cert: File.expand_path('~/.docker/cert.pem'),
                             client_key: File.expand_path('~/.docker/key.pem')).
                        and_return(double(body: json_string, status: 200))
