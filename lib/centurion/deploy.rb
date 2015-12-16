@@ -126,4 +126,14 @@ module Centurion::Deploy
 
     server.attach(container['Id'])
   end
+
+  def enter_container(server, service)
+    container = if service.public_ports.nil? || service.public_ports.empty?
+      server.find_containers_by_name(service.name).first
+    else
+      server.find_containers_by_public_port(service.public_ports.first).first
+    end
+
+    server.exec_it(container["Id"], "/bin/bash")
+  end
 end
