@@ -13,6 +13,7 @@ Your name could be here!
  * [Jon Wood][jellybob]
  * [Mark Borcherding][markborcherding]
  * [Nick Laferriere][laferrieren]
+ * [Hugo Chinchilla][hugochinchilla]
 
 Pre-release
 -----------

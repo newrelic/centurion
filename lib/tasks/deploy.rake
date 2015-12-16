@@ -12,7 +12,7 @@ end
 
 task :deploy_console do
   invoke 'deploy:get_image'
-  invoke 'deploy:stop'
+  #invoke 'deploy:stop'
   invoke 'deploy:launch_console'
   invoke 'deploy:cleanup'
 end
@@ -106,7 +106,8 @@ namespace :deploy do
   end
 
   task :launch_console do
-    on_each_docker_host do |server|
+    on_first_docker_host do |server|
+      defined_service.port_bindings.clear
       launch_console(server, defined_service)
     end
   end
