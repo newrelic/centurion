@@ -8,6 +8,10 @@ module Centurion::DeployDSL
     build_server_group.tap { |hosts| hosts.each { |host| block.call(host) } }
   end
 
+  def on_first_docker_host(&block)
+    build_server_group.tap { |hosts| block.call(hosts.first) }
+  end
+
   def env_vars(new_vars)
     current = fetch(:env_vars, {})
     new_vars.each_pair do |new_key, new_value|

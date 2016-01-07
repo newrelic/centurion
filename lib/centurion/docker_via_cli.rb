@@ -31,6 +31,14 @@ class Centurion::DockerViaCli
     Centurion::Shell.echo(build_command(:exec, "#{container_id} #{commandline}"))
   end
 
+  def exec_it(container_id, commandline)
+    # the "or true" on the command is to prevent an exception from Shell.validate_status
+    # because docker exec returns the same exit code as the latest command executed on
+    # the shell, which causes an exception to be raised if the latest comand executed
+    # was unsuccessful when you exit the shell.
+    Centurion::Shell.echo(build_command(:exec, "-it #{container_id} #{commandline} || true"))
+  end
+
   private
 
   def self.tls_keys
