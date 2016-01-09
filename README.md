@@ -299,6 +299,26 @@ You have to set the following keys:
   end
 ```
 
+### Callbacks
+
+You can create callbacks to perform custom actions during a deploy.
+
+```ruby
+  task :production => :common do
+    before_stopping_image do |server|
+      my_loadbalancer.disable server.hostname
+    end
+
+    after_image_started  do |server|
+      my_chat_server.post "#{server.hostname} started my image....waiting for health check"
+    end
+
+    after_health_check_ok do |server|
+      my_loadbalancer.enable server.hostname
+    end
+  end
+```
+
 Deploying
 ---------
 

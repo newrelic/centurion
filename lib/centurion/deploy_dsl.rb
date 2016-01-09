@@ -134,7 +134,42 @@ module Centurion::DeployDSL
     Centurion::Service::RestartPolicy.new(fetch(:restart_policy_name, 'on-failure'), fetch(:restart_policy_max_retry_count, 10))
   end
 
+  def before_stopping_image(callback = nil, &block)
+    on :before_stopping_image, callback, &block
+  end
+
+  def after_image_started(callback = nil, &block)
+    on :after_image_started, callback, &block
+  end
+
+  def after_health_check_ok(callback = nil, &block)
+    on :after_health_check_ok, callback, &block
+  end
+
+  def on(name, callback = nil, &block)
+    abort('A callback or block is require') unless callback || block
+    abort('Callback expects a lambda, proc, or block') if callback && !callback.respond_to?(:call)
+    callbacks[name] <<= (callback || block)
+  end
+
   private
+
+  def callbacks
+    fetch('callbacks') || set('callbacks', Hash.new { [] })
+  end
+
+  def service_under_construction
+    service = fetch(:service,
+      Centurion::Service.from_hash(
+        fetch(:project),
+        image:    fetch(:image),
+        hostname: fetch(:container_hostname),
+        dns:      fetch(:custom_dns)
+      )
+    )
+    set(:service, service)
+  end
+
 
   def build_server_group
     hosts, docker_path = fetch(:hosts, []), fetch(:docker_path)

@@ -181,4 +181,27 @@ describe Centurion::DeployDSL do
     DeployDSLTest.set(:image, 'charlemagne')
     expect(DeployDSLTest.defined_service.image).to eq('charlemagne:roland')
   end
+
+  describe 'callbacks' do
+    shared_examples_for 'a callback for' do |callback_name|
+      it 'accepts procs' do
+        callback = ->(_) {}
+        allow(DeployDSLTest).to receive(:on)
+        expect(DeployDSLTest).to receive(:on).with(callback_name, callback)
+        DeployDSLTest.send callback_name, callback
+      end
+    end
+
+    describe '#before_stopping_image' do
+      it_behaves_like 'a callback for', :before_stopping_image
+    end
+
+    describe '#after_image_started' do
+      it_behaves_like 'a callback for', :after_image_started
+    end
+
+    describe '#after_health_check_ok' do
+      it_behaves_like 'a callback for', :after_health_check_ok
+    end
+  end
 end
