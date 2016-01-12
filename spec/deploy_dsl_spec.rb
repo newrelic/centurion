@@ -124,6 +124,16 @@ describe Centurion::DeployDSL do
       expect(DeployDSLTest.defined_service.network_mode).to eq('host')
     end
 
+    it 'accepts cpu share limit' do
+      DeployDSLTest.cpu_shares(12345678)
+      expect(DeployDSLTest.defined_service.cpu_shares).to eq(12345678)
+    end
+
+    it 'accepts memory limit' do
+      DeployDSLTest.memory(12345)
+      expect(DeployDSLTest.defined_service.memory).to eq(12345)
+    end
+
     it 'accepts bridge mode' do
       DeployDSLTest.network_mode('bridge')
       expect(DeployDSLTest.defined_service.network_mode).to eq('bridge')

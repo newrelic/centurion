@@ -34,6 +34,8 @@ module Centurion
         s.port_bindings = fetch(:port_bindings, [])
         s.network_mode  = fetch(:network_mode, 'bridge')
         s.command       = fetch(:command, nil)
+        s.memory        = fetch(:memory, 0)
+        s.cpu_shares    = fetch(:cpu_shares, 0)
 
         s.add_env_vars(fetch(:env_vars, {}))
       end
@@ -140,6 +142,12 @@ module Centurion
 
       # Add ExtraHosts if needed
       host_config['ExtraHosts'] = extra_hosts if extra_hosts
+
+      # Set memory limits
+      host_config['Memory'] = memory if memory
+
+      # Set cpushare limits
+      host_config['CpuShares'] = cpu_shares if cpu_shares
 
       # Restart Policy
       if restart_policy
