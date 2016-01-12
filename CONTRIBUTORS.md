@@ -75,3 +75,5 @@ Contributor                                   | Commits    | Additions | Deletio
 [skarap]: https://github.com/skarap
 [jellybob]: https://github.com/jellybob
 [markborcherding]: https://github.com/markborcherding
+[dselans]: https://github.com/dselans
+[idleyoungman]: https://github.com/idleyoungman
