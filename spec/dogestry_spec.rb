@@ -55,15 +55,6 @@ describe Centurion::Dogestry do
     end
   end
 
- describe '#pull' do
-   it 'returns correct value' do
-    if registry.which('dogestry')
-      expect(registry).to receive(:echo).with("dogestry #{flags} pull #{registry.s3_url} #{repo}")
-      registry.pull(repo, pull_hosts)
-    end
-   end
- end
-
   describe '#which' do
     it 'finds dogestry command line' do
       allow(File).to receive(:executable?).and_return(true)
