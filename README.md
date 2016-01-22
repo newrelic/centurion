@@ -549,6 +549,10 @@ Contributions are more than welcome. Bug reports with specific reproduction
 steps are great. If you have a code contribution you'd like to make, open a
 pull request with suggested code.
 
+Note that PR's and issues are reviewed every ~2 weeks. If your PR or issue is
+critical in nature, please reflect that in the description so that it receives
+faster attention.
+
 Pull requests should:
 
  * Clearly state their intent in the title
