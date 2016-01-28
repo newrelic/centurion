@@ -8,8 +8,10 @@ module Centurion::Deploy
 
   def stop_containers(target_server, service, timeout = 30)
     old_containers = if service.public_ports.nil? || service.public_ports.empty?
+      info "Looking for containers with names like #{service.name}"
       target_server.find_containers_by_name(service.name)
     else
+      info "Looking for containers listening on port #{service.public_ports.first}"
       target_server.find_containers_by_public_port(service.public_ports.first)
     end
 
