@@ -60,7 +60,7 @@ set :name,  opts[:project].gsub(/_/, '-')
 # Override environment variables when specified
 if opts[:override_env]
   opts[:override_env].split(',').each do |envvar|
-    key, value = envvar.split('=')
+    key, value = envvar.split('=', 2)
     env_vars(key => value)
   end
 end
