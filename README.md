@@ -292,12 +292,15 @@ You have to set the following keys:
 
 ```ruby
   task :production => :common do
+    set :tlsverify, true
     set :tlscacert, '/usr/local/certs/ca.pem'
     set :tlscert, '/usr/local/certs/ssl.crt'
     set :tlskey, '/usr/local/certs/ssl.key'
     # ...
   end
 ```
+
+Mofidy the filenames as appropriate for your cert, ca, and key.
 
 Deploying
 ---------
