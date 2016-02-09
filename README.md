@@ -300,7 +300,7 @@ You have to set the following keys:
   end
 ```
 
-Mofidy the filenames as appropriate for your cert, ca, and key.
+Modify the paths as appropriate for your cert, ca, and key files.
 
 Deploying
 ---------
