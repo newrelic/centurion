@@ -109,8 +109,11 @@ module Centurion::DeployDSL
   end
 
   def health_check(method)
-   abort("Health check expects a callable (lambda, proc, method), but #{method.class} was specified")  unless method.respond_to?(:call)
    set(:health_check, method)
+  end
+
+  def health_check_args(args)
+    set(:health_check_args, args)
   end
 
   def extra_host(ip, name)
