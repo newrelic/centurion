@@ -4,6 +4,31 @@ require_relative 'service'
 require 'uri'
 
 module Centurion::DeployDSL
+
+  def marathon_host(host)
+    set(:marathon_host, host)
+  end
+
+  def marathon_port(port)
+    set(:marathon_port, port)
+  end
+
+  def instances(instance_count)
+    set(:instances, instance_count)
+  end
+
+  def min_health_capacity(minimum_health_capacity)
+    set(:min_health_capacity, minimum_health_capacity)
+  end
+
+  def max_health_capacity(maximum_health_capacity)
+    set(:max_health_capacity, maximum_health_capacity)
+  end
+
+  def executor(executor_path)
+    set(:executor, executor_path)
+  end
+
   def on_each_docker_host(&block)
     build_server_group.tap { |hosts| hosts.each { |host| block.call(host) } }
   end
@@ -124,6 +149,10 @@ module Centurion::DeployDSL
 
   def defined_service
     Centurion::Service.from_env
+  end
+
+  def defined_mesos_service
+    Centurion::MesosService.from_env
   end
 
   def defined_health_check
