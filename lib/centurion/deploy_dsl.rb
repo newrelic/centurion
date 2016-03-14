@@ -5,12 +5,8 @@ require 'uri'
 
 module Centurion::DeployDSL
 
-  def marathon_host(host)
-    set(:marathon_host, host)
-  end
-
-  def marathon_port(port)
-    set(:marathon_port, port)
+  def marathon_url(url)
+    set(:marathon_url, url)
   end
 
   def instances(instance_count)
