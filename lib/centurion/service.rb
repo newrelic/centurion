@@ -5,8 +5,8 @@ module Centurion
   class Service
     extend ::Capistrano::DSL
 
-    attr_accessor :command, :dns, :extra_hosts, :image, :name, :volumes, :port_bindings, :network_mode, :cap_adds, :cap_drops 
-    attr_reader :memory, :cpu_shares, :env_vars
+    attr_accessor :command, :dns, :extra_hosts, :image, :name, :volumes, :port_bindings
+    attr_reader :memory, :cpu_shares, :env_vars, :network_mode, :cap_adds, :cap_drops
 
     def initialize(name)
       @name          = name
@@ -83,10 +83,6 @@ module Centurion
         raise ArgumentError, "invalid value for cgroup CPU constraint: #{shares}, value must be a between 0 and 18446744073709551615"
       end
       @cpu_shares = shares
-    end
-
-    def image=(image)
-      @image = image
     end
 
     def build_config(server_hostname, &block)
