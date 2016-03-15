@@ -157,7 +157,6 @@ describe Centurion::MesosService do
     service.cap_adds = ['IPC_BIND', 'NET_RAW']
     service.cap_drops = ['DAC_OVERRIDE']
     service.add_volume('/volumes/redis.8000', '/data')
-    require 'pry'; binding.pry
     expect(service.build_host_config(Centurion::MesosService::RestartPolicy.new('on-failure', 10))).to eq({
       'Binds' => ['/volumes/redis.8000:/data'],
       'CapAdd' => ['IPC_BIND', 'NET_RAW'],

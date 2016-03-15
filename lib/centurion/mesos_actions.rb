@@ -31,7 +31,6 @@ module Centurion::MesosActions
     begin
       Marathon::App.start(service.centurion_to_mesos)
     rescue Marathon::Error::MarathonError => e
-      require 'pry'; binding.pry
       puts "** Cleaning up"
       puts "\n\n #{e}\n\n".red
       exit
