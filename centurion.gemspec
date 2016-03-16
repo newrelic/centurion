@@ -36,7 +36,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'trollop'
   spec.add_dependency 'excon', '~> 0.33'
   spec.add_dependency 'logger-colors'
-  spec.add_dependency 'marathon-api', :git => 'https://github.com/newrelic-forks/marathon-api.git'
+  spec.add_dependency 'marathon-api'
   spec.add_dependency 'colorize'
 
   spec.add_development_dependency 'bundler'
