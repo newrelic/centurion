@@ -7,9 +7,9 @@ require 'json'
 namespace :mesos do
   include Centurion::MesosActions
 
-  task :deploy do    
+  task :deploy do
     create_new defined_mesos_service
-  end      
+  end
 
   task :list do
     list defined_mesos_service
@@ -27,6 +27,6 @@ namespace :mesos do
 
   task :delete do
     delete_app defined_mesos_service
-  end                
+  end
 
 end

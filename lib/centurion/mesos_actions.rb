@@ -6,7 +6,7 @@ module Centurion::MesosActions
     puts "Application Summary"
     puts "-------------------------------------------------------------------"
     puts Marathon::App.get(service.name).to_pretty_s
-    puts 
+    puts
     puts "Running Instances"
     puts "-------------------------------------------------------------------"
     tasks = Marathon::Tasks.new(Marathon::Connection.new(Marathon.url))
@@ -63,7 +63,7 @@ module Centurion::MesosActions
           puts "** Cancelling deploy".red
           delete_app service
           return
-        end                                                        
+        end
       end
     end
   end
@@ -107,8 +107,8 @@ module Centurion::MesosActions
             if killed_count == service.instances
               puts "** Upgrade Succeeded"
               return
-            end 
-          end                                                        
+            end
+          end
         end
       end
   end

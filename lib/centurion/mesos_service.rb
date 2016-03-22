@@ -80,7 +80,7 @@ module Centurion
       events = IO::popen(cmd, 'r+')
       while line = events.readline
         next if line =~ /^\r\n$/
-        next if line =~ /^event:/ 
+        next if line =~ /^event:/
         json_event = line.gsub(/^data:\s+/,'')
         event_object = JSON.load(json_event)
         yield(event_object)
@@ -104,14 +104,14 @@ module Centurion
         "instances" => @instances,
         "labels" => {
           "HealthCheck" => @health_check,
-          "HealthCheckArgs" => @health_check_args          
+          "HealthCheckArgs" => @health_check_args
         },
         "cmd" => "/bin/true",
         "upgradeStrategy" => {
           "minimumHealthCapacity" => @min_health_capacity,
           "maximumOverCapacity" => @max_health_capacity
         },
-        "executor" => @executor, 
+        "executor" => @executor,
         "ports" => @port_bindings.map {|x| x.host_port},
         "env" => @env_vars,
         "container" => {
@@ -126,7 +126,7 @@ module Centurion
               }
             ].concat(get_real_ports),
             :portMappings => @port_bindings.inject([]) do |memo,binding|
-              memo << { 
+              memo << {
                 :containerPort => binding.container_port,
                 :hostPort => 0,
                 :servicePort => 0,
