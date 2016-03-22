@@ -137,6 +137,18 @@ module Centurion::DeployDSL
     set(:health_check_args, args)
   end
 
+  def health_check_grace_period(seconds)
+    set(:health_check_grace_period, seconds)
+  end
+
+  def health_check_max_count(num)
+    set(:health_check_max_count, num)
+  end
+
+  def health_check_interval(seconds)
+    set(:health_check_interval, seconds)
+  end
+
   def extra_host(ip, name)
     current = fetch(:extra_hosts, [])
     current.push("#{name}:#{ip}")
