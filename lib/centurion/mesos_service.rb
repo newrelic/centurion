@@ -8,7 +8,8 @@ module Centurion
     extend ::Capistrano::DSL
 
     attr_accessor :instances, :min_health_capacity, :max_health_capacity, :executor,
-                  :health_check, :health_check_args, :haproxy_mode
+                  :health_check, :health_check_args, :haproxy_mode, :health_check_grace_period,
+                  :health_check_interval, :health_check_max_count
     attr_reader :env_vars, :cpu_shares, :memory, :image
 
     def initialize(name, marathon_url)
@@ -46,6 +47,9 @@ module Centurion
         s.cpu_shares          = fetch(:cpu_shares, 0)
         s.health_check        = fetch(:health_check, 'http')
         s.health_check_args   = fetch(:health_check_args, '/status/check')
+        s.health_check_grace_period = fetch(:health_check_grace_period, 10)
+        s.health_check_interval     = fetch(:health_check_interval, 3)
+        s.health_check_max_count    = fetch(:health_check_max_count, 1)
         s.haproxy_mode        = fetch(:haproxy_mode, 'http')
 
         s.add_env_vars(fetch(:env_vars, {}))
@@ -80,7 +84,7 @@ module Centurion
       events = IO::popen(cmd, 'r+')
       while line = events.readline
         next if line =~ /^\r\n$/
-        next if line =~ /^event:/ 
+        next if line =~ /^event:/
         json_event = line.gsub(/^data:\s+/,'')
         event_object = JSON.load(json_event)
         yield(event_object)
@@ -103,15 +107,19 @@ module Centurion
         "mem" => @memory,
         "instances" => @instances,
         "labels" => {
+          # all labels must be strings
           "HealthCheck" => @health_check,
-          "HealthCheckArgs" => @health_check_args          
+          "HealthCheckArgs" => @health_check_args,
+          "HealthCheckGracePeriod" => @health_check_grace_period.to_s,
+          "HealthCheckInterval" => @health_check_interval.to_s,
+          "HealthCheckMaxCount" => @health_check_max_count.to_s
         },
         "cmd" => "/bin/true",
         "upgradeStrategy" => {
           "minimumHealthCapacity" => @min_health_capacity,
           "maximumOverCapacity" => @max_health_capacity
         },
-        "executor" => @executor, 
+        "executor" => @executor,
         "ports" => @port_bindings.map {|x| x.host_port},
         "env" => @env_vars,
         "container" => {
@@ -126,7 +134,7 @@ module Centurion
               }
             ].concat(get_real_ports),
             :portMappings => @port_bindings.inject([]) do |memo,binding|
-              memo << { 
+              memo << {
                 :containerPort => binding.container_port,
                 :hostPort => 0,
                 :servicePort => 0,
