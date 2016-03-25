@@ -54,6 +54,10 @@ module Centurion::DeployDSL
     set(:command, command)
   end
 
+  def ipc_mode(mode)
+    set(:ipc_mode, mode)
+  end
+
   def localhost
     # DOCKER_HOST is like 'tcp://127.0.0.1:2375'
     docker_host_uri = URI.parse(ENV['DOCKER_HOST'] || "tcp://127.0.0.1")
