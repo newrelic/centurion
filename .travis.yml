@@ -1,1 +1,3 @@
 language: ruby
+before_install:
+  - gem update bundler
