@@ -47,6 +47,8 @@ describe Centurion::MesosService do
 
   it 'rejects non-numeric cpu shares' do
     expect(-> { service.cpu_shares = 'all' }).to raise_error ArgumentError
+    expect(-> { service.cpu_shares = '' }).to raise_error ArgumentError
+    expect { service.cpu_shares = '1.5' }.to_not raise_error
   end
 
   it 'has a custom dns association' do

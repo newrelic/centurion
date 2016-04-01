@@ -19,7 +19,7 @@ module Centurion
       @port_bindings = []
       @cap_adds      = []
       @cap_drops     = []
-      @network_mode  = ''
+      @network_mode  = 'bridge'
       Marathon.url   = marathon_url
     end
 
@@ -63,6 +63,15 @@ module Centurion
 
     def add_volume(host_volume, container_volume)
       @volumes << Volume.new(host_volume, container_volume)
+    end
+
+    def cpu_shares=(shares)
+      begin
+        Float(shares) != nil
+      rescue
+        raise ArgumentError, "invalid value for cgroup CPU constraint: #{shares}, value must be a between 0 and 18446744073709551615"
+      end
+      @cpu_shares = shares
     end
 
     def with_timeout timeout, &block
