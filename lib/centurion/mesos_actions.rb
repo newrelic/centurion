@@ -69,7 +69,13 @@ module Centurion::MesosActions
   end
 
   def delete_app service
-    Marathon::App.delete(service.name)
+    begin
+      Marathon::App.delete(service.name)
+    rescue Marathon::Error::MarathonError => e
+      puts "** Cleaning up"
+      puts "\n\n #{e}\n\n".red
+      exit
+    end
   end
 
   def with_timeout timeout, &block
