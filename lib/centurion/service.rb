@@ -5,7 +5,7 @@ module Centurion
   class Service
     extend ::Capistrano::DSL
 
-    attr_accessor :command, :dns, :extra_hosts, :image, :name, :volumes, :port_bindings, :network_mode, :cap_adds, :cap_drops 
+    attr_accessor :command, :dns, :extra_hosts, :image, :name, :volumes, :port_bindings, :network_mode, :cap_adds, :cap_drops, :ipc_mode
     attr_reader :memory, :cpu_shares, :env_vars
 
     def initialize(name)
@@ -36,6 +36,7 @@ module Centurion
         s.command       = fetch(:command, nil)
         s.memory        = fetch(:memory, 0)
         s.cpu_shares    = fetch(:cpu_shares, 0)
+        s.ipc_mode      = fetch(:ipc_mode, nil)
 
         s.add_env_vars(fetch(:env_vars, {}))
       end
@@ -87,6 +88,10 @@ module Centurion
 
     def image=(image)
       @image = image
+    end
+
+    def ipc_mode=(mode)
+      @ipc_mode = mode
     end
 
     def build_config(server_hostname, &block)
@@ -148,6 +153,9 @@ module Centurion
 
       # Set cpushare limits
       host_config['CpuShares'] = cpu_shares if cpu_shares
+
+      # Set ipc mode
+      host_config['IpcMode'] = ipc_mode if ipc_mode
 
       # Restart Policy
       if restart_policy

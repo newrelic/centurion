@@ -46,7 +46,7 @@ describe Centurion::DeployDSL do
       expect(DeployDSLTest.defined_service.cap_adds).to eq(['IPC_LOCK'])
     end
 
-    it 'adds multiple capabilites' do 
+    it 'adds multiple capabilites' do
       DeployDSLTest.add_capability 'IPC_LOCK'
       DeployDSLTest.add_capability 'SYS_RESOURCE'
       expect(DeployDSLTest.defined_service.cap_adds).to eq(['IPC_LOCK', 'SYS_RESOURCE'])
@@ -63,12 +63,12 @@ describe Centurion::DeployDSL do
       expect(DeployDSLTest.defined_service.cap_drops).to eq(['IPC_LOCK'])
     end
 
-    it 'drops multiple capabilites' do 
+    it 'drops multiple capabilites' do
       DeployDSLTest.drop_capability 'IPC_LOCK'
       DeployDSLTest.drop_capability 'SYS_RESOURCE'
       expect(DeployDSLTest.defined_service.cap_drops).to eq(['IPC_LOCK', 'SYS_RESOURCE'])
     end
-  end      
+  end
 
   it 'adds hosts to the host list' do
     DeployDSLTest.set(:hosts, [ 'host1' ])
@@ -146,6 +146,13 @@ describe Centurion::DeployDSL do
 
     it 'fails when invalid mode is passed' do
       expect { DeployDSLTest.network_mode('foo') }.to raise_error(SystemExit)
+    end
+  end
+
+  describe '#ipc_mode' do
+    it 'accepts ipc host mode' do
+      DeployDSLTest.ipc_mode('host')
+      expect(DeployDSLTest.defined_service.ipc_mode).to eq('host')
     end
   end
 

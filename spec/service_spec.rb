@@ -45,6 +45,11 @@ describe Centurion::Service do
     expect(service.cpu_shares).to eq(512)
   end
 
+  it 'has an ipc mode' do
+    service.ipc_mode = 'host'
+    expect(service.ipc_mode).to eq('host')
+  end
+
   it 'rejects non-numeric cpu shares' do
     expect(-> { service.cpu_shares = 'all' }).to raise_error
   end
