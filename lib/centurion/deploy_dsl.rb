@@ -33,6 +33,14 @@ module Centurion::DeployDSL
     build_server_group.tap { |hosts| block.call(hosts.first) }
   end
 
+  def docker_labels(new_docker_labels)
+    current = fetch(:docker_labels, {})
+    new_docker_labels.each_pair do |new_key, new_value|
+      current[new_key.to_s] = new_value.to_s
+    end
+    set(:docker_labels, current)
+  end
+
   def env_vars(new_vars)
     current = fetch(:env_vars, {})
     new_vars.each_pair do |new_key, new_value|

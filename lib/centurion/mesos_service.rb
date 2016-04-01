@@ -10,11 +10,12 @@ module Centurion
     attr_accessor :instances, :min_health_capacity, :max_health_capacity, :executor,
                   :health_check, :health_check_args, :haproxy_mode, :health_check_grace_period,
                   :health_check_interval, :health_check_max_count
-    attr_reader :env_vars, :cpu_shares, :memory, :image
+    attr_reader :env_vars, :cpu_shares, :memory, :image, :docker_labels
 
     def initialize(name, marathon_url)
       @name          = name
       @env_vars      = {}
+      @docker_labels = {}
       @volumes       = []
       @port_bindings = []
       @cap_adds      = []
@@ -53,6 +54,8 @@ module Centurion
         s.haproxy_mode        = fetch(:haproxy_mode, 'http')
 
         s.add_env_vars(fetch(:env_vars, {}))
+        s.add_docker_labels(fetch(:docker_labels, {}))
+        s.docker_labels['HAProxyMode'] = fetch(:haproxy_mode, 'http')
 
       end
     end
@@ -100,6 +103,18 @@ module Centurion
       end
     end
 
+    def get_docker_labels
+      labels = []
+      @docker_labels.each do |k,v|
+        labels.push({
+          :key => 'docker_label',
+          :value => "#{k}=#{v}"
+          })
+      end
+      return labels
+    end
+
+
     def centurion_to_mesos
       payload = {
         "id" => @name,
@@ -127,12 +142,7 @@ module Centurion
           :docker => {
             :image => @image,
             :network => @network_mode,
-            :parameters => [
-              {
-                :key => "docker_label",
-                :value => "HAProxyMode=#{@haproxy_mode}"
-              }
-            ].concat(get_real_ports),
+            :parameters => get_docker_labels.concat(get_real_ports),
             :portMappings => @port_bindings.inject([]) do |memo,binding|
               memo << {
                 :containerPort => binding.container_port,

@@ -16,6 +16,7 @@ module Centurion
       @cap_adds      = []
       @cap_drops     = []
       @network_mode  = 'bridge'
+      @docker_labels = {}
     end
 
     def self.from_env
@@ -38,11 +39,16 @@ module Centurion
         s.cpu_shares    = fetch(:cpu_shares, 0)
 
         s.add_env_vars(fetch(:env_vars, {}))
+        s.add_docker_labels(fetch(:docker_labels, {}))
       end
     end
 
     def add_env_vars(new_vars)
       @env_vars.merge!(new_vars)
+    end
+
+    def add_docker_labels(new_docker_labels)
+      @docker_labels.merge!(new_docker_labels)
     end
 
     def add_port_bindings(host_port, container_port, type = 'tcp', host_ip = nil)
@@ -105,6 +111,10 @@ module Centurion
         container_config['Env'] = env_vars.map do |k,v|
           "#{k}=#{interpolate_var(v, server_hostname)}"
         end
+      end
+
+      unless docker_labels.empty?
+        container_config['Labels'] = docker_labels
       end
 
       unless volumes.empty?
