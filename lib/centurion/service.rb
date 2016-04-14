@@ -6,7 +6,8 @@ module Centurion
     extend ::Capistrano::DSL
 
     attr_accessor :command, :dns, :extra_hosts, :image, :name, :volumes, :port_bindings
-    attr_reader :memory, :cpu_shares, :env_vars, :network_mode, :cap_adds, :cap_drops
+    attr_reader :memory, :cpu_shares, :env_vars, :network_mode, :cap_adds, :cap_drops,
+                :docker_labels
 
     def initialize(name)
       @name          = name
