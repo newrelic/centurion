@@ -8,9 +8,9 @@ module Centurion
     extend ::Capistrano::DSL
 
     attr_accessor :instances, :min_health_capacity, :max_health_capacity, :executor,
-                  :health_check, :health_check_args, :haproxy_mode, :health_check_grace_period,
-                  :health_check_interval, :health_check_max_count, :cpu_shares
-    attr_reader :env_vars, :memory, :image, :docker_labels
+                  :health_check, :health_check_args, :health_check_grace_period,
+                  :health_check_interval, :health_check_max_count
+    attr_reader :env_vars, :cpu_shares, :memory, :image, :docker_labels
 
     def initialize(name, marathon_url)
       @name          = name
@@ -51,11 +51,9 @@ module Centurion
         s.health_check_grace_period = fetch(:health_check_grace_period, 10)
         s.health_check_interval     = fetch(:health_check_interval, 3)
         s.health_check_max_count    = fetch(:health_check_max_count, 1)
-        s.haproxy_mode        = fetch(:haproxy_mode, 'http')
 
         s.add_env_vars(fetch(:env_vars, {}))
         s.add_docker_labels(fetch(:docker_labels, {}))
-        s.docker_labels['HAProxyMode'] = fetch(:haproxy_mode, 'http')
 
       end
     end
