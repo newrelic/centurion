@@ -20,6 +20,14 @@ module Centurion::DeployDSL
     set(:env_vars, current)
   end
 
+  def labels(new_labels)
+    current = fetch(:labels, {})
+    new_labels.each_pair do |new_key, new_value|
+      current[new_key.to_s] = new_value.to_s
+    end
+    set(:labels, current)
+  end
+
   def add_capability(new_cap_adds)
     if !valid_capability?(new_cap_adds)
       abort("Invalid capability addition #{new_cap_adds} specified.")
