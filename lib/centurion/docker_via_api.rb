@@ -49,7 +49,9 @@ class Centurion::DockerViaApi
     path = @docker_api_version + "/containers/#{container_id}/stop?t=#{timeout}"
     response = Excon.post(
       @base_uri + path,
-      tls_excon_arguments
+      tls_excon_arguments.merge(
+        read_timeout: timeout
+      )
     )
     raise response.inspect unless response.status == 204
     true
