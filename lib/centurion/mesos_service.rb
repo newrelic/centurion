@@ -8,8 +8,7 @@ module Centurion
     extend ::Capistrano::DSL
 
     attr_accessor :instances, :min_health_capacity, :max_health_capacity, :executor,
-                  :health_check, :health_check_args, :health_check_grace_period,
-                  :health_check_interval, :health_check_max_count
+                  :health_check, :health_checks
     attr_reader :env_vars, :cpu_shares, :memory, :image, :docker_labels
 
     def initialize(name, marathon_url)
@@ -21,6 +20,7 @@ module Centurion
       @cap_adds      = []
       @cap_drops     = []
       @network_mode  = 'bridge'
+      @health_checks = []
       Marathon.url   = marathon_url
     end
 
@@ -31,6 +31,18 @@ module Centurion
         else
           fetch(:image, nil)
         end
+
+        health_checks = fetch(:health_checks, [
+          {
+            protocol: "HTTP",
+            path: "/status/check",
+            gracePeriodSeconds: 30,
+            intervalSeconds: 3,
+            portIndex: 0,
+            timeoutSeconds: 3,
+            maxConsecutiveFailures: 3            
+          }
+        ])
 
         s.instances           = fetch(:instances, 1)
         s.min_health_capacity = fetch(:min_health_capacity, 1)
@@ -47,10 +59,7 @@ module Centurion
         s.memory              = fetch(:memory, 0)
         s.cpu_shares          = fetch(:cpu_shares, 0)
         s.health_check        = fetch(:health_check, 'http')
-        s.health_check_args   = fetch(:health_check_args, '/status/check')
-        s.health_check_grace_period = fetch(:health_check_grace_period, 10)
-        s.health_check_interval     = fetch(:health_check_interval, 3)
-        s.health_check_max_count    = fetch(:health_check_max_count, 1)
+        s.health_checks       = health_checks
 
         s.add_env_vars(fetch(:env_vars, {}))
         s.add_docker_labels(fetch(:docker_labels, {}))
@@ -104,7 +113,7 @@ module Centurion
     def get_real_ports
       @port_bindings.inject([]) do |memo, binding|
         memo.push({
-          :key => "docker_label",
+          :key => "label",
           :value => "ServicePort_#{binding.container_port}=#{binding.host_port}"
           })
       end
@@ -114,7 +123,7 @@ module Centurion
       labels = []
       @docker_labels.each do |k,v|
         labels.push({
-          :key => 'docker_label',
+          :key => 'label',
           :value => "#{k}=#{v}"
           })
       end
@@ -128,24 +137,16 @@ module Centurion
         "cpus" => @cpu_shares,
         "mem" => @memory,
         "instances" => @instances,
-        "labels" => {
-          # all labels must be strings
-          "HealthCheck" => @health_check,
-          "HealthCheckArgs" => @health_check_args,
-          "HealthCheckGracePeriod" => @health_check_grace_period.to_s,
-          "HealthCheckInterval" => @health_check_interval.to_s,
-          "HealthCheckMaxCount" => @health_check_max_count.to_s
-        },
-        "cmd" => "/bin/true",
+        "healthChecks" => @health_checks,
+        "cmd" => nil,
         "upgradeStrategy" => {
           "minimumHealthCapacity" => @min_health_capacity,
           "maximumOverCapacity" => @max_health_capacity
         },
-        "executor" => @executor,
         "ports" => @port_bindings.map {|x| x.host_port},
         "env" => @env_vars,
         "container" => {
-          :type => "MESOS",
+          :type => "DOCKER",
           :docker => {
             :image => @image,
             :network => @network_mode,

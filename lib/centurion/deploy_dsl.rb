@@ -141,20 +141,20 @@ module Centurion::DeployDSL
    set(:health_check, method)
   end
 
-  def health_check_args(args)
-    set(:health_check_args, args)
-  end
 
-  def health_check_grace_period(seconds)
-    set(:health_check_grace_period, seconds)
-  end
+            # protocol: "HTTP",
+            # path: "/status/check",
+            # gracePeriodSeconds: 30,
+            # intervalSeconds: 3,
+            # portIndex: 0,
+            # timeoutSeconds: 3,
+            # maxConsecutiveFailures: 3
+    
 
-  def health_check_max_count(num)
-    set(:health_check_max_count, num)
-  end
-
-  def health_check_interval(seconds)
-    set(:health_check_interval, seconds)
+  def health_checks(health_checks)
+    current = fetch(:health_checks, [])
+    current.push(health_checks)
+    set(:health_checks, current)
   end
 
   def extra_host(ip, name)
