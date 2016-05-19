@@ -150,7 +150,7 @@ You can cause your container to be started with a specific DNS server
 IP address (the equivalent of `docker run --dns 172.17.42.1 ...`) like this:
 ```ruby
   task :production => :common do
-    set :dns, '172.17.42.1'
+    set :dns, [ '172.17.42.1' ]
     # ...
   end
 ```
