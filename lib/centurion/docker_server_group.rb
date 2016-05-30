@@ -9,10 +9,11 @@ class Centurion::DockerServerGroup
 
   attr_reader :hosts
 
-  def initialize(hosts, docker_path, tls_params = {})
+  def initialize(hosts, docker_path, tls_params = {}, api_version=nil)
     raise ArgumentError.new('Bad Host list!') if hosts.nil? || hosts.empty?
+    api_version ||= '1.12'
     @hosts = hosts.map do |hostname|
-      Centurion::DockerServer.new(hostname, docker_path, tls_params)
+      Centurion::DockerServer.new(hostname, docker_path, tls_params, api_version)
     end
   end
 

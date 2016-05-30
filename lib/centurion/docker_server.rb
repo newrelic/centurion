@@ -18,11 +18,13 @@ class Centurion::DockerServer
                  :remove_container, :restart_container
   def_delegators :docker_via_cli, :pull, :tail, :attach, :exec, :exec_it
 
-  def initialize(host, docker_path, tls_params = {})
+  def initialize(host, docker_path, tls_params = {}, api_version=nil)
     @docker_path = docker_path
     @hostname, @port = host.split(':')
     @port ||= '2375'
     @tls_params = tls_params
+    api_version ||= '1.12'
+    @api_version = api_version
   end
 
   def current_tags_for(image)
@@ -64,7 +66,7 @@ class Centurion::DockerServer
 
   def docker_via_api
     @docker_via_api ||= Centurion::DockerViaApi.new(@hostname, @port,
-                                                    @tls_params, nil)
+                                                    @tls_params, @api_version)
   end
 
   def docker_via_cli

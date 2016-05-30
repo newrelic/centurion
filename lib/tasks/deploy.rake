@@ -183,7 +183,8 @@ namespace :deploy do
     registry = Centurion::DockerRegistry.new(
       fetch(:docker_registry),
       fetch(:registry_user),
-      fetch(:registry_password)
+      fetch(:registry_password),
+      fetch(:registry_version)
     )
     exact_image = registry.digest_for_tag(fetch(:image), fetch(:tag))
     set :image_id, exact_image
