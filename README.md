@@ -37,8 +37,6 @@ one roll-up commit of all our internal code. But all internal development will
 now be on public GitHub. See the CONTRIBUTORS file for the contributors to the
 original internal project.
 
-The **current stable release** is 1.8.0.
-
 Installation
 ------------
 
