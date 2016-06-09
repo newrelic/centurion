@@ -63,14 +63,14 @@ describe Centurion::DockerViaApi do
 
     it 'stops a container' do
       expect(Excon).to receive(:post).
-                       with(excon_uri + "v1.12" + "/containers/12345/stop?t=300", {}).
+                       with(excon_uri + "v1.12" + "/containers/12345/stop?t=300", {read_timeout: 300}).
                        and_return(double(status: 204))
       api.stop_container('12345', 300)
     end
 
     it 'stops a container with a custom timeout' do
       expect(Excon).to receive(:post).
-                       with(excon_uri + "v1.12" + "/containers/12345/stop?t=30", {}).
+                       with(excon_uri + "v1.12" + "/containers/12345/stop?t=30", {read_timeout: 30}).
                        and_return(double(status: 204))
       api.stop_container('12345')
     end
@@ -178,7 +178,8 @@ describe Centurion::DockerViaApi do
       expect(Excon).to receive(:post).
                        with(excon_uri + "v1.12" + "/containers/12345/stop?t=300",
                             client_cert: '/certs/cert.pem',
-                            client_key: '/certs/key.pem').
+                            client_key: '/certs/key.pem',
+                            read_timeout: 300).
                        and_return(double(status: 204))
       api.stop_container('12345', 300)
     end
@@ -187,7 +188,8 @@ describe Centurion::DockerViaApi do
       expect(Excon).to receive(:post).
                        with(excon_uri + "v1.12" + "/containers/12345/stop?t=30",
                             client_cert: '/certs/cert.pem',
-                            client_key: '/certs/key.pem').
+                            client_key: '/certs/key.pem',
+                            read_timeout: 30).
                        and_return(double(status: 204))
       api.stop_container('12345')
     end
