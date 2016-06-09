@@ -23,7 +23,7 @@ Commercial Docker Registry Providers:
 - [Quay.io](https://quay.io) from the CoreOS team
 
 Open-source:
-- The [Docker registry](https://github.com/dotcloud/docker-registry) project,
+- The [Docker Distribution](https://github.com/docker/distribution) project,
   built and maintained by Docker. You host this yourself.
 - (*NEW!*) [Dogestry](https://github.com/dogestry/dogestry) is an
   s3-backed Docker registry alternative that removes the requirement to set up
