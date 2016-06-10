@@ -14,6 +14,8 @@ Your name could be here!
  * [Mark Borcherding][markborcherding]
  * [Nick Laferriere][laferrieren]
  * [Hugo Chinchilla][hugochinchilla]
+ * [Dan Selans][dselans]
+ * [Dan Young][idleyoungman]
 
 Pre-release
 -----------

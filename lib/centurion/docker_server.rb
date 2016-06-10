@@ -21,7 +21,11 @@ class Centurion::DockerServer
   def initialize(host, docker_path, tls_params = {})
     @docker_path = docker_path
     @hostname, @port = host.split(':')
-    @port ||= '2375'
+    @port ||= if tls_params.empty?
+      '2375'
+    else
+      '2376'
+    end
     @tls_params = tls_params
   end
 

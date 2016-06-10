@@ -152,6 +152,7 @@ class Centurion::DockerViaApi
     Excon.defaults[:nonblock]        = false
     Excon.defaults[:tcp_nodelay]     = true
     Excon.defaults[:ssl_ca_file]     = @tls_args[:tlscacert]
+    Excon.defaults[:ssl_verify_peer] = false
   end
 
   def default_tls_args(tls_enabled)

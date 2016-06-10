@@ -31,6 +31,7 @@ end
 
 task :stop => ['deploy:stop']
 task :enter_container => ['deploy:enter_container']
+task :logs => ['deploy:logs']
 
 namespace :dev do
   task :export_only do
@@ -122,6 +123,13 @@ namespace :deploy do
   task :enter_container do
     on_first_docker_host do |server|
       enter_container(server, defined_service)
+    end
+  end
+
+  task :logs do
+    Centurion::DockerServerGroup.new(fetch(:hosts, []), fetch(:docker_path)).each_in_parallel do |host|
+      container_id = host.ps.select { |c| c['Names'].select { |n| n =~ /#{fetch(:name)}/ } }.first['Id']
+      host.tail(container_id)
     end
   end
 

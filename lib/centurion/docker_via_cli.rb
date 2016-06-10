@@ -68,7 +68,7 @@ class Centurion::DockerViaCli
 
   def build_command(action, destination)
     command = "#{@docker_path} -H=#{@docker_host}"
-    command << tls_parameters
+    command << tls_parameters || ''
     command << case action
                when :pull then ' pull '
                when :logs then ' logs -f '
