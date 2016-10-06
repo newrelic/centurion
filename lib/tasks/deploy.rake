@@ -134,12 +134,19 @@ namespace :deploy do
   end
 
   task :rolling_deploy do
+    stop_start_errors = []
     on_each_docker_host do |server|
       service = defined_service
 
-      stop_containers(server, service, fetch(:stop_timeout, 30))
-
-      container = start_new_container(server, service, defined_restart_policy)
+      begin
+        stop_containers(server, service, fetch(:stop_timeout, 30))
+        container = start_new_container(server, service, defined_restart_policy)
+      rescue e
+        on_fail = fetch(:rolling_deploy_on_docker_failure, :exit)
+        raise e unless on_fail == :continue
+        stop_start_errors << e.message
+        next
+      end
 
       public_ports = service.public_ports - fetch(:rolling_deploy_skip_ports, [])
       public_ports.each do |port|
@@ -157,6 +164,10 @@ namespace :deploy do
       end
 
       wait_for_load_balancer_check_interval
+    end
+
+    unless stop_start_errors.empty?
+      raise stop_start_errors.join("\n")
     end
   end
 
