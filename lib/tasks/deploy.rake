@@ -98,9 +98,11 @@ namespace :deploy do
   # - remote: list
   # - remote: stop
   task :stop do
-    on_each_docker_host do |server|
-      stop_containers(server, defined_service, fetch(:stop_timeout, 30))
+    threads = on_each_docker_host.map do |server|
+      Thread.new { stop_containers(server, defined_service, fetch(:stop_timeout, 30)) }
     end
+
+    threads.each { |t| t.join }
   end
 
   # start
