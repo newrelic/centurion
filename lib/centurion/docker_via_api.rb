@@ -50,7 +50,9 @@ class Centurion::DockerViaApi
     response = Excon.post(
       @base_uri + path,
       tls_excon_arguments.merge(
-        read_timeout: timeout
+        # Wait for both the docker stop timeout AND the kill AND
+        # potentially a very slow HTTP server.
+        read_timeout: timeout + 120
       )
     )
     raise response.inspect unless response.status == 204
@@ -94,7 +96,11 @@ class Centurion::DockerViaApi
     path = @docker_api_version + "/containers/#{container_id}/restart?t=#{timeout}"
     response = Excon.post(
       @base_uri + path,
-      tls_excon_arguments
+      tls_excon_arguments.merge(
+        # Wait for both the docker stop timeout AND the kill AND
+        # potentially a very slow HTTP server.
+        read_timeout: timeout + 120
+      )
     )
     case response.status
     when 204
