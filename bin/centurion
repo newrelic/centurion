@@ -55,7 +55,7 @@ invoke("environment:#{opts[:environment]}")
 set :image, opts[:image] if opts[:image]
 set :tag,   opts[:tag] if opts[:tag]
 set :hosts, opts[:hosts].split(",") if opts[:hosts]
-set :name,  opts[:project].gsub(/_/, '-')
+set :name,  opts[:project].gsub(/_/, '-') unless fetch(:name)
 
 # Override environment variables when specified
 if opts[:override_env]
