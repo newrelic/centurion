@@ -221,12 +221,16 @@ describe Centurion::DeployDSL do
       end
     end
 
-    describe '#before_stopping_image' do
-      it_behaves_like 'a callback for', :before_stopping_image
+    describe '#before_stopping_container' do
+      it_behaves_like 'a callback for', :before_stopping_container
     end
 
-    describe '#after_image_started' do
-      it_behaves_like 'a callback for', :after_image_started
+    describe '#before_starting_container' do
+      it_behaves_like 'a callback for', :before_starting_container
+    end
+
+    describe '#after_container_started' do
+      it_behaves_like 'a callback for', :after_container_started
     end
 
     describe '#after_health_check_ok' do

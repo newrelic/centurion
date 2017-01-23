@@ -24,37 +24,62 @@ RSpec.describe Centurion::DeployCallbacks do
     end
   end
 
-  shared_examples_for 'a before callback' do |callback, method_name|
+  shared_examples_for 'the before_stopping_container callbacks' do |callback, method_name|
     include_examples 'a callback'
 
-    it 'invokes all the callback before the method' do
-      expect(object).to receive(:emit).with(callback, server).ordered
+    it 'invokes all the callbacks' do
+      expect(object).to receive(:emit).with(callback, server, service).ordered
       expect(object).to receive(:doing).with(method_name).ordered
       subject
     end
   end
 
-  shared_examples_for 'an after callback' do |callback, method_name|
+  shared_examples_for 'the before_starting_container callbacks' do |callback|
     include_examples 'a callback'
 
-    it 'invokes all the callback before the method' do
+    it 'invokes all the callbacks' do
+      expect(object).to receive(:emit).with(callback, server, service).ordered
+      subject
+    end
+  end
+
+  shared_examples_for 'the after_starting_container callbacks' do |callback, method_name|
+    include_examples 'a callback'
+
+    it 'invokes all the callbacks' do
+      expect(object).to receive(:doing).with(method_name).ordered
+      expect(object).to receive(:emit).with(callback, server, service).ordered
+      subject
+    end
+  end
+
+  shared_examples_for 'the after_health_check_ok callbacks' do |callback, method_name|
+    include_examples 'a callback'
+
+    it 'invokes all the callbacks' do
       expect(object).to receive(:doing).with(method_name).ordered
       expect(object).to receive(:emit).with(callback, server).ordered
       subject
     end
   end
 
-  describe 'before stopping callback' do
+  describe 'the before_stopping_container callback' do
     subject { object.stop_containers server, service }
-    it_behaves_like 'a before callback',
-                    :before_stopping_image,
+    it_behaves_like 'the before_stopping_container callbacks',
+                    :before_stopping_container,
                     :stop_containers
+  end
+
+  describe 'before_starting_container callback' do 
+    subject { object.before_starting_container server, service }
+    it_behaves_like 'the before_starting_container callbacks',
+                    :before_starting_container
   end
 
   describe 'after started callback' do
     subject { object.start_new_container server, service, double }
-    it_behaves_like 'an after callback',
-                    :after_image_started,
+    it_behaves_like 'the after_starting_container callbacks',
+                    :after_starting_container,
                     :start_new_container
   end
 
@@ -72,7 +97,7 @@ RSpec.describe Centurion::DeployCallbacks do
       ]
     end
     subject { object.wait_for_health_check_ok(*args) }
-    it_behaves_like 'an after callback',
+    it_behaves_like 'the after_health_check_ok callbacks',
                     :after_health_check_ok,
                     :wait_for_health_check_ok
   end

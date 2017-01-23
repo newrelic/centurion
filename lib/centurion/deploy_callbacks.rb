@@ -3,12 +3,16 @@ module Centurion
   # be useful to communicate with a loadbalancer, chat room, etc.
   module DeployCallbacks
     def stop_containers(server, service, timeout = 30)
-      emit :before_stopping_image, server
+      emit :before_stopping_container, server, service
       super server, service, timeout
     end
 
+    def before_starting_container(server, service)
+      emit :before_starting_container, server, service
+    end
+
     def start_new_container(server, service, restart_policy)
-      super(server, service, restart_policy).tap { emit :after_image_started, server }
+      super(server, service, restart_policy).tap { emit :after_starting_container, server, service }
     end
 
     def wait_for_health_check_ok(health_check_method, server, port, endpoint, image_id, tag, sleep_time=5, retries=12)

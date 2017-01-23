@@ -146,12 +146,16 @@ module Centurion::DeployDSL
     Centurion::Service::RestartPolicy.new(fetch(:restart_policy_name, 'on-failure'), fetch(:restart_policy_max_retry_count, 10))
   end
 
-  def before_stopping_image(callback = nil, &block)
-    on :before_stopping_image, callback, &block
+  def before_stopping_container(callback = nil, &block)
+    on :before_stopping_container, callback, &block
   end
 
-  def after_image_started(callback = nil, &block)
-    on :after_image_started, callback, &block
+  def before_starting_container(callback = nil, &block)
+    on :before_starting_container, callback, &block
+  end
+
+  def after_container_started(callback = nil, &block)
+    on :after_container_started, callback, &block
   end
 
   def after_health_check_ok(callback = nil, &block)
@@ -159,7 +163,7 @@ module Centurion::DeployDSL
   end
 
   def on(name, callback = nil, &block)
-    abort('A callback or block is require') unless callback || block
+    abort('A callback or block is required') unless callback || block
     abort('Callback expects a lambda, proc, or block') if callback && !callback.respond_to?(:call)
     callbacks[name] <<= (callback || block)
   end

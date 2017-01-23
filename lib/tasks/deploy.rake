@@ -140,6 +140,8 @@ namespace :deploy do
 
       stop_containers(server, service, fetch(:stop_timeout, 30))
 
+      DeployCallbacks.before_starting_image(server, service)
+
       container = start_new_container(server, service, defined_restart_policy)
 
       public_ports = service.public_ports - fetch(:rolling_deploy_skip_ports, [])
