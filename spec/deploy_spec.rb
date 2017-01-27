@@ -147,6 +147,22 @@ describe Centurion::Deploy do
 
       test_deploy.stop_containers(server, service)
     end
+
+    it 'calls stop_container on the right containers in host networking mode' do
+      service = Centurion::Service.new(:centurion)
+      service.network_mode = 'host'
+      service.add_port_bindings(8080, 80)
+
+      second_container = container.dup
+      second_container = container.dup.tap { |c| c['Id'] = c['Id'].sub(/49494/, '55555') }
+      containers = [ container, second_container ]
+
+      expect(server).to receive(:find_containers_by_name).with(:centurion).and_return(containers)
+      expect(server).to receive(:stop_container).with(container['Id'], 30).once
+      expect(server).to receive(:stop_container).with(second_container['Id'], 30).once
+
+      test_deploy.stop_containers(server, service)
+    end
   end
 
   describe '#wait_for_load_balancer_check_interval' do
