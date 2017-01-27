@@ -6,6 +6,7 @@ describe Centurion::Service do
   let(:service)  { Centurion::Service.new(:redis) }
   let(:hostname) { 'shakespeare' }
   let(:image)    { 'redis' }
+  let(:labels)   { { 'test' => '123' } }
 
   it 'creates a service from the environment' do
     extend Capistrano::DSL
@@ -15,6 +16,7 @@ describe Centurion::Service do
     set(:hostname, hostname)
     set(:binds, [ Centurion::Service::Volume.new('/foo', '/foo/bar') ])
     set(:port_bindings, [ Centurion::Service::PortBinding.new(12340, 80, 'tcp') ])
+    set(:labels, labels)
 
     svc = Centurion::Service.from_env
     expect(svc.name).to eq('mycontainer')
@@ -24,6 +26,7 @@ describe Centurion::Service do
     expect(svc.volumes.first.host_volume).to eq('/foo')
     expect(svc.port_bindings.size).to eq(1)
     expect(svc.port_bindings.first.container_port).to eq(80)
+    expect(svc.labels).to eq(labels)
   end
 
   it 'starts with a command' do
@@ -68,6 +71,12 @@ describe Centurion::Service do
     service.add_env_vars(SLAVE_OF: '127.0.0.1')
     service.add_env_vars(USE_AOF: '1')
     expect(service.env_vars).to eq(SLAVE_OF: '127.0.0.1', USE_AOF: '1')
+  end
+
+  it 'has labels and flattens them all to text' do
+    service.add_labels(labels)
+    service.add_labels(another: 'label')
+    expect(service.labels).to eq(labels.merge('another' => 'label'))
   end
 
   it 'has volume bindings' do

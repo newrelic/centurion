@@ -40,6 +40,18 @@ describe Centurion::DeployDSL do
     )
   end
 
+  it 'adds new labels to the existing ones, as strings' do
+    DeployDSLTest.labels(Shakespeare: 'Hamlet')
+    DeployDSLTest.labels(Dickens: 'David Copperfield',
+                           Dickens_birth_year: 1812)
+
+    expect(DeployDSLTest.defined_service.labels).to eq(
+      'Shakespeare'        => 'Hamlet',
+      'Dickens'            => 'David Copperfield',
+      'Dickens_birth_year' => '1812'
+    )
+  end
+
   describe '#add_capability' do
     it 'adds one capability' do
       DeployDSLTest.add_capability 'IPC_LOCK'

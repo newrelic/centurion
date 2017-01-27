@@ -6,7 +6,7 @@ module Centurion
     extend ::Capistrano::DSL
 
     attr_accessor :command, :dns, :extra_hosts, :image, :name, :volumes, :port_bindings, :network_mode, :cap_adds, :cap_drops, :ipc_mode
-    attr_reader :memory, :cpu_shares, :env_vars
+    attr_reader :memory, :cpu_shares, :env_vars, :labels
 
     def initialize(name)
       @name          = name
@@ -15,6 +15,7 @@ module Centurion
       @port_bindings = []
       @cap_adds      = []
       @cap_drops     = []
+      @labels        = {}
       @network_mode  = 'bridge'
     end
 
@@ -38,6 +39,7 @@ module Centurion
         s.cpu_shares    = fetch(:cpu_shares, 0)
         s.ipc_mode      = fetch(:ipc_mode, nil)
 
+        s.add_labels(fetch(:labels, {}))
         s.add_env_vars(fetch(:env_vars, {}))
       end
     end
@@ -52,6 +54,10 @@ module Centurion
 
     def add_volume(host_volume, container_volume)
       @volumes << Volume.new(host_volume, container_volume)
+    end
+
+    def add_labels(labels)
+      @labels.merge!(Hash[labels.map { |(k,v)| [ k.to_s, v.to_s ]}])
     end
 
     def cap_adds=(capabilites)
@@ -101,6 +107,7 @@ module Centurion
         c['Cmd'] = command if command
         c['Memory'] = memory if memory
         c['CpuShares'] = cpu_shares if cpu_shares
+        c['Labels'] = labels unless labels.nil? || labels.empty?
       end
 
       unless port_bindings.empty?
