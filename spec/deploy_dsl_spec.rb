@@ -65,7 +65,7 @@ describe Centurion::DeployDSL do
     end
 
     it 'fails when an invalid capability is added' do
-      lambda{ DeployDSLTest.add_capability 'FOO_BAR' }.should raise_error SystemExit
+      expect { DeployDSLTest.add_capability 'FOO_BAR' }.to raise_error SystemExit
     end
   end
 
@@ -210,4 +210,5 @@ describe Centurion::DeployDSL do
     DeployDSLTest.set(:image, 'charlemagne')
     expect(DeployDSLTest.defined_service.image).to eq('charlemagne:roland')
   end
+
 end
