@@ -69,7 +69,11 @@ well with the hand-off in many organizations between the build and deploy
 steps. If you only have one application, or don't need this you can
 decentralize the config into each repo.
 
-It will look for configuration files in either `./config/centurion` or `.`.
+It will look for configuration files in the following paths:
+- `$CENTURION_CONFIG_HOME/config/centurion`
+- `$CENTURION_CONFIG_HOME`
+- `./config/centurion`
+- `.`
 
 The pattern at New Relic is to have a configs repo with a `Gemfile` that
 sources the Centurion gem. If you want Centurion to set up the structure for
