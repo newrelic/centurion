@@ -249,8 +249,10 @@ set :network_mode, 'networkmode'
 Docker (and therefore Centurion) supports one of `bridge` (the default), `host`,
 and `container:<container-id>` for this argument.
 
-*Note:* While `host_port` remains required, the mappings specified in it are
-*ignored* when using `host` and `container...` network modes.
+In `host` and `container...` network modes, you may specify a 
+`host_port, container_port` mapping, however the port numbers will only be used
+for container health checks. The mapping itself, while still passed via the API,
+will be ignored by Docker.
 
 ### CGroup Resource Constraints
 
