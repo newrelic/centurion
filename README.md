@@ -173,6 +173,40 @@ deploy a project:
 ```
 With this, the container will be named something like `backend-4f692997`.
 
+### Container Labels
+
+You may add arbitrary labels to your containers by calling `labels` with a hash.
+The call is cumulative, so you may express patterns like:
+
+```ruby
+namespace :environment do
+  task :common do
+    set :image, 'example.com/newrelic/radio-radio'
+    host 'docker-server-1.example.com'
+    labels team: 'radio-ops'
+  end
+
+  desc 'Staging environment'
+  task :staging => :common do
+    labels environment: 'radio-staging'
+    env_vars YOUR_ENV: 'staging'
+  end
+end
+```
+
+This would result in the container having two labels, as shown in a 
+`docker inspect` example:
+
+```
+  "Labels": {
+    "team": "radio-ops",
+    "environment": "radio-staging"
+  }
+```
+
+Hash keys and values will be stringified, so you may pass any object with a 
+`#to_s` method.
+
 ### Container Hostnames
 
 If you don't specify a hostname to use inside your container, the container
@@ -215,8 +249,10 @@ set :network_mode, 'networkmode'
 Docker (and therefore Centurion) supports one of `bridge` (the default), `host`,
 and `container:<container-id>` for this argument.
 
-*Note:* While `host_port` remains required, the mappings specified in it are
-*ignored* when using `host` and `container...` network modes.
+In `host` and `container...` network modes, you may specify a 
+`host_port, container_port` mapping, however the port numbers will only be used
+for container health checks. The mapping itself, while still passed via the API,
+will be ignored by Docker.
 
 ### CGroup Resource Constraints
 
