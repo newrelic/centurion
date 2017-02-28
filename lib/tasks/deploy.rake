@@ -142,8 +142,8 @@ namespace :deploy do
         stop_containers(server, service, fetch(:stop_timeout, 30))
         container = start_new_container(server, service, defined_restart_policy)
       rescue e
-        on_fail = fetch(:rolling_deploy_on_docker_failure, :exit)
-        raise e unless on_fail == :continue
+        on_fail = fetch(:rolling_deploy_on_failure, :exit)
+        raise unless on_fail == :continue
         stop_start_errors << e.message
         next
       end

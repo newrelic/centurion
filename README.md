@@ -411,7 +411,7 @@ are the same everywhere. Settings are per-project.
    ports are not HTTP services, this allows you to only health check the ports
    that are. The default is an empty array. If you have non-HTTP services that you
    want to check, see Custom Health Checks in the previous section.
- * `rolling_deploy_on_docker_failure` => What to do when Centurion encounters an error stopping or starting a container during a rolling deploy. By default, when an error is encountered the deploy will stop and immediately raise that error. If this option is set to `:continue` Centurion will continue deploying to the remaining hosts and raise at the end. 
+ * `rolling_deploy_on_failure` => What to do when Centurion encounters an error stopping or starting a container during a rolling deploy. By default, when an error is encountered the deploy will stop and immediately raise that error. If this option is set to `:continue` Centurion will continue deploying to the remaining hosts and raise at the end. 
 
 ###Deploy a project to a fleet of Docker servers
 
