@@ -140,7 +140,7 @@ namespace :deploy do
 
       stop_containers(server, service, fetch(:stop_timeout, 30))
 
-      DeployCallbacks.before_starting_image(server, service)
+      Centurion::DeployCallbacks.before_starting_container(server, service)
 
       container = start_new_container(server, service, defined_restart_policy)
 
