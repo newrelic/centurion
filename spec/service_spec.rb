@@ -17,6 +17,7 @@ describe Centurion::Service do
     set(:binds, [ Centurion::Service::Volume.new('/foo', '/foo/bar') ])
     set(:port_bindings, [ Centurion::Service::PortBinding.new(12340, 80, 'tcp') ])
     set(:labels, labels)
+    set(:security_opt, ['seccomp=unconfined'])
 
     svc = Centurion::Service.from_env
     expect(svc.name).to eq('mycontainer')
@@ -27,6 +28,7 @@ describe Centurion::Service do
     expect(svc.port_bindings.size).to eq(1)
     expect(svc.port_bindings.first.container_port).to eq(80)
     expect(svc.labels).to eq(labels)
+    expect(svc.security_opt).to eq(['seccomp=unconfined'])
   end
 
   it 'starts with a command' do
@@ -171,6 +173,7 @@ describe Centurion::Service do
     service.cap_adds = ['IPC_BIND', 'NET_RAW']
     service.cap_drops = ['DAC_OVERRIDE']
     service.add_volume('/volumes/redis.8000', '/data')
+    service.security_opt = 'seccomp=unconfined'
 
     expect(service.build_host_config(Centurion::Service::RestartPolicy.new('on-failure', 10))).to eq({
       'Binds' => ['/volumes/redis.8000:/data'],
@@ -184,7 +187,8 @@ describe Centurion::Service do
       'RestartPolicy' => {
         'Name' => 'on-failure',
         'MaximumRetryCount' => 10
-      }
+      },
+      'SecurityOpt' => 'seccomp=unconfined'
     })
   end
 
