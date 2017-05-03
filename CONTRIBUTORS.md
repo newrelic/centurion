@@ -16,6 +16,7 @@ Your name could be here!
  * [Hugo Chinchilla][hugochinchilla]
  * [Dan Selans][dselans]
  * [Dan Young][idleyoungman]
+ * [Trevor Strieber][tstrieber]
 
 Pre-release
 -----------

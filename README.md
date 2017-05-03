@@ -342,7 +342,7 @@ Deploying
 Centurion supports a number of tasks out of the box that make working with
 distributed containers easy.  Here are some examples:
 
-###Do a rolling deployment to a fleet of Docker servers
+### Do a rolling deployment to a fleet of Docker servers
 
 A rolling deployment will stop and start each container one at a time to make
 sure that the application stays available from the viewpoint of the load
@@ -352,9 +352,9 @@ the root path of the application. The healthcheck endpoint is configurable by ad
 `set(:status_endpoint, '/somewhere/else')` in your config. The status endpoint
 must respond with a valid response in the 200 status range.
 
-````bash
+```bash
 $ bundle exec centurion -p radio-radio -e staging -a rolling_deploy
-````
+```
 
 **Custom Health Check**:
 You can use a custom health check by specifying a callable object (anything that
@@ -365,7 +365,7 @@ should return a truthy value, falsey otherwise. Here's an example of a custom
 health check that verifies that an elasticsearch node is up and has joined the
 cluster.
 
-````ruby
+```ruby
 def cluster_green?(target_server, port, endpoint)
   response = begin
     Excon.get("http://#{target_server.hostname}:#{port}#{endpoint}")
@@ -386,7 +386,7 @@ task :production => :common do
   host 'es-01.example.com'
   host 'es-02.example.com'
 end
-````
+```
 
 **Rolling Deployment Settings**:
 You can change the following settings in your config to tune how the rolling
@@ -412,35 +412,36 @@ are the same everywhere. Settings are per-project.
    that are. The default is an empty array. If you have non-HTTP services that you
    want to check, see Custom Health Checks in the previous section.
 
-###Deploy a project to a fleet of Docker servers
+### Deploy a project to a fleet of Docker servers
 
 This will hard stop, then start containers on all the specified hosts. This
 is not recommended for apps where one endpoint needs to be available at all
 times. It is fast.
 
-````bash
+```bash
 $ bundle exec centurion -p radio-radio -e staging -a deploy
-````
+```
 
-###Deploy a bash console on a host
+### Deploy a bash console on a host
 
 This will give you a command line shell with all of your existing environment
 passed to the container. The `CMD` from the `Dockerfile` will be replaced
 with `/bin/bash`. It will use the first host from the host list.
 
-````bash
+```bash
 $ bundle exec centurion -p radio-radio -e staging -a deploy_console
-````
+```
+
 ### Repair unhealthy docker containers
 
 This will preform a health check on each host using rolling deployment
 health check settings and redeploy to the host if a health check fails.
 
-````bash
+```bash
 $ bundle exec centurion -p radio-radio -e staging -a repair
-````
+```
 
-###List all the tags running on your servers for a particular project
+### List all the tags running on your servers for a particular project
 
 Returns a nicely-formatted list of all the current tags and which machines they
 are running on. Gives a unique list of tags across all hosts as well.  This is
@@ -451,7 +452,7 @@ goes wrong mid-deploy.
 $ bundle exec centurion -p radio-radio -e staging -a list:running_container_tags
 ```
 
-###List all the containers currently running for this project
+### List all the containers currently running for this project
 
 Returns a (as yet not very nicely formatted) list of all the containers for
 this project on each of the servers from the config.
@@ -460,13 +461,13 @@ this project on each of the servers from the config.
 $ bundle exec centurion -p radio-radio -e staging -a list:running_containers
 ```
 
-###List registry images
+### List registry images
 
 Returns a list of all the images for this project in the registry.
 
-````bash
+```bash
 $ bundle exec centurion -p radio-radio -e staging -a list
-````
+```
 
 ### Registry
 
@@ -609,4 +610,4 @@ patents, and ideas in that code in our products if we so choose. You also agree
 the code is provided as-is and you provide no warranties as to its fitness or
 correctness for any purpose
 
-Copyright (c) 2014-2016 New Relic, Inc. All rights reserved.
+Copyright (c) 2014-2017 New Relic, Inc. All rights reserved.
