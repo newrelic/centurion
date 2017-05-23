@@ -25,9 +25,6 @@ Commercial Docker Registry Providers:
 Open-source:
 - The [Docker Distribution](https://github.com/docker/distribution) project,
   built and maintained by Docker. You host this yourself.
-- (*NEW!*) [Dogestry](https://github.com/dogestry/dogestry) is an
-  s3-backed Docker registry alternative that removes the requirement to set up
-  a centralized registry service or host anything yourself.
 
 Status
 ------
