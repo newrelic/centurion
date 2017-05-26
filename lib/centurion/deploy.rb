@@ -1,10 +1,14 @@
 require 'excon'
 require 'socket'
 
+require_relative 'deploy_callbacks'
+
 module Centurion; end
 
 module Centurion::Deploy
+
   FAILED_CONTAINER_VALIDATION = 100
+
 
   def stop_containers(target_server, service, timeout = 30)
     old_containers = if service.public_ports.nil? || service.public_ports.empty? || service.network_mode == 'host'

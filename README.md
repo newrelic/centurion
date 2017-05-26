@@ -352,6 +352,30 @@ You have to set the following keys:
 
 Modify the paths as appropriate for your cert, ca, and key files.
 
+### Callbacks
+
+You can create callbacks to perform custom actions during a deploy.
+
+```ruby
+  task :production => :common do
+    before_stopping_container do |server, service|
+      my_loadbalancer.disable server.hostname
+    end
+
+    before_starting_container do |server, service|
+      my_chat_server.post "#{server.hostname} starting #{service.image}..."
+    end
+
+    after_starting_container do |server, service|
+      my_chat_server.post "#{server.hostname} started #{service.image}, waiting for health check..."
+    end
+
+    after_health_check_ok do |server, service|
+      my_loadbalancer.enable server.hostname
+    end
+  end
+```
+
 Deploying
 ---------
 

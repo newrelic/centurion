@@ -47,6 +47,7 @@ end
 
 namespace :deploy do
   include Centurion::Deploy
+  include Centurion::DeployCallbacks
 
   namespace :dogestry do
     task :validate_pull_image do
@@ -138,6 +139,8 @@ namespace :deploy do
       service = defined_service
 
       stop_containers(server, service, fetch(:stop_timeout, 30))
+
+      Centurion::DeployCallbacks.before_starting_container(server, service)
 
       container = start_new_container(server, service, defined_restart_policy)
 
