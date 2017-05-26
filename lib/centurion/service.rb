@@ -5,7 +5,7 @@ module Centurion
   class Service
     extend ::Capistrano::DSL
 
-    attr_accessor :command, :dns, :extra_hosts, :image, :name, :volumes, :port_bindings, :network_mode, :cap_adds, :cap_drops, :ipc_mode
+    attr_accessor :command, :dns, :extra_hosts, :image, :name, :volumes, :port_bindings, :network_mode, :cap_adds, :cap_drops, :ipc_mode, :security_opt
     attr_reader :memory, :cpu_shares, :env_vars, :labels
 
     def initialize(name)
@@ -16,6 +16,7 @@ module Centurion
       @cap_adds      = []
       @cap_drops     = []
       @labels        = {}
+      @security_opt  = []
       @network_mode  = 'bridge'
     end
 
@@ -38,6 +39,7 @@ module Centurion
         s.memory        = fetch(:memory, 0)
         s.cpu_shares    = fetch(:cpu_shares, 0)
         s.ipc_mode      = fetch(:ipc_mode, nil)
+        s.security_opt  = fetch(:security_opt, [])
 
         s.add_labels(fetch(:labels, {}))
         s.add_env_vars(fetch(:env_vars, {}))
@@ -98,6 +100,10 @@ module Centurion
 
     def ipc_mode=(mode)
       @ipc_mode = mode
+    end
+
+    def add_security_opt(seccomp)
+      @security_opt << seccomp
     end
 
     def build_config(server_hostname, &block)
@@ -163,6 +169,9 @@ module Centurion
 
       # Set ipc mode
       host_config['IpcMode'] = ipc_mode if ipc_mode
+
+      # Set seccomp profile
+      host_config['SecurityOpt'] = security_opt unless security_opt.nil? || security_opt.empty?
 
       # Restart Policy
       if restart_policy

@@ -289,6 +289,25 @@ drop_capability 'SOME_CAPABILITY'
 For more information on which kernel capabilities may be specified, see the
 [Docker docs](https://docs.docker.com/reference/run/#runtime-privilege-linux-capabilities-and-lxc-configuration).
 
+### Setting the security options
+
+Some Docker platforms support container security overlays called `seccomp`. 
+During container creation, you may specify security options to control the 
+seccomp permissions. 
+
+To set a seccomp path:
+```ruby
+add_security_opt 'seccomp=/path/to/seccomp/profile.json'
+```
+
+Or, to unblock all syscalls in a container:
+
+```ruby
+add_security_opt 'seccomp=unconfined'
+```
+
+For more information on this argument, see the [Docker docs](https://docs.docker.com/engine/security/seccomp/).
+
 ### Interpolation
 
 Currently there a couple of special strings for interpolation that can be added
