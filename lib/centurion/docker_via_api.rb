@@ -2,13 +2,21 @@ require 'excon'
 require 'json'
 require 'uri'
 require 'securerandom'
+require 'centurion/ssh'
 
 module Centurion; end
 
 class Centurion::DockerViaApi
-  def initialize(hostname, port, tls_args = {}, api_version = nil)
-    @tls_args = default_tls_args(tls_args[:tls]).merge(tls_args.reject { |k, v| v.nil? }) # Required by tls_enable?
-    @base_uri = "http#{'s' if tls_enable?}://#{hostname}:#{port}"
+  def initialize(hostname, port, connection_opts = {}, api_version = nil)
+    @tls_args = default_tls_args(connection_opts[:tls]).merge(connection_opts.reject { |k, v| v.nil? }) # Required by tls_enable?
+    if connection_opts[:ssh]
+      @base_uri = hostname
+      @ssh = true
+      @ssh_user = connection_opts[:ssh_user]
+      @ssh_log_level = connection_opts[:ssh_log_level]
+    else
+      @base_uri = "http#{'s' if tls_enable?}://#{hostname}:#{port}"
+    end
     api_version ||= "/v1.12"
     @docker_api_version = api_version
     configure_excon_globally
@@ -17,7 +25,7 @@ class Centurion::DockerViaApi
   def ps(options={})
     path = @docker_api_version + "/containers/json"
     path += "?all=1" if options[:all]
-    response = Excon.get(@base_uri + path, tls_excon_arguments)
+    response = with_excon {|e| e.get(path: path)}
 
     raise unless response.status == 200
     JSON.load(response.body)
@@ -27,61 +35,64 @@ class Centurion::DockerViaApi
     repository = "#{image}:#{tag}"
     path       = @docker_api_version + "/images/#{repository}/json"
 
-    response = Excon.get(
-      @base_uri + path,
-      tls_excon_arguments.merge(headers: {'Accept' => 'application/json'})
-    )
+    response = with_excon do |e|
+      e.get(
+        path: path,
+        headers: {'Accept' => 'application/json'}
+      )
+    end
     raise response.inspect unless response.status == 200
     JSON.load(response.body)
   end
 
   def remove_container(container_id)
     path = @docker_api_version + "/containers/#{container_id}"
-    response = Excon.delete(
-      @base_uri + path,
-      tls_excon_arguments
-    )
+    response = with_excon do |e|
+      e.delete(
+        path: path,
+      )
+    end
     raise response.inspect unless response.status == 204
     true
   end
 
   def stop_container(container_id, timeout = 30)
     path = @docker_api_version + "/containers/#{container_id}/stop?t=#{timeout}"
-    response = Excon.post(
-      @base_uri + path,
-      tls_excon_arguments.merge(
+    response = with_excon do |e|
+      e.post(
+        path: path,
         # Wait for both the docker stop timeout AND the kill AND
         # potentially a very slow HTTP server.
         read_timeout: timeout + 120
       )
-    )
+    end
     raise response.inspect unless response.status == 204
     true
   end
 
   def create_container(configuration, name = nil)
     path = @docker_api_version + "/containers/create"
-    response = Excon.post(
-      @base_uri + path,
-      tls_excon_arguments.merge(
-        query: name ? {name: "#{name}-#{SecureRandom.hex(7)}"} : nil,
+    response = with_excon do |e|
+      e.post(
+        path: path,
+        query: name ? "name=#{name}-#{SecureRandom.hex(7)}" : nil,
         body: configuration.to_json,
         headers: { "Content-Type" => "application/json" }
       )
-    )
+    end
     raise response.inspect unless response.status == 201
     JSON.load(response.body)
   end
 
   def start_container(container_id, configuration)
     path = @docker_api_version + "/containers/#{container_id}/start"
-    response = Excon.post(
-      @base_uri + path,
-      tls_excon_arguments.merge(
+    response = with_excon do |e|
+      e.post(
+        path: path,
         body: configuration.to_json,
         headers: { "Content-Type" => "application/json" }
       )
-    )
+    end
     case response.status
     when 204
       true
@@ -94,14 +105,14 @@ class Centurion::DockerViaApi
 
   def restart_container(container_id, timeout = 30)
     path = @docker_api_version + "/containers/#{container_id}/restart?t=#{timeout}"
-    response = Excon.post(
-      @base_uri + path,
-      tls_excon_arguments.merge(
+    response = with_excon do |e|
+      e.post(
+        path: path,
         # Wait for both the docker stop timeout AND the kill AND
         # potentially a very slow HTTP server.
         read_timeout: timeout + 120
       )
-    )
+    end
     case response.status
     when 204
       true
@@ -116,10 +127,11 @@ class Centurion::DockerViaApi
 
   def inspect_container(container_id)
     path = @docker_api_version + "/containers/#{container_id}/json"
-    response = Excon.get(
-      @base_uri + path,
-      tls_excon_arguments
-    )
+    response = with_excon do |e|
+      e.get(
+        path: path,
+      )
+    end
     raise response.inspect unless response.status == 200
     JSON.load(response.body)
   end
@@ -170,6 +182,21 @@ class Centurion::DockerViaApi
       }
     else
       {}
+    end
+  end
+
+  def with_excon(&block)
+    if @ssh
+      with_excon_via_ssh(&block)
+    else
+      yield Excon.new(@base_uri, tls_excon_arguments)
+    end
+  end
+
+  def with_excon_via_ssh
+    Centurion::SSH.with_docker_socket(@base_uri, @ssh_user, @ssh_log_level) do |socket|
+      conn = Excon.new('unix:///', socket: socket)
+      yield conn
     end
   end
 end

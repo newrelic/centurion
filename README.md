@@ -352,6 +352,27 @@ You have to set the following keys:
 
 Modify the paths as appropriate for your cert, ca, and key files.
 
+### Use SSH to connect *beta*
+
+If your Docker server does not expose its HTTP service over TCP, you can
+instead talk to it via SSH.
+
+This functions by creating a local Unix socket that forwards to the remote
+Docker Unix socket, so it requires that the user you connect as has access to
+the Docker socket without any `sudo`. Currently it also assumes that you
+authenticate via public key, so be sure that you have `ssh-add`ed your key to
+your SSH agent if it has a passcode.
+
+You can configure it with a few options:
+
+```ruby
+  task :common do
+    set :ssh, true # enable ssh connections
+    set :ssh_user, "myuser" # if you want to specify the user to connect as, otherwise your current user
+    set :ssh_log_level, Logger::DEBUG # passed on to net/ssh, can be noisy; defaults to Logger::WARN
+  end
+```
+
 Deploying
 ---------
 

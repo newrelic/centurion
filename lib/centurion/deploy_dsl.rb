@@ -150,7 +150,7 @@ module Centurion::DeployDSL
 
   def build_server_group
     hosts, docker_path = fetch(:hosts, []), fetch(:docker_path)
-    Centurion::DockerServerGroup.new(hosts, docker_path, build_tls_params)
+    Centurion::DockerServerGroup.new(hosts, docker_path, build_server_params)
   end
 
   def validate_options_keys(options, valid_keys)
@@ -180,13 +180,23 @@ module Centurion::DeployDSL
     Centurion::DockerViaCli.tls_keys.all? { |key| fetch(key).present? }
   end
 
-  def build_tls_params
-    return {} unless fetch(:tlsverify)
-    {
-      tls: fetch(:tlsverify || tls_paths_available?),
-      tlscacert: fetch(:tlscacert),
-      tlscert: fetch(:tlscert),
-      tlskey: fetch(:tlskey)
-    }
+  def build_server_params
+    opts = {}
+    if fetch(:tlsverify)
+      opts[:tls] = fetch(:tlsverify || tls_paths_available?)
+      opts[:tlscacert] = fetch(:tlscacert)
+      opts[:tlscert] = fetch(:tlscert)
+      opts[:tlskey] = fetch(:tlskey)
+    end
+
+    if fetch(:ssh, false) == true
+      opts[:ssh] = true
+
+      # nil is OK for both of these, defaults applied internally
+      opts[:ssh_user] = fetch(:ssh_user)
+      opts[:ssh_log_level] = fetch(:ssh_log_level)
+    end
+
+    opts
   end
 end
