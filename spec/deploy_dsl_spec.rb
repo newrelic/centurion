@@ -210,4 +210,19 @@ describe Centurion::DeployDSL do
     DeployDSLTest.set(:image, 'charlemagne')
     expect(DeployDSLTest.defined_service.image).to eq('charlemagne:roland')
   end
+
+  it 'configures ssh connections with no user' do
+    DeployDSLTest.set(:ssh, true)
+    DeployDSLTest.set(:hosts, %w{ host1 })
+
+    DeployDSLTest.on_each_docker_host { |h| expect(h.describe).to eq("host1 via SSH") }
+  end
+
+  it 'configures ssh connections with a user' do
+    DeployDSLTest.set(:ssh, true)
+    DeployDSLTest.set(:ssh_user, 'myuser')
+    DeployDSLTest.set(:hosts, %w{ host1 })
+
+    DeployDSLTest.on_each_docker_host { |h| expect(h.describe).to eq("host1 via SSH user myuser") }
+  end
 end

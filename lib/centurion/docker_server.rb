@@ -18,15 +18,15 @@ class Centurion::DockerServer
                  :remove_container, :restart_container
   def_delegators :docker_via_cli, :pull, :tail, :attach, :exec, :exec_it
 
-  def initialize(host, docker_path, tls_params = {})
+  def initialize(host, docker_path, connection_opts = {})
     @docker_path = docker_path
     @hostname, @port = host.split(':')
-    @port ||= if tls_params.empty?
-      '2375'
-    else
-      '2376'
-    end
-    @tls_params = tls_params
+    @port ||= if connection_opts[:tls]
+                '2376'
+              else
+                '2375'
+              end
+    @connection_opts = connection_opts
   end
 
   def current_tags_for(image)
@@ -64,16 +64,26 @@ class Centurion::DockerServer
     end
   end
 
+  def describe
+    desc = hostname
+    desc += " via TLS" if @connection_opts[:tls]
+    if @connection_opts[:ssh]
+      desc += " via SSH"
+      desc += " user #{@connection_opts[:ssh_user]}" if @connection_opts[:ssh_user]
+    end
+    desc
+  end
+
   private
 
   def docker_via_api
     @docker_via_api ||= Centurion::DockerViaApi.new(@hostname, @port,
-                                                    @tls_params, nil)
+                                                    @connection_opts, nil)
   end
 
   def docker_via_cli
     @docker_via_cli ||= Centurion::DockerViaCli.new(@hostname, @port,
-                                                    @docker_path, @tls_params)
+                                                    @docker_path, @connection_opts)
   end
 
   def parse_image_tags_for(running_containers)

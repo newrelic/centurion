@@ -1,34 +1,47 @@
 require 'pty'
 require_relative 'logging'
 require_relative 'shell'
+require 'centurion/ssh'
 
 module Centurion; end
 
 class Centurion::DockerViaCli
   include Centurion::Logging
 
-  def initialize(hostname, port, docker_path, tls_args = {})
-    @docker_host = "tcp://#{hostname}:#{port}"
+  def initialize(hostname, port, docker_path, connection_opts = {})
+    if connection_opts[:ssh]
+      @docker_host = hostname
+    else
+      @docker_host = "tcp://#{hostname}:#{port}"
+    end
     @docker_path = docker_path
-    @tls_args = tls_args
+    @connection_opts = connection_opts
   end
 
   def pull(image, tag='latest')
     info 'Using CLI to pull'
-    Centurion::Shell.echo(build_command(:pull, "#{image}:#{tag}"))
+    connect do
+      Centurion::Shell.echo(build_command(:pull, "#{image}:#{tag}"))
+    end
   end
 
   def tail(container_id)
     info "Tailing the logs on #{container_id}"
-    Centurion::Shell.echo(build_command(:logs, container_id))
+    connect do
+      Centurion::Shell.echo(build_command(:logs, container_id))
+    end
   end
 
   def attach(container_id)
-    Centurion::Shell.echo(build_command(:attach, container_id))
+    connect do
+      Centurion::Shell.echo(build_command(:attach, container_id))
+    end
   end
 
   def exec(container_id, commandline)
-    Centurion::Shell.echo(build_command(:exec, "#{container_id} #{commandline}"))
+    connect do
+      Centurion::Shell.echo(build_command(:exec, "#{container_id} #{commandline}"))
+    end
   end
 
   def exec_it(container_id, commandline)
@@ -36,7 +49,9 @@ class Centurion::DockerViaCli
     # because docker exec returns the same exit code as the latest command executed on
     # the shell, which causes an exception to be raised if the latest comand executed
     # was unsuccessful when you exit the shell.
-    Centurion::Shell.echo(build_command(:exec, "-it #{container_id} #{commandline} || true"))
+    connect do
+      Centurion::Shell.echo(build_command(:exec, "-it #{container_id} #{commandline} || true"))
+    end
   end
 
   private
@@ -46,28 +61,29 @@ class Centurion::DockerViaCli
   end
 
   def all_tls_path_available?
-    self.class.tls_keys.all? { |key| @tls_args.key?(key) }
+    self.class.tls_keys.all? { |key| @connection_opts.key?(key) }
   end
 
   def tls_parameters
-    return '' if @tls_args.nil? || @tls_args.empty?
+    return '' if @connection_opts.nil? || @connection_opts.empty?
 
     tls_flags = ''
 
     # --tlsverify can be set without passing the cacert, cert and key flags
-    if @tls_args[:tls] == true || all_tls_path_available?
+    if @connection_opts[:tls] == true || all_tls_path_available?
       tls_flags << ' --tlsverify'
     end
 
     self.class.tls_keys.each do |key|
-      tls_flags << " --#{key}=#{@tls_args[key]}" if @tls_args[key]
+      tls_flags << " --#{key}=#{@connection_opts[key]}" if @connection_opts[key]
     end
 
     tls_flags
   end
 
   def build_command(action, destination)
-    command = "#{@docker_path} -H=#{@docker_host}"
+    host = @socket ? "unix://#{@socket}" : @docker_host
+    command = "#{@docker_path} -H=#{host}"
     command << tls_parameters || ''
     command << case action
                when :pull then ' pull '
@@ -77,5 +93,18 @@ class Centurion::DockerViaCli
                end
     command << destination
     command
+  end
+
+  def connect
+    if @connection_opts[:ssh]
+      Centurion::SSH.with_docker_socket(@docker_host, @connection_opts[:ssh_user], @connection_opts[:ssh_log_level]) do |socket|
+        @socket = socket
+        ret = yield
+        @socket = nil
+        ret
+      end
+    else
+      yield
+    end
   end
 end
