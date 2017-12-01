@@ -1,5 +1,6 @@
 require 'net/ssh'
 require 'sshkit'
+require 'tempfile'
 
 module Centurion; end
 

@@ -10,13 +10,13 @@ Gem::Specification.new do |spec|
     'Nic Benders', 'Karl Matthias', 'Andrew Bloomgarden', 'Aaron Bento',
     'Paul Showalter', 'David Kerr', 'Jonathan Owens', 'Jon Guymon',
     'Merlyn Albery-Speyer', 'Amjith Ramanujam', 'David Celis', 'Emily Hyland',
-    'Bryan Stearns']
+    'Bryan Stearns', 'Sean P. Kane']
   spec.email         = [
     'nic@newrelic.com', 'kmatthias@newrelic.com', 'andrew@newrelic.com',
     'aaron@newrelic.com', 'poeslacker@gmail.com', 'dkerr@newrelic.com',
     'jonathan@newrelic.com', 'jon@newrelic.com', 'merlyn@newrelic.com',
     'amjith@newrelic.com', 'dcelis@newrelic.com', 'ehyland@newrelic.com',
-    'bryan@newrelic.com']
+    'bryan@newrelic.com', 'skane@newrelic.com']
   spec.summary       = <<-EOS.gsub(/^\s+/, '')
     A deployment tool for Docker. Takes containers from a Docker registry and
     runs them on a fleet of hosts with the correct environment variables, host
@@ -37,6 +37,9 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'excon', '~> 0.33'
   spec.add_dependency 'logger-colors'
   spec.add_dependency 'net-ssh'
+  spec.add_dependency 'rbnacl'
+  spec.add_dependency 'rbnacl-libsodium'
+  spec.add_dependency 'bcrypt_pbkdf'
   spec.add_dependency 'sshkit'
 
   spec.add_development_dependency 'bundler'
