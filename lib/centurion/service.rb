@@ -178,7 +178,7 @@ module Centurion
         host_config['RestartPolicy'] = {}
 
         restart_policy_name = restart_policy.name
-        restart_policy_name = 'on-failure' unless ["always", "on-failure", "no"].include?(restart_policy_name)
+        restart_policy_name = 'on-failure' unless ["always", "on-failure", "no", "unless-stopped"].include?(restart_policy_name)
 
         host_config['RestartPolicy']['Name'] = restart_policy_name
         host_config['RestartPolicy']['MaximumRetryCount'] = restart_policy.max_retry_count || 10 if restart_policy_name == 'on-failure'
