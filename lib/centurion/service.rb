@@ -125,7 +125,6 @@ module Centurion
 
       unless env_vars.empty?
         container_config['Env'] = env_vars.map do |k,v|
-          puts "#{k} : #{v.class}"
           if v.respond_to? :call
             "#{k}=#{v.call(server_hostname)}"
           else
