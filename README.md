@@ -141,6 +141,10 @@ Most of the DSL items (`host_port`, `host_volume`, `env_vars`, `host`) can be
 specified more than once and will append to the configuration. However, there
 can only be one `command`; the last one will take priority.
 
+You can also assign lambdas to environment variables. The lambda function will
+be invoked by Centurion with `server_hostname` as its only argument. This is
+useful to assign a sticky identity for each of the containers in the deploy.
+
 You can cause your container to be started with a specific DNS server
 IP address (the equivalent of `docker run --dns 172.17.42.1 ...`) like this:
 ```ruby
