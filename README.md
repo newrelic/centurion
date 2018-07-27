@@ -142,8 +142,24 @@ specified more than once and will append to the configuration. However, there
 can only be one `command`; the last one will take priority.
 
 You can also assign lambdas to environment variables. The lambda function will
-be invoked by Centurion with `server_hostname` as its only argument. This is
-useful to assign a sticky identity for each of the containers in the deploy.
+be invoked by Centurion during deploy time with `server_hostname` as its only
+argument. The `server_hostname` yielded will be the same string as was
+specified in the `host` argument for the server currently being deployed to.
+
+This is useful to assign a sticky identity for each of the containers
+in the deploy. For example, a hash mapping hostname to another string which is
+different on each host. 
+```ruby
+  desc 'Host-specific env vars'
+  task :production => :common do
+    env_vars MEMBER_ID: lambda do |hostname| 
+        {
+          'web-server-1.company.net' => 'machine1'
+          'web-server-2.company.net' => 'machine2'
+        }[hostname]
+      end
+  end
+```
 
 You can cause your container to be started with a specific DNS server
 IP address (the equivalent of `docker run --dns 172.17.42.1 ...`) like this:
