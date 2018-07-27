@@ -15,7 +15,7 @@ module Centurion::DeployDSL
   def env_vars(new_vars)
     current = fetch(:env_vars, {})
     new_vars.each_pair do |new_key, new_value|
-      current[new_key.to_s] = new_value.to_s
+      current[new_key.to_s] = new_value.respond_to?(:call) ? new_value : new_value.to_s
     end
     set(:env_vars, current)
   end

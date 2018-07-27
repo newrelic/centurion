@@ -166,6 +166,12 @@ describe Centurion::Service do
     expect { service.add_env_vars(SOMETHING: true) }.not_to raise_error
   end
 
+  it 'does supports lambdas as env vars' do
+    service = Centurion::Service.new(:redis)
+    service.add_env_vars(DYNAMIC_VAR: ->(hostname) { "the-#{hostname}" })
+    expect(service.build_config('example.com')['Env']).to eq(['DYNAMIC_VAR=the-example.com'])
+  end
+
   it 'builds a valid docker host configuration' do
     service = Centurion::Service.new(:redis)
     service.dns = 'example.com'

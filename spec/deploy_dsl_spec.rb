@@ -28,15 +28,18 @@ describe Centurion::DeployDSL do
     expect(DeployDSLTest.defined_service.command).to eq(command)
   end
 
-  it 'adds new env_vars to the existing ones, as strings' do
+  it 'adds new env_vars to the existing ones, maintaining lambdas' do
+    lambda = ->() { Random.rand(5) }
     DeployDSLTest.env_vars('SHAKESPEARE' => 'Hamlet')
     DeployDSLTest.env_vars('DICKENS' => 'David Copperfield',
-                           DICKENS_BIRTH_YEAR: 1812)
+                           DICKENS_BIRTH_YEAR: 1812,
+                           RANDOM_NUMBER: lambda)
 
     expect(DeployDSLTest.defined_service.env_vars).to eq(
       'SHAKESPEARE'        => 'Hamlet',
       'DICKENS'            => 'David Copperfield',
-      'DICKENS_BIRTH_YEAR' => '1812'
+      'DICKENS_BIRTH_YEAR' => '1812',
+      'RANDOM_NUMBER'      => lambda
     )
   end
 
