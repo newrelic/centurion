@@ -18,6 +18,8 @@ describe Centurion::Service do
     set(:port_bindings, [ Centurion::Service::PortBinding.new(12340, 80, 'tcp') ])
     set(:labels, labels)
     set(:security_opt, ['seccomp=unconfined'])
+    set(:network_mode, 'host')
+    set(:pid_mode, 'host')
 
     svc = Centurion::Service.from_env
     expect(svc.name).to eq('mycontainer')
@@ -29,6 +31,8 @@ describe Centurion::Service do
     expect(svc.port_bindings.first.container_port).to eq(80)
     expect(svc.labels).to eq(labels)
     expect(svc.security_opt).to eq(['seccomp=unconfined'])
+    expect(svc.network_mode).to eq('host')
+    expect(svc.pid_mode).to eq('host')
   end
 
   it 'starts with a command' do
@@ -62,6 +66,14 @@ describe Centurion::Service do
   it 'has a custom dns association' do
     service.dns = 'redis.example.com'
     expect(service.dns).to eq('redis.example.com')
+  end
+
+  it 'has a default network mode' do
+    expect(service.network_mode).to eq('bridge')
+  end
+
+  it 'has no default pid mode' do
+    expect(service.pid_mode).to be(nil)
   end
 
   it 'boots from a docker image' do
@@ -309,4 +321,35 @@ describe Centurion::Service do
    })
   end
 
+  it 'builds docker configuration for container-linked pids' do
+    service.pid_mode = 'container:a2e8937b'
+    expect(service.build_host_config(Centurion::Service::RestartPolicy.new('on-failure', 50))).to eq({
+      'Binds' => [],
+      'CapAdd' => [],
+      'CapDrop' => [],
+      'NetworkMode' => 'bridge',
+      'PidMode' => 'container:a2e8937b',
+      'PortBindings' => {},
+       'RestartPolicy' => {
+         'Name' => 'on-failure',
+         'MaximumRetryCount' => 50
+      }
+   })
+  end
+
+  it 'builds docker configuration for host pids' do
+    service.pid_mode = 'host'
+    expect(service.build_host_config(Centurion::Service::RestartPolicy.new('on-failure', 50))).to eq({
+      'Binds' => [],
+      'CapAdd' => [],
+      'CapDrop' => [],
+      'NetworkMode' => 'bridge',
+      'PidMode' => 'host',
+      'PortBindings' => {},
+       'RestartPolicy' => {
+         'Name' => 'on-failure',
+         'MaximumRetryCount' => 50
+      }
+   })
+  end
 end
