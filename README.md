@@ -271,6 +271,17 @@ In `host` and `container...` network modes, you may specify a
 for container health checks. The mapping itself, while still passed via the API,
 will be ignored by Docker.
 
+### PID modes
+
+You may specify the PID mode you would like a container to use via:
+
+```ruby
+set :pid_mode, 'pidmode'
+```
+
+Docker (and therefore Centurion) supports one of nothing (the default), `host`,
+and `container:<container-id>` for this argument.
+
 ### CGroup Resource Constraints
 
 Limits on memory and CPU can be specified with the `memory` and `cpu_shares`

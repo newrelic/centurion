@@ -5,7 +5,7 @@ module Centurion
   class Service
     extend ::Capistrano::DSL
 
-    attr_accessor :command, :dns, :extra_hosts, :image, :name, :volumes, :port_bindings, :network_mode, :cap_adds, :cap_drops, :ipc_mode, :security_opt
+    attr_accessor :command, :dns, :extra_hosts, :image, :name, :volumes, :port_bindings, :network_mode, :pid_mode, :cap_adds, :cap_drops, :ipc_mode, :security_opt
     attr_reader :memory, :cpu_shares, :env_vars, :labels
 
     def initialize(name)
@@ -35,6 +35,7 @@ module Centurion
         s.volumes       = fetch(:binds, [])
         s.port_bindings = fetch(:port_bindings, [])
         s.network_mode  = fetch(:network_mode, 'bridge')
+        s.pid_mode      = fetch(:pid_mode, nil)
         s.command       = fetch(:command, nil)
         s.memory        = fetch(:memory, 0)
         s.cpu_shares    = fetch(:cpu_shares, 0)
@@ -74,10 +75,6 @@ module Centurion
         raise ArgumentError, "invalid value for capability drops: #{capabilites}, value must be an array"
       end
       @cap_drops = capabilites
-    end
-
-    def network_mode=(mode)
-      @network_mode = mode
     end
 
     def memory=(bytes)
@@ -158,6 +155,9 @@ module Centurion
 
       # Set the network mode
       host_config['NetworkMode'] = network_mode
+
+      # Set the pid mode if specified
+      host_config['PidMode'] = pid_mode if pid_mode
 
       # DNS if specified
       host_config['Dns'] = dns if dns
