@@ -108,6 +108,7 @@ module Centurion::Deploy
 
     info "Starting new container #{container['Id'][0..7]}"
     server.start_container(container['Id'], host_config)
+    info "Container #{container['Id'][0..7]} successfully"
 
     # since this likely contains secrets we don't want to be always printing configurations
     debug "Inspecting new container #{container['Id'][0..7]}:"
