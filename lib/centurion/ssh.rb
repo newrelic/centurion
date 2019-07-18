@@ -7,7 +7,7 @@ module Centurion; end
 module Centurion::SSH
   extend self
 
-  def with_docker_socket(hostname, user, log_level = nil)
+  def with_docker_socket(hostname, user, log_level = nil, ssh_socket_heartbeat = nil)
     log_level ||= Logger::WARN
 
     with_sshkit(hostname, user) do
@@ -24,7 +24,7 @@ module Centurion::SSH
           yield local_socket_path
         end
 
-        ssh.loop { t.alive? }
+        ssh.loop(ssh_socket_heartbeat) { t.alive? }
         ssh.forward.cancel_local_socket local_socket_path
         local_socket_path_file.delete
         t.value

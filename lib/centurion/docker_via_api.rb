@@ -12,8 +12,7 @@ class Centurion::DockerViaApi
     if connection_opts[:ssh]
       @base_uri = hostname
       @ssh = true
-      @ssh_user = connection_opts[:ssh_user]
-      @ssh_log_level = connection_opts[:ssh_log_level]
+      @connection_opts = connection_opts
     else
       @base_uri = "http#{'s' if tls_enable?}://#{hostname}:#{port}"
     end
@@ -194,7 +193,7 @@ class Centurion::DockerViaApi
   end
 
   def with_excon_via_ssh
-    Centurion::SSH.with_docker_socket(@base_uri, @ssh_user, @ssh_log_level) do |socket|
+    Centurion::SSH.with_docker_socket(@base_uri, @connection_opts[:ssh_user], @connection_opts[:ssh_log_level], @connection_opts[:ssh_socket_heartbeat]) do |socket|
       conn = Excon.new('unix:///', socket: socket)
       yield conn
     end

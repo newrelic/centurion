@@ -97,7 +97,7 @@ class Centurion::DockerViaCli
 
   def connect
     if @connection_opts[:ssh]
-      Centurion::SSH.with_docker_socket(@docker_host, @connection_opts[:ssh_user], @connection_opts[:ssh_log_level]) do |socket|
+      Centurion::SSH.with_docker_socket(@docker_host, @connection_opts[:ssh_user], @connection_opts[:ssh_log_level], @connection_opts[:ssh_socket_heartbeat]) do |socket|
         @socket = socket
         ret = yield
         @socket = nil
