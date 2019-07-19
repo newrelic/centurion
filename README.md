@@ -405,6 +405,16 @@ You can configure it with a few options:
   end
 ```
 
+#### Troubleshooting SSH connections
+
+In some cases you may notice your SSH commands are completing successfully,
+but the connection isn't aware they are done. This will manifest as a tunneled
+command taking much longer than anticipated - minutes depending on your
+server's configuration. You may need to set `:ssh_socket_heartbeat` to a
+smaller number. This will check more frequently if the command has completed
+which can alleviate this issue, though it will consume more CPU as it wakes up
+its threads more frequently.
+
 Deploying
 ---------
 
