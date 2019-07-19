@@ -7,7 +7,7 @@ module Centurion; end
 module Centurion::SSH
   extend self
 
-  def with_docker_socket(hostname, user, log_level = nil, ssh_socket_heartbeat = nil)
+  def with_docker_socket(hostname, user, log_level = nil, ssh_socket_heartbeat = 30)
     log_level ||= Logger::WARN
 
     with_sshkit(hostname, user) do

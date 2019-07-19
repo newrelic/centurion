@@ -401,7 +401,7 @@ You can configure it with a few options:
     set :ssh, true # enable ssh connections
     set :ssh_user, "myuser" # if you want to specify the user to connect as, otherwise your current user
     set :ssh_log_level, Logger::DEBUG # passed on to net/ssh, can be noisy; defaults to Logger::WARN
-    set :ssh_socket_heartbeat, 5 # passed on to net/ssh (Net::SSH::Connection::Session#loop); defaults to nil
+    set :ssh_socket_heartbeat, 5 # passed on to net/ssh (Net::SSH::Connection::Session#loop); defaults to 30
   end
 ```
 
