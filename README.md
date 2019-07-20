@@ -401,8 +401,19 @@ You can configure it with a few options:
     set :ssh, true # enable ssh connections
     set :ssh_user, "myuser" # if you want to specify the user to connect as, otherwise your current user
     set :ssh_log_level, Logger::DEBUG # passed on to net/ssh, can be noisy; defaults to Logger::WARN
+    set :ssh_socket_heartbeat, 5 # passed on to net/ssh (Net::SSH::Connection::Session#loop); defaults to 30
   end
 ```
+
+#### Troubleshooting SSH connections
+
+In some cases you may notice your SSH commands are completing successfully,
+but the connection isn't aware they are done. This will manifest as a tunneled
+command taking much longer than anticipated - minutes depending on your
+server's configuration. You may need to set `:ssh_socket_heartbeat` to a
+smaller number. This will check more frequently if the command has completed
+which can alleviate this issue, though it will consume more CPU as it wakes up
+its threads more frequently.
 
 Deploying
 ---------

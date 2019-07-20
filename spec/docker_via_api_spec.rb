@@ -134,6 +134,7 @@ describe Centurion::DockerViaApi do
     let(:port) { nil }
     let(:ssh_user) { 'myuser' }
     let(:ssh_log_level) { nil }
+    let(:ssh_socket_heartbeat) { nil }
     let(:base_req) { {
       socket: '/tmp/socket/path'
     } }
@@ -142,12 +143,13 @@ describe Centurion::DockerViaApi do
       p = { ssh: true}
       p[:ssh_user] = ssh_user if ssh_user
       p[:ssh_log_level] = ssh_log_level if ssh_log_level
+      p[:ssh_socket_heartbeat] = ssh_socket_heartbeat if ssh_socket_heartbeat
       p
     end
 
     context 'with no log level' do
       before do
-        expect(Centurion::SSH).to receive(:with_docker_socket).with(hostname, ssh_user, nil).and_yield('/tmp/socket/path')
+        expect(Centurion::SSH).to receive(:with_docker_socket).with(hostname, ssh_user, nil, nil).and_yield('/tmp/socket/path')
       end
 
       it_behaves_like 'docker API'
@@ -157,7 +159,7 @@ describe Centurion::DockerViaApi do
       let(:ssh_user) { nil }
 
       before do
-        expect(Centurion::SSH).to receive(:with_docker_socket).with(hostname, nil, nil).and_yield('/tmp/socket/path')
+        expect(Centurion::SSH).to receive(:with_docker_socket).with(hostname, nil, nil, nil).and_yield('/tmp/socket/path')
       end
 
       it_behaves_like 'docker API'
@@ -167,7 +169,17 @@ describe Centurion::DockerViaApi do
       let(:ssh_log_level) { Logger::DEBUG }
 
       before do
-        expect(Centurion::SSH).to receive(:with_docker_socket).with(hostname, ssh_user, Logger::DEBUG).and_yield('/tmp/socket/path')
+        expect(Centurion::SSH).to receive(:with_docker_socket).with(hostname, ssh_user, Logger::DEBUG, nil).and_yield('/tmp/socket/path')
+      end
+
+      it_behaves_like 'docker API'
+    end
+
+    context 'with a socket heartbeat set' do
+      let(:ssh_socket_heartbeat) { 5 }
+
+      before do
+        expect(Centurion::SSH).to receive(:with_docker_socket).with(hostname, ssh_user, nil, 5).and_yield('/tmp/socket/path')
       end
 
       it_behaves_like 'docker API'

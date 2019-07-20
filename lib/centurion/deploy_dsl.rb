@@ -195,6 +195,7 @@ module Centurion::DeployDSL
       # nil is OK for both of these, defaults applied internally
       opts[:ssh_user] = fetch(:ssh_user)
       opts[:ssh_log_level] = fetch(:ssh_log_level)
+      opts[:ssh_socket_heartbeat] = fetch(:ssh_socket_heartbeat)
     end
 
     opts
