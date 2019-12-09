@@ -139,7 +139,12 @@ namespace :deploy do
 
       stop_containers(server, service, fetch(:stop_timeout, 30))
 
-      container = start_new_container(server, service, defined_restart_policy)
+      container = start_new_container(
+        server,
+        service,
+        defined_restart_policy,
+        fetch(:container_create_pull_retries, 0)
+      )
 
       public_ports = service.public_ports - fetch(:rolling_deploy_skip_ports, [])
       public_ports.each do |port|
@@ -169,7 +174,7 @@ namespace :deploy do
       public_ports = service.public_ports - fetch(:rolling_deploy_skip_ports, [])
       public_ports.each do |port|
         unless method(:http_status_ok?).call(server, port, fetch(:status_endpoint, '/'))
-          failed_healthcheck = true 
+          failed_healthcheck = true
           break
         end
       end

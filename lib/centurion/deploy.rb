@@ -99,10 +99,21 @@ module Centurion::Deploy
     end
   end
 
-  def start_new_container(server, service, restart_policy)
+  def start_new_container(server, service, restart_policy, retry_count=0)
     container_config = service.build_config(server.hostname, &hostname_proc)
     info "Creating new container for #{container_config['Image']}"
-    container = server.create_container(container_config, service.name)
+    delay_sec = 1
+
+    begin
+      container = server.create_container(container_config, service.name)
+    rescue ImageNotFoundError
+      fail "Creation of container for #{container_config['Image']} failed" if retry_count.zero?
+
+      retry_count -= 1
+      info "Creation of container for #{container_config['Image']} failed; retrying in #{delay_sec}s #{retry_count} more times"
+      sleep delay_sec
+      retry
+    end
 
     host_config = service.build_host_config(restart_policy)
 

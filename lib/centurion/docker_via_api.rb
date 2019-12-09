@@ -6,6 +6,9 @@ require 'centurion/ssh'
 
 module Centurion; end
 
+class ImageNotFoundError < StandardError
+end
+
 class Centurion::DockerViaApi
   def initialize(hostname, port, connection_opts = {}, api_version = nil)
     @tls_args = default_tls_args(connection_opts[:tls]).merge(connection_opts.reject { |k, v| v.nil? }) # Required by tls_enable?
@@ -79,8 +82,14 @@ class Centurion::DockerViaApi
         headers: { "Content-Type" => "application/json" }
       )
     end
-    raise response.inspect unless response.status == 201
-    JSON.load(response.body)
+    case response.status
+    when 201
+      JSON.load(response.body)
+    when 404
+      raise ImageNotFoundError
+    else
+      raise response.inspect
+    end
   end
 
   def start_container(container_id, configuration)
