@@ -1,6 +1,5 @@
 language: ruby
 rvm:
-  - 1.9.3-p551
   - 2.0.0
   - 2.1
   - 2.2
@@ -12,4 +11,4 @@ before_install:
   # downgrade bundler to fix installation error with ruby <= 2.2
   # https://docs.travis-ci.com/user/languages/ruby/#bundler-20
   - gem uninstall -v '>= 2' -i $(rvm gemdir)@global -ax bundler || true
-  - gem install bundler -v '< 2'
+  - gem install bundler -v '= 1.17.3'

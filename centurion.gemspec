@@ -34,7 +34,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'trollop'
-  spec.add_dependency 'excon', '~> 0.33'
+  spec.add_dependency 'excon', '~> 0.71.0'
   spec.add_dependency 'logger-colors'
   spec.add_dependency 'net-ssh'
   spec.add_dependency 'rbnacl'
