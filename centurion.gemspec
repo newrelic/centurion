@@ -43,8 +43,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'sshkit'
 
   spec.add_development_dependency 'bundler'
-  spec.add_development_dependency 'rake', '~> 10.5'
-  spec.add_development_dependency 'rspec', '~> 3.1.0'
+  spec.add_development_dependency 'rake', '~> 12.3.3'
+  spec.add_development_dependency 'rspec', '~> 3.5.0'
   spec.add_development_dependency 'pry'
   spec.add_development_dependency 'simplecov'
 
