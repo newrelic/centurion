@@ -6,7 +6,7 @@ them on a fleet of hosts with the correct environment variables, host volume
 mappings, and port mappings. Supports rolling deployments out of the box, and
 makes it easy to ship applications to Docker servers.
 
-We're using it to run our production infrastructure.
+We're using it in our production infrastructure.
 
 Centurion works in a two part deployment process where the build process ships
 a container to the registry, and Centurion ships containers from the registry
@@ -29,7 +29,7 @@ Open-source:
 Status
 ------
 
-This project is under active development! The initial release on GitHub contains
+This project still being maintained, but no new feature work is planned. The initial commit on GitHub contains
 one roll-up commit of all our internal code. But all internal development will
 now be on public GitHub. See the CONTRIBUTORS file for the contributors to the
 original internal project.
