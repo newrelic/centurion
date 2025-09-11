@@ -1,3 +1,6 @@
+> [!WARNING]
+> This project is archived and no longer actively maintained. While the code remains available for reference, no new features or bug fixes are planned.
+
 Centurion
 =========
 
@@ -29,9 +32,9 @@ Open-source:
 Status
 ------
 
-This project still being maintained, but no new feature work is planned. The initial commit on GitHub contains
-one roll-up commit of all our internal code. But all internal development will
-now be on public GitHub. See the CONTRIBUTORS file for the contributors to the
+This project is archived and no longer maintained. No new feature work or bug
+fixes are planned. The initial commit on GitHub contains one roll-up commit of
+all our internal code. See the CONTRIBUTORS file for the contributors to the
 original internal project.
 
 Installation
@@ -654,13 +657,19 @@ environment exported.
 Future Additions
 ----------------
 
-We're currently looking at the following feature additions:
+**This section is for historical reference only. No future additions are planned
+as the project is archived.**
+
+Previously considered feature additions included:
 
  * [etcd](https://github.com/coreos/etcd) integration for configs and discovery
  * Add the ability to show all the available tasks on the command line
 
 Contributions
 -------------
+
+**This project is archived and no longer accepts contributions.** This section
+is preserved for historical reference.
 
 Contributions are more than welcome. Bug reports with specific reproduction
 steps are great. If you have a code contribution you'd like to make, open a
